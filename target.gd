@@ -7,6 +7,7 @@ const DEFAULT_HEALTH = 100
 var health = DEFAULT_HEALTH
 
 @onready var collision_shape = $CollisionShape3D
+@onready var hit_sound = $"Hit Sound"
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -21,6 +22,8 @@ func take_damage(amount: int) -> void:
 	print("Target health now %s" % health)
 	if health <= 0:
 		destroy()
+	else:
+		hit_sound.play()
 
 func destroy():
 	collision_shape.disabled = true 

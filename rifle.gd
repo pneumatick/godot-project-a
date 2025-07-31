@@ -6,6 +6,7 @@ extends Node3D
 @export var damage: int = 25
 
 @onready var player = get_node("/root/3D Scene Root/Player")
+@onready var fire_sound = $"Fire Sound"
 
 var current_ammo = max_ammo
 var can_fire = true
@@ -27,6 +28,7 @@ func _process(delta: float) -> void:
 func fire():
 	current_ammo -= 1
 	print("Bang! Ammo: ", current_ammo)
+	fire_sound.play()
 	
 	var camera = get_viewport().get_camera_3d()
 	if not camera:
