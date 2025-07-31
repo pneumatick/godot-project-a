@@ -1,0 +1,31 @@
+[gd_scene load_steps=2 format=3 uid="uid://tldca8ygc1hw"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_g5xil"]
+
+[node name="HUD" type="CanvasLayer"]
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 1152.0
+offset_bottom = 648.0
+
+[node name="Death Counter" type="Label" parent="Control"]
+layout_mode = 1
+offset_left = 5.0
+offset_top = 5.0
+offset_right = 45.0
+offset_bottom = 28.0
+text = "0"
+
+[node name="Health Bar" type="ProgressBar" parent="Control"]
+material = SubResource("CanvasItemMaterial_g5xil")
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -144.0
+offset_top = 5.0
+offset_right = 144.0
+offset_bottom = 32.0
+grow_horizontal = 2

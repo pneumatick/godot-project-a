@@ -3,6 +3,7 @@ extends Area3D
 signal picked_up
 
 @export var weapon_name: String = "Rifle"
+@export var respawn_time: float = 5.0
 
 @onready var level = get_node("/root/3D Scene Root")
 
@@ -19,6 +20,6 @@ func _on_body_entered(body):
 		monitoring = false
 		visible = false
 		picked_up.emit(weapon_name)
-		await get_tree().create_timer(5.0).timeout
+		await get_tree().create_timer(respawn_time).timeout
 		monitoring = true
 		visible = true

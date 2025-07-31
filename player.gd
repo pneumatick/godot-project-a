@@ -16,6 +16,7 @@ var _player_rotation : Vector3
 var _camera_rotation : Vector3
 var _damaging_bodies : Dictionary = {}
 var _items : Array = []
+var _alive : bool = true
 
 @export var TILT_LOWER_LIMIT := deg_to_rad(-90.0)
 @export var TILT_UPPER_LIMIT := deg_to_rad(90.0)
@@ -85,6 +86,7 @@ func _update_camera(delta: float) -> void:
 	_tilt_input = 0.0
 
 func die() -> void:
+	_alive = false
 	set_physics_process(false)
 	visible = false
 	velocity = Vector3.ZERO
@@ -94,12 +96,16 @@ func die() -> void:
 	for child in right_hand_children:
 		child.queue_free()
 	death.emit()
+	# Wait a bit before respawning the player
+	await get_tree().create_timer(2.0).timeout
+	respawn(Vector3(0.0, 1.0, 0.0))
 
 func respawn(position: Vector3) -> void:
 	global_transform.origin = position
 	HEALTH = DEFAULT_HEALTH
 	health_bar.value = HEALTH
 	visible = true
+	_alive = true
 	set_physics_process(true)
 
 func _on_mob_detector_body_entered(body: Node3D) -> void:
@@ -114,8 +120,12 @@ func _on_mob_detector_body_entered(body: Node3D) -> void:
 		if $DamageTimer.is_stopped():
 			HEALTH -= damage_amount
 			health_bar.value = HEALTH
-			print("The player was hit, health now %s, (starting timer)" % [str(HEALTH)])
-			$DamageTimer.start(0.5)
+			print("The player was hit, health now %s" % [str(HEALTH)])
+			if HEALTH <= 0 and _alive:
+				die()
+			else:
+				print("Starting damage timer...")
+				$DamageTimer.start(0.5)
 
 func _on_mob_detector_body_exited(body: Node3D) -> void:
 	if _damaging_bodies.has(body):
@@ -131,8 +141,8 @@ func _on_damage_timer_timeout():
 			health_bar.value = HEALTH
 			print("The player was hit, health now %s" % [str(HEALTH)])
 		
-		if HEALTH <= 0:
-			die()
+	if HEALTH <= 0 and _alive:
+		die()
 
 func update_item_display():
 	print("Item display updating...")

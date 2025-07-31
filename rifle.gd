@@ -5,6 +5,8 @@ extends Node3D
 @export var max_distance: float = 1000.0
 @export var damage: int = 25
 
+@onready var player = get_node("/root/3D Scene Root/Player")
+
 var current_ammo = max_ammo
 var can_fire = true
 
@@ -39,7 +41,7 @@ func fire():
 			from,
 			to,
 			0xFFFFFFFF,			  # Default value
-			[self, get_parent()]  # exclude gun and player (specifically "Right Hand")
+			[self, player]  # exclude gun and player
 		)
 	)
 	

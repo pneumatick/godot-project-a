@@ -1,10 +1,11 @@
-[gd_scene load_steps=18 format=3 uid="uid://hmv4dr58x4if"]
+[gd_scene load_steps=16 format=3 uid="uid://hmv4dr58x4if"]
 
 [ext_resource type="Script" uid="uid://cf8moef3pykdp" path="res://3d_scene_root.gd" id="1_1rpu5"]
 [ext_resource type="PackedScene" uid="uid://c2dcha7sipp8a" path="res://player.tscn" id="1_sxnch"]
 [ext_resource type="Script" uid="uid://bpumr1tul6w4p" path="res://death_cube.gd" id="3_g5xil"]
 [ext_resource type="PackedScene" uid="uid://ducw325a8ghny" path="res://rifle_pickup.tscn" id="4_5rbum"]
-[ext_resource type="Script" uid="uid://be5xgn6bx24f8" path="res://target.gd" id="5_23mtt"]
+[ext_resource type="PackedScene" uid="uid://tldca8ygc1hw" path="res://hud.tscn" id="4_kb1pf"]
+[ext_resource type="PackedScene" uid="uid://mlxqh5iqxvxs" path="res://target.tscn" id="5_23mtt"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_sxnch"]
 size = Vector3(10, 1, 10)
@@ -33,14 +34,6 @@ sky_material = SubResource("ProceduralSkyMaterial_g5xil")
 background_mode = 2
 sky = SubResource("Sky_g5xil")
 ambient_light_color = Color(0.617455, 0.617455, 0.617455, 1)
-
-[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_g5xil"]
-
-[sub_resource type="CylinderShape3D" id="CylinderShape3D_kb1pf"]
-height = 0.02
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_7mpes"]
-height = 0.02
 
 [node name="3D Scene Root" type="Node3D"]
 script = ExtResource("1_1rpu5")
@@ -79,46 +72,13 @@ mesh = SubResource("BoxMesh_g5xil")
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_5rbum")
 
-[node name="HUD" type="CanvasLayer" parent="."]
-
-[node name="Control" type="Control" parent="HUD"]
-layout_mode = 3
-anchors_preset = 0
-offset_right = 1152.0
-offset_bottom = 648.0
-
-[node name="Death Counter" type="Label" parent="HUD/Control"]
-layout_mode = 1
-offset_left = 5.0
-offset_top = 5.0
-offset_right = 45.0
-offset_bottom = 28.0
-text = "0"
-
-[node name="Health Bar" type="ProgressBar" parent="HUD/Control"]
-material = SubResource("CanvasItemMaterial_g5xil")
-layout_mode = 1
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -144.0
-offset_top = 5.0
-offset_right = 144.0
-offset_bottom = 32.0
-grow_horizontal = 2
+[node name="HUD" parent="." instance=ExtResource("4_kb1pf")]
 
 [node name="Rifle Pickup" parent="." instance=ExtResource("4_5rbum")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0, -3)
 
-[node name="Target" type="StaticBody3D" parent="."]
+[node name="Target" parent="." instance=ExtResource("5_23mtt")]
 transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 5, 1.5, 0)
-script = ExtResource("5_23mtt")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Target"]
-shape = SubResource("CylinderShape3D_kb1pf")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Target"]
-mesh = SubResource("CylinderMesh_7mpes")
 
 [connection signal="death" from="Player" to="." method="_on_player_death"]
 [connection signal="picked_up" from="Rifle Pickup" to="." method="_on_gun_pickup_picked_up"]
