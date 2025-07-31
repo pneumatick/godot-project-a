@@ -23,7 +23,7 @@ var _alive : bool = true
 @export var TILT_UPPER_LIMIT := deg_to_rad(90.0)
 @export var CAMERA_CONTROLLER : Camera3D
 @export var MOUSE_SENSITIVITY : float = 0.5
-@export var HEALTH : int = DEFAULT_HEALTH
+@export var health : int = DEFAULT_HEALTH
 
 @onready var right_hand : Node3D = get_node("Pivot/Camera3D/Right Hand")
 
@@ -34,7 +34,7 @@ var _alive : bool = true
 
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-	health_bar.value = HEALTH
+	health_bar.value = health
 
 func _physics_process(delta: float) -> void:
 	# Update the camera view
@@ -104,10 +104,10 @@ func die() -> void:
 	await get_tree().create_timer(2.0).timeout
 	respawn(Vector3(0.0, 1.0, 0.0))
 
-func respawn(position: Vector3) -> void:
-	global_transform.origin = position
-	HEALTH = DEFAULT_HEALTH
-	health_bar.value = HEALTH
+func respawn(respawn_position: Vector3) -> void:
+	global_transform.origin = respawn_position
+	health = DEFAULT_HEALTH
+	health_bar.value = health
 	visible = true
 	_alive = true
 	set_physics_process(true)
@@ -122,10 +122,10 @@ func _on_mob_detector_body_entered(body: Node3D) -> void:
 		# Do the initial damage, and set the timer to continue doing damage
 		# so long as the player remains in the body.
 		if $DamageTimer.is_stopped():
-			HEALTH -= damage_amount
-			health_bar.value = HEALTH
-			print("The player was hit, health now %s" % [str(HEALTH)])
-			if HEALTH <= 0 and _alive:
+			health -= damage_amount
+			health_bar.value = health
+			print("The player was hit, health now %s" % [str(health)])
+			if health <= 0 and _alive:
 				die()
 			else:
 				print("Starting damage timer...")
@@ -140,13 +140,13 @@ func _on_mob_detector_body_exited(body: Node3D) -> void:
 
 # Accumulate damage when the damage timer times out
 func _on_damage_timer_timeout():
-	if HEALTH > 0:
+	if health > 0:
 		for body in _damaging_bodies.keys():
-			HEALTH -= _damaging_bodies[body]
-			health_bar.value = HEALTH
-			print("The player was hit, health now %s" % [str(HEALTH)])
+			health -= _damaging_bodies[body]
+			health_bar.value = health
+			print("The player was hit, health now %s" % [str(health)])
 		
-	if HEALTH <= 0 and _alive:
+	if health <= 0 and _alive:
 		die()
 
 # Add an item to the player's inventory (and hand)
