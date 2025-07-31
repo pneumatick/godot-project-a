@@ -32,6 +32,7 @@ var _alive : bool = true
 @onready var death_counter : Label = get_node("/root/3D Scene Root/HUD/Control/Death Counter")
 @onready var rifle : PackedScene = preload("res://rifle.tscn")
 @onready var hit_sound : AudioStreamPlayer3D = $"Hit Sound"
+@onready var death_sound : AudioStreamPlayer3D = $"Death Sound"
 
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
@@ -100,6 +101,7 @@ func die() -> void:
 	var right_hand_children = right_hand.get_children()
 	for child in right_hand_children:
 		child.queue_free()
+	death_sound.play()
 	death.emit()
 	# Wait a bit before respawning the player
 	await get_tree().create_timer(2.0).timeout
@@ -120,6 +122,8 @@ func take_damage(amount: int) -> void:
 		print("The player was hit, health now %s" % [str(health)])
 		if health <= 0 and _alive:
 			die()
+		else:
+			hit_sound.play()
 
 func _on_mob_detector_body_entered(body: Node3D) -> void:
 	print("%s entered..." % [body.name])
