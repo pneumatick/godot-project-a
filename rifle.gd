@@ -38,7 +38,7 @@ func fire():
 		PhysicsRayQueryParameters3D.create(
 			from,
 			to,
-			0xFFFFFFFF,			  # Default value (can't override "exclude" to avoid this...)
+			0xFFFFFFFF,			  # Default value
 			[self, get_parent()]  # exclude gun and player (specifically "Right Hand")
 		)
 	)
