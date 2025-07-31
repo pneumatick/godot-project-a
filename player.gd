@@ -31,6 +31,7 @@ var _alive : bool = true
 @onready var health_bar : ProgressBar = get_node("/root/3D Scene Root/HUD/Control/Health Bar")
 @onready var death_counter : Label = get_node("/root/3D Scene Root/HUD/Control/Death Counter")
 @onready var rifle : PackedScene = preload("res://rifle.tscn")
+@onready var hit_sound : AudioStreamPlayer3D = $"Hit Sound"
 
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
@@ -112,6 +113,14 @@ func respawn(respawn_position: Vector3) -> void:
 	_alive = true
 	set_physics_process(true)
 
+func take_damage(amount: int) -> void:
+	if health > 0:
+		health -= amount
+		health_bar.value = health
+		print("The player was hit, health now %s" % [str(health)])
+		if health <= 0 and _alive:
+			die()
+
 func _on_mob_detector_body_entered(body: Node3D) -> void:
 	print("%s entered..." % [body.name])
 	
@@ -122,12 +131,8 @@ func _on_mob_detector_body_entered(body: Node3D) -> void:
 		# Do the initial damage, and set the timer to continue doing damage
 		# so long as the player remains in the body.
 		if $DamageTimer.is_stopped():
-			health -= damage_amount
-			health_bar.value = health
-			print("The player was hit, health now %s" % [str(health)])
-			if health <= 0 and _alive:
-				die()
-			else:
+			take_damage(damage_amount)
+			if _alive:
 				print("Starting damage timer...")
 				$DamageTimer.start(0.5)
 
@@ -140,14 +145,8 @@ func _on_mob_detector_body_exited(body: Node3D) -> void:
 
 # Accumulate damage when the damage timer times out
 func _on_damage_timer_timeout():
-	if health > 0:
-		for body in _damaging_bodies.keys():
-			health -= _damaging_bodies[body]
-			health_bar.value = health
-			print("The player was hit, health now %s" % [str(health)])
-		
-	if health <= 0 and _alive:
-		die()
+	for body in _damaging_bodies.keys():
+		take_damage(_damaging_bodies[body])
 
 # Add an item to the player's inventory (and hand)
 func add_item(item_name: String):
