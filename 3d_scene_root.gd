@@ -4,7 +4,7 @@ extends Node3D
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	pass # Replace with function body.
+	pass
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
@@ -15,8 +15,8 @@ func _input(event: InputEvent) -> void:
 		get_tree().quit()
 
 func _on_player_death() -> void:
-	print("The player has died.")
+	print("World acknowledges that the player has died.")
 
 func _on_gun_pickup_picked_up(weapon_name: String) -> void:
 	# This also shouldn't need to exist...
-	print("%s picked up" % weapon_name)
+	print("World acknowledges that %s was picked up" % weapon_name)

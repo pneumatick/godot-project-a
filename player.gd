@@ -16,6 +16,7 @@ var _player_rotation : Vector3
 var _camera_rotation : Vector3
 var _damaging_bodies : Dictionary = {}
 var _items : Array = []
+var _inventory : Dictionary = {}
 var _alive : bool = true
 
 @export var TILT_LOWER_LIMIT := deg_to_rad(-90.0)
@@ -26,6 +27,7 @@ var _alive : bool = true
 
 @onready var right_hand : Node3D = get_node("Pivot/Camera3D/Right Hand")
 
+@onready var world : Node3D = get_node("/root/3D Scene Root")
 @onready var health_bar : ProgressBar = get_node("/root/3D Scene Root/HUD/Control/Health Bar")
 @onready var death_counter : Label = get_node("/root/3D Scene Root/HUD/Control/Death Counter")
 @onready var rifle : PackedScene = preload("res://rifle.tscn")
@@ -85,12 +87,14 @@ func _update_camera(delta: float) -> void:
 	_rotation_input = 0.0
 	_tilt_input = 0.0
 
+# Handle player death logic
 func die() -> void:
 	_alive = false
 	set_physics_process(false)
 	visible = false
 	velocity = Vector3.ZERO
 	death_counter.text = str(int(death_counter.text) + 1)
+	_inventory = {}
 	_items = []
 	var right_hand_children = right_hand.get_children()
 	for child in right_hand_children:
@@ -134,6 +138,7 @@ func _on_mob_detector_body_exited(body: Node3D) -> void:
 		if _damaging_bodies.size() == 0:
 			$DamageTimer.stop()
 
+# Accumulate damage when the damage timer times out
 func _on_damage_timer_timeout():
 	if HEALTH > 0:
 		for body in _damaging_bodies.keys():
@@ -144,13 +149,24 @@ func _on_damage_timer_timeout():
 	if HEALTH <= 0 and _alive:
 		die()
 
-func update_item_display():
-	print("Item display updating...")
-	var new_rifle = rifle.instantiate()
-	new_rifle.position = Vector3(0.5, -0.25, -0.25)
-	right_hand.add_child(new_rifle)
+# Add an item to the player's inventory (and hand)
+func add_item(item_name: String):
+	print("Adding %s..." % item_name)
+	if item_name == "Rifle":
+		var new_rifle = rifle.instantiate()
+		right_hand.add_child(new_rifle)
+		_inventory[item_name] = new_rifle
+		_items.append(item_name)
+	else:
+		print("Unknown item %s" % item_name)
 
+# Handle gun pickups
 func _on_gun_pickup_picked_up(weapon_name: String) -> void:
+	if _inventory.has(weapon_name):
+		# This assumes that the weapon remains invisible in the hand when 
+		# not in use
+		var weapon = right_hand.get_node(weapon_name)
+		weapon.load_ammo(weapon.max_ammo)
+	else:
+		add_item(weapon_name)
 	print("Picked up weapon: ", weapon_name)
-	_items.append(weapon_name)
-	update_item_display()

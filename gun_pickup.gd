@@ -2,7 +2,7 @@ extends Area3D
 
 signal picked_up
 
-@export var weapon_name: String = "Rifle"
+@export var weapon_name: String = "Rifle"			# Default: Rifle
 @export var respawn_time: float = 5.0
 
 @onready var level = get_node("/root/3D Scene Root")

@@ -12,7 +12,8 @@ var can_fire = true
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	pass # Replace with function body.
+	# Set default position relative to camera (center of view being origin)
+	position = Vector3(0.5, -0.25, -0.25)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
@@ -21,8 +22,8 @@ func _process(delta: float) -> void:
 		can_fire = false
 		await get_tree().create_timer(fire_rate).timeout
 		can_fire = true
-		
-		
+
+# Fire the weapon
 func fire():
 	current_ammo -= 1
 	print("Bang! Ammo: ", current_ammo)
@@ -50,3 +51,10 @@ func fire():
 		
 		if result.collider.has_method("take_damage"):
 			result.collider.take_damage(damage)
+
+# Load ammo into the weapon
+func load_ammo(amount: int):
+	if current_ammo + amount > max_ammo:
+		current_ammo = max_ammo
+	else:
+		current_ammo += amount
