@@ -1,0 +1,108 @@
+[gd_scene load_steps=15 format=3 uid="uid://hmv4dr58x4if"]
+
+[ext_resource type="Script" uid="uid://cf8moef3pykdp" path="res://3d_scene_root.gd" id="1_1rpu5"]
+[ext_resource type="PackedScene" uid="uid://c2dcha7sipp8a" path="res://player.tscn" id="1_sxnch"]
+[ext_resource type="Script" uid="uid://bpumr1tul6w4p" path="res://death_cube.gd" id="3_g5xil"]
+[ext_resource type="PackedScene" uid="uid://ducw325a8ghny" path="res://rifle_pickup.tscn" id="4_5rbum"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_sxnch"]
+size = Vector3(10, 1, 10)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sxnch"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_1rpu5"]
+material = SubResource("StandardMaterial3D_sxnch")
+size = Vector3(10, 1, 10)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_1rpu5"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1rpu5"]
+albedo_color = Color(1, 0, 0, 1)
+metallic = 0.74
+
+[sub_resource type="BoxMesh" id="BoxMesh_g5xil"]
+material = SubResource("StandardMaterial3D_1rpu5")
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_g5xil"]
+
+[sub_resource type="Sky" id="Sky_g5xil"]
+sky_material = SubResource("ProceduralSkyMaterial_g5xil")
+
+[sub_resource type="Environment" id="Environment_5rbum"]
+background_mode = 2
+sky = SubResource("Sky_g5xil")
+ambient_light_color = Color(0.617455, 0.617455, 0.617455, 1)
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_g5xil"]
+
+[node name="3D Scene Root" type="Node3D"]
+script = ExtResource("1_1rpu5")
+
+[node name="Player" parent="." instance=ExtResource("1_sxnch")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+
+[node name="Floor" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0)
+collision_layer = 4
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor"]
+shape = SubResource("BoxShape3D_sxnch")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Floor"]
+mesh = SubResource("BoxMesh_1rpu5")
+skeleton = NodePath("../CollisionShape3D")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.0871558, 0.996195, 0, -0.996195, 0.0871558, 10, 50, 0)
+
+[node name="Death Cube" type="CharacterBody3D" parent="." groups=["mob"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -4)
+collision_layer = 2
+collision_mask = 0
+motion_mode = 1
+script = ExtResource("3_g5xil")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Death Cube"]
+shape = SubResource("BoxShape3D_1rpu5")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Death Cube"]
+mesh = SubResource("BoxMesh_g5xil")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_5rbum")
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="Control" type="Control" parent="HUD"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 1152.0
+offset_bottom = 648.0
+
+[node name="Death Counter" type="Label" parent="HUD/Control"]
+layout_mode = 1
+offset_left = 5.0
+offset_top = 5.0
+offset_right = 45.0
+offset_bottom = 28.0
+text = "0"
+
+[node name="Health Bar" type="ProgressBar" parent="HUD/Control"]
+material = SubResource("CanvasItemMaterial_g5xil")
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -144.0
+offset_top = 5.0
+offset_right = 144.0
+offset_bottom = 32.0
+grow_horizontal = 2
+
+[node name="Rifle Pickup" parent="." instance=ExtResource("4_5rbum")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0, -3)
+
+[connection signal="death" from="Player" to="." method="_on_player_death"]
+[connection signal="picked_up" from="Rifle Pickup" to="." method="_on_gun_pickup_picked_up"]
+[connection signal="picked_up" from="Rifle Pickup" to="Player" method="_on_gun_pickup_picked_up"]
