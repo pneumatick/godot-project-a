@@ -11,7 +11,6 @@ const SPEED = 5.0
 const JUMP_VELOCITY = 4.5
 const DEFAULT_HEALTH = 100
 
-# Variables to deal with mouse movement
 var _mouse_input : bool = false
 var _mouse_rotation : Vector3
 var _rotation_input : float
@@ -21,30 +20,36 @@ var _camera_rotation : Vector3
 var _damaging_bodies : Dictionary = {}
 var _items : Array = []
 var _inventory : Dictionary = {}
+var _weapon_scenes : Dictionary = {}
 var _alive : bool = true
 var _money : int = 0
 
-@export var TILT_LOWER_LIMIT := deg_to_rad(-90.0)
-@export var TILT_UPPER_LIMIT := deg_to_rad(90.0)
-@export var CAMERA_CONTROLLER : Camera3D
-@export var MOUSE_SENSITIVITY : float = 0.5
+@export var tilt_lower_limit := deg_to_rad(-90.0)
+@export var tilt_upper_limit := deg_to_rad(90.0)
+@export var camera_controller : Camera3D
+@export var mouse_sensitivity : float = 0.5
 @export var health : int = DEFAULT_HEALTH
 @export var death_deduction : int = 15
 
+# Nodes internal to scene
 @onready var right_hand : Node3D = get_node("Pivot/Camera3D/Right Hand")
 
+# Nodes external to scene
 @onready var world : Node3D = get_node("/root/3D Scene Root")
 @onready var health_bar : ProgressBar = get_node("/root/3D Scene Root/HUD/Control/Health Bar")
 @onready var death_counter : Label = get_node("/root/3D Scene Root/HUD/Control/Death Counter")
-@onready var rifle : PackedScene = preload("res://Scenes/rifle.tscn")
-@onready var pistol : PackedScene = preload("res://Scenes/pistol.tscn")
+@onready var money_display : Label = get_node("/root/3D Scene Root/HUD/Control/Money")
 @onready var hit_sound : AudioStreamPlayer3D = $"Hit Sound"
 @onready var death_sound : AudioStreamPlayer3D = $"Death Sound"
-@onready var money_display : Label = get_node("/root/3D Scene Root/HUD/Control/Money")
 
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	health_bar.value = health
+	
+	# Prepare weapon scenes dictionary
+	_weapon_scenes["Rifle"] = preload("res://Scenes/rifle.tscn")
+	_weapon_scenes["Pistol"] = preload("res://Scenes/pistol.tscn")
+	
 	spawn.emit()						# Probably not supposed to be here...
 
 func _physics_process(delta: float) -> void:
@@ -79,19 +84,19 @@ func _physics_process(delta: float) -> void:
 func _input(event):
 	_mouse_input = event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED
 	if _mouse_input :
-		_rotation_input = -event.relative.x * MOUSE_SENSITIVITY
-		_tilt_input = -event.relative.y * MOUSE_SENSITIVITY
+		_rotation_input = -event.relative.x * mouse_sensitivity
+		_tilt_input = -event.relative.y * mouse_sensitivity
 
 func _update_camera(delta: float) -> void:
 	_mouse_rotation.x += _tilt_input * delta
-	_mouse_rotation.x = clamp(_mouse_rotation.x, TILT_LOWER_LIMIT, TILT_UPPER_LIMIT)
+	_mouse_rotation.x = clamp(_mouse_rotation.x, tilt_lower_limit, tilt_upper_limit)
 	_mouse_rotation.y += _rotation_input * delta
 	
 	_player_rotation = Vector3(0.0,_mouse_rotation.y,0.0)
 	_camera_rotation = Vector3(_mouse_rotation.x,0.0,0.0)
 	
-	CAMERA_CONTROLLER.transform.basis = Basis.from_euler(_camera_rotation)
-	CAMERA_CONTROLLER.rotation.z = 0.0
+	camera_controller.transform.basis = Basis.from_euler(_camera_rotation)
+	camera_controller.rotation.z = 0.0
 	
 	global_transform.basis = Basis.from_euler(_player_rotation)
 	
@@ -99,7 +104,7 @@ func _update_camera(delta: float) -> void:
 	_tilt_input = 0.0
 
 # Handle player death logic
-func die() -> void:
+func _die() -> void:
 	_alive = false
 	set_physics_process(false)
 	visible = false
@@ -124,9 +129,9 @@ func die() -> void:
 	
 	# Wait a bit before respawning the player
 	await get_tree().create_timer(2.0).timeout
-	respawn(Vector3(0.0, 1.0, 0.0))
+	_respawn(Vector3(0.0, 1.0, 0.0))
 
-func respawn(respawn_position: Vector3) -> void:
+func _respawn(respawn_position: Vector3) -> void:
 	global_transform.origin = respawn_position
 	health = DEFAULT_HEALTH
 	health_bar.value = health
@@ -135,13 +140,13 @@ func respawn(respawn_position: Vector3) -> void:
 	set_physics_process(true)
 	spawn.emit()
 
-func take_damage(amount: int) -> void:
+func _take_damage(amount: int) -> void:
 	if health > 0:
 		health -= amount
 		health_bar.value = health
 		print("The player was hit, health now %s" % [str(health)])
 		if health <= 0 and _alive:
-			die()
+			_die()
 		else:
 			hit_sound.play()
 
@@ -155,7 +160,7 @@ func _on_mob_detector_body_entered(body: Node3D) -> void:
 		# Do the initial damage, and set the timer to continue doing damage
 		# so long as the player remains in the body.
 		if $DamageTimer.is_stopped():
-			take_damage(damage_amount)
+			_take_damage(damage_amount)
 			if _alive:
 				print("Starting damage timer...")
 				$DamageTimer.start(0.5)
@@ -170,28 +175,21 @@ func _on_mob_detector_body_exited(body: Node3D) -> void:
 # Accumulate damage when the damage timer times out
 func _on_damage_timer_timeout():
 	for body in _damaging_bodies.keys():
-		take_damage(_damaging_bodies[body])
+		_take_damage(_damaging_bodies[body])
 
-func equip_weapon(weapon: Node) -> void:
+func _equip_weapon(weapon: Node) -> void:
 	weapon_equipped.emit(weapon)
 
 # Add an item to the player's inventory (and hand)
-func add_item(item_name: String):
+func _add_item(item_name: String):
 	print("Adding %s..." % item_name)
-	if item_name == "Rifle":
-		var new_rifle = rifle.instantiate()
-		right_hand.add_child(new_rifle)
-		_inventory[item_name] = new_rifle
+	if _weapon_scenes.has(item_name):
+		var new_weapon = _weapon_scenes[item_name].instantiate()
+		right_hand.add_child(new_weapon)
+		_inventory[item_name] = new_weapon
 		_items.append(item_name)
-		equip_weapon(new_rifle)
-		weapon_picked_up.emit(new_rifle)
-	elif item_name == "Pistol":
-		var new_pistol = pistol.instantiate()
-		right_hand.add_child(new_pistol)
-		_inventory[item_name] = new_pistol
-		_items.append(item_name)
-		equip_weapon(new_pistol)
-		weapon_picked_up.emit(new_pistol)
+		_equip_weapon(new_weapon)
+		weapon_picked_up.emit(new_weapon)
 	else:
 		print("Unknown item %s" % item_name)
 
@@ -204,7 +202,7 @@ func _on_gun_pickup_picked_up(weapon_name: String) -> void:
 		weapon.load_ammo(weapon.max_ammo)
 		weapon_reloaded.emit(weapon)
 	else:
-		add_item(weapon_name)
+		_add_item(weapon_name)
 	print("Picked up weapon: ", weapon_name)
 
 func _on_target_destroyed(value: int) -> void:

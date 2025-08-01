@@ -10,10 +10,10 @@
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_4flbx"]
 
-[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("CAMERA_CONTROLLER")]
+[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("camera_controller")]
 collision_mask = 6
 script = ExtResource("1_4flbx")
-CAMERA_CONTROLLER = NodePath("Pivot/Camera3D")
+camera_controller = NodePath("Pivot/Camera3D")
 
 [node name="Pivot" type="Node3D" parent="."]
 
