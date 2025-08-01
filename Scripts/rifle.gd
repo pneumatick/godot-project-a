@@ -10,20 +10,23 @@ extends Node3D
 @onready var ammo_label = get_node("/root/3D Scene Root/HUD/Control/Ammo")
 @onready var fire_sound = $"Fire Sound"
 
-var can_fire = true
+var _can_fire : bool
+var _equipped : bool
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	# Set default position relative to camera (center of view being origin)
 	position = Vector3(0.5, -0.25, -0.25)
+	
+	_can_fire = true
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
-	if Input.is_action_pressed("fire") and can_fire and current_ammo > 0:
+	if Input.is_action_pressed("fire") and _can_fire and current_ammo > 0:
 		fire()
-		can_fire = false
+		_can_fire = false
 		await get_tree().create_timer(fire_rate).timeout
-		can_fire = true
+		_can_fire = true
 
 # Fire the weapon
 func fire():
@@ -63,3 +66,15 @@ func load_ammo(amount: int):
 		current_ammo = max_ammo
 	else:
 		current_ammo += amount
+
+func equip() -> void:
+	_equipped = true
+	visible = true
+	set_process(true)
+	set_process_input(true)		# Probably not necessary
+
+func unequip() -> void:
+	_equipped = false
+	visible = false
+	set_process(false)
+	set_process_input(false)	# Probably not necessary

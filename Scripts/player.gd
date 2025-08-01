@@ -20,6 +20,7 @@ var _camera_rotation : Vector3
 var _damaging_bodies : Dictionary = {}
 var _items : Array = []
 var _inventory : Dictionary = {}
+var _equipped_item_idx : int = 0
 var _weapon_scenes : Dictionary = {}
 var _alive : bool = true
 var _money : int = 0
@@ -86,6 +87,11 @@ func _input(event):
 	if _mouse_input :
 		_rotation_input = -event.relative.x * mouse_sensitivity
 		_tilt_input = -event.relative.y * mouse_sensitivity
+	elif event.is_action_pressed("previous_item"):
+		if len(_items) > 0:
+			_equip_item(_equipped_item_idx - 1)
+	elif event.is_action_pressed("next_item"):
+		_equip_item(_equipped_item_idx + 1)
 
 func _update_camera(delta: float) -> void:
 	_mouse_rotation.x += _tilt_input * delta
@@ -112,8 +118,8 @@ func _die() -> void:
 	death_counter.text = str(int(death_counter.text) + 1)
 	
 	# Dump inventory
-	_inventory = {}
 	_items = []
+	_inventory = {}
 	
 	# Deduct money
 	_money -= death_deduction
@@ -177,8 +183,16 @@ func _on_damage_timer_timeout():
 	for body in _damaging_bodies.keys():
 		_take_damage(_damaging_bodies[body])
 
-func _equip_weapon(weapon: Node) -> void:
-	weapon_equipped.emit(weapon)
+# Equip held item
+func _equip_item(idx: int) -> void:
+	# Unequip current item if necessary
+	if _items.size() > 1:
+		_items[_equipped_item_idx].unequip()
+	
+	idx = wrapi(idx, 0, _items.size())
+	_items[idx].equip()
+	weapon_equipped.emit(_items[idx])
+	_equipped_item_idx = idx
 
 # Add an item to the player's inventory (and hand)
 func _add_item(item_name: String):
@@ -186,9 +200,12 @@ func _add_item(item_name: String):
 	if _weapon_scenes.has(item_name):
 		var new_weapon = _weapon_scenes[item_name].instantiate()
 		right_hand.add_child(new_weapon)
+		_items.append(new_weapon)
 		_inventory[item_name] = new_weapon
-		_items.append(item_name)
-		_equip_weapon(new_weapon)
+		if _items.size() == 1:
+			_equip_item(0)
+		else:
+			new_weapon.unequip()
 		weapon_picked_up.emit(new_weapon)
 	else:
 		print("Unknown item %s" % item_name)
@@ -196,11 +213,10 @@ func _add_item(item_name: String):
 # Handle gun pickups
 func _on_gun_pickup_picked_up(weapon_name: String) -> void:
 	if _inventory.has(weapon_name):
-		# This assumes that the weapon remains invisible in the hand when 
-		# not in use
-		var weapon = right_hand.get_node(weapon_name)
+		var weapon = _inventory[weapon_name]
 		weapon.load_ammo(weapon.max_ammo)
-		weapon_reloaded.emit(weapon)
+		if weapon == _items[_equipped_item_idx]:
+			weapon_reloaded.emit(weapon)
 	else:
 		_add_item(weapon_name)
 	print("Picked up weapon: ", weapon_name)
