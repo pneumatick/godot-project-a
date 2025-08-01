@@ -4,11 +4,12 @@ extends Node3D
 @export var max_ammo: int = 100
 @export var max_distance: float = 1000.0
 @export var damage: int = 25
+@export var current_ammo = max_ammo
 
 @onready var player = get_node("/root/3D Scene Root/Player")
+@onready var ammo_label = get_node("/root/3D Scene Root/HUD/Control/Ammo")
 @onready var fire_sound = $"Fire Sound"
 
-var current_ammo = max_ammo
 var can_fire = true
 
 # Called when the node enters the scene tree for the first time.
@@ -30,13 +31,16 @@ func fire():
 	print("Bang! Ammo: ", current_ammo)
 	fire_sound.play()
 	
+	# Update ammo label
+	ammo_label.text = str(current_ammo)
+	
 	var camera = get_viewport().get_camera_3d()
 	if not camera:
 		print("No camera found!")
 		return
 	
 	var from = camera.global_transform.origin
-	var to = from + camera.global_transform.basis.z * -max_distance  # -Z is forward
+	var to = from + camera.global_transform.basis.z * -max_distance
 	
 	var space_state = get_world_3d().direct_space_state
 	var result = space_state.intersect_ray(
@@ -44,13 +48,12 @@ func fire():
 			from,
 			to,
 			0xFFFFFFFF,			  # Default value
-			[self, player]  # exclude gun and player
+			[self, player]  	  # exclude gun and player
 		)
 	)
 	
 	if result:
 		print("Hit: ", result.collider)
-		
 		if result.collider.has_method("take_damage"):
 			result.collider.take_damage(damage)
 

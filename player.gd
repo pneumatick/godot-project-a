@@ -1,7 +1,11 @@
 extends CharacterBody3D
 
-# Emitted when the player is hit by a mob
+signal spawn
 signal death
+signal weapon_equipped
+signal weapon_reloaded
+signal weapon_picked_up
+signal money_change
 
 const SPEED = 5.0
 const JUMP_VELOCITY = 4.5
@@ -18,12 +22,14 @@ var _damaging_bodies : Dictionary = {}
 var _items : Array = []
 var _inventory : Dictionary = {}
 var _alive : bool = true
+var _money : int = 0
 
 @export var TILT_LOWER_LIMIT := deg_to_rad(-90.0)
 @export var TILT_UPPER_LIMIT := deg_to_rad(90.0)
 @export var CAMERA_CONTROLLER : Camera3D
 @export var MOUSE_SENSITIVITY : float = 0.5
 @export var health : int = DEFAULT_HEALTH
+@export var death_deduction : int = 15
 
 @onready var right_hand : Node3D = get_node("Pivot/Camera3D/Right Hand")
 
@@ -33,10 +39,12 @@ var _alive : bool = true
 @onready var rifle : PackedScene = preload("res://rifle.tscn")
 @onready var hit_sound : AudioStreamPlayer3D = $"Hit Sound"
 @onready var death_sound : AudioStreamPlayer3D = $"Death Sound"
+@onready var money_display : Label = get_node("/root/3D Scene Root/HUD/Control/Money")
 
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	health_bar.value = health
+	spawn.emit()						# Probably not supposed to be here...
 
 func _physics_process(delta: float) -> void:
 	# Update the camera view
@@ -96,13 +104,23 @@ func die() -> void:
 	visible = false
 	velocity = Vector3.ZERO
 	death_counter.text = str(int(death_counter.text) + 1)
+	
+	# Dump inventory
 	_inventory = {}
 	_items = []
+	
+	# Deduct money
+	_money -= death_deduction
+	money_change.emit(_money)
+	
+	# Remove whatever is in the right hand
 	var right_hand_children = right_hand.get_children()
 	for child in right_hand_children:
 		child.queue_free()
+	
 	death_sound.play()
 	death.emit()
+	
 	# Wait a bit before respawning the player
 	await get_tree().create_timer(2.0).timeout
 	respawn(Vector3(0.0, 1.0, 0.0))
@@ -114,6 +132,7 @@ func respawn(respawn_position: Vector3) -> void:
 	visible = true
 	_alive = true
 	set_physics_process(true)
+	spawn.emit()
 
 func take_damage(amount: int) -> void:
 	if health > 0:
@@ -152,6 +171,9 @@ func _on_damage_timer_timeout():
 	for body in _damaging_bodies.keys():
 		take_damage(_damaging_bodies[body])
 
+func equip_weapon(weapon: Node) -> void:
+	weapon_equipped.emit(weapon)
+
 # Add an item to the player's inventory (and hand)
 func add_item(item_name: String):
 	print("Adding %s..." % item_name)
@@ -160,6 +182,8 @@ func add_item(item_name: String):
 		right_hand.add_child(new_rifle)
 		_inventory[item_name] = new_rifle
 		_items.append(item_name)
+		equip_weapon(new_rifle)
+		weapon_picked_up.emit(new_rifle)
 	else:
 		print("Unknown item %s" % item_name)
 
@@ -170,6 +194,11 @@ func _on_gun_pickup_picked_up(weapon_name: String) -> void:
 		# not in use
 		var weapon = right_hand.get_node(weapon_name)
 		weapon.load_ammo(weapon.max_ammo)
+		weapon_reloaded.emit(weapon)
 	else:
 		add_item(weapon_name)
 	print("Picked up weapon: ", weapon_name)
+
+func _on_target_destroyed(value: int) -> void:
+	_money += value
+	money_change.emit(_money)

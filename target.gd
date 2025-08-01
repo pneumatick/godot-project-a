@@ -6,6 +6,8 @@ const DEFAULT_HEALTH = 100
 
 var health = DEFAULT_HEALTH
 
+@export var value: int = 10
+
 @onready var collision_shape = $CollisionShape3D
 @onready var hit_sound = $"Hit Sound"
 
@@ -28,8 +30,10 @@ func take_damage(amount: int) -> void:
 func destroy():
 	collision_shape.disabled = true 
 	visible = false
-	destroyed.emit()
+	# Reward the player with money
+	destroyed.emit(value)
 	await get_tree().create_timer(2.0).timeout
 	collision_shape.disabled = false
 	visible = true
 	health = DEFAULT_HEALTH
+	
