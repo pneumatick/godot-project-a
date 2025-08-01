@@ -36,7 +36,8 @@ var _money : int = 0
 @onready var world : Node3D = get_node("/root/3D Scene Root")
 @onready var health_bar : ProgressBar = get_node("/root/3D Scene Root/HUD/Control/Health Bar")
 @onready var death_counter : Label = get_node("/root/3D Scene Root/HUD/Control/Death Counter")
-@onready var rifle : PackedScene = preload("res://rifle.tscn")
+@onready var rifle : PackedScene = preload("res://Scenes/rifle.tscn")
+@onready var pistol : PackedScene = preload("res://Scenes/pistol.tscn")
 @onready var hit_sound : AudioStreamPlayer3D = $"Hit Sound"
 @onready var death_sound : AudioStreamPlayer3D = $"Death Sound"
 @onready var money_display : Label = get_node("/root/3D Scene Root/HUD/Control/Money")
@@ -184,6 +185,13 @@ func add_item(item_name: String):
 		_items.append(item_name)
 		equip_weapon(new_rifle)
 		weapon_picked_up.emit(new_rifle)
+	elif item_name == "Pistol":
+		var new_pistol = pistol.instantiate()
+		right_hand.add_child(new_pistol)
+		_inventory[item_name] = new_pistol
+		_items.append(item_name)
+		equip_weapon(new_pistol)
+		weapon_picked_up.emit(new_pistol)
 	else:
 		print("Unknown item %s" % item_name)
 

@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://tldca8ygc1hw"]
 
-[ext_resource type="Script" uid="uid://bwsr8lcu0e48x" path="res://crosshair.gd" id="1_37p78"]
-[ext_resource type="Script" uid="uid://dnu7pnurodndd" path="res://hud.gd" id="1_64ctp"]
+[ext_resource type="Script" uid="uid://bwsr8lcu0e48x" path="res://Scripts/crosshair.gd" id="1_37p78"]
+[ext_resource type="Script" uid="uid://dnu7pnurodndd" path="res://Scripts/hud.gd" id="1_64ctp"]
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_g5xil"]
 

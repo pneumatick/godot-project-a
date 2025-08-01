@@ -1,8 +1,8 @@
 [gd_scene load_steps=7 format=3 uid="uid://c2dcha7sipp8a"]
 
-[ext_resource type="Script" uid="uid://ck610abr6ujd" path="res://player.gd" id="1_4flbx"]
-[ext_resource type="AudioStream" uid="uid://m02ydh4m0xlk" path="res://steve-old-hurt-sound_XKZxUk4.mp3" id="2_onrkg"]
-[ext_resource type="AudioStream" uid="uid://bdrr5ckf2evlb" path="res://you goat a fuckin hell.wav" id="3_i3pqv"]
+[ext_resource type="Script" uid="uid://ck610abr6ujd" path="res://Scripts/player.gd" id="1_4flbx"]
+[ext_resource type="AudioStream" uid="uid://m02ydh4m0xlk" path="res://Assets/Sounds/steve-old-hurt-sound_XKZxUk4.mp3" id="2_onrkg"]
+[ext_resource type="AudioStream" uid="uid://bdrr5ckf2evlb" path="res://Assets/Sounds/you goat a fuckin hell.wav" id="3_i3pqv"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_c3xsu"]
 

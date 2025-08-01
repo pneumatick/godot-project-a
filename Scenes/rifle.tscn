@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3 uid="uid://bmh5wgvl4dejy"]
 
-[ext_resource type="Script" uid="uid://dnhcbjk5xtiow" path="res://rifle.gd" id="1_j33d7"]
-[ext_resource type="AudioStream" uid="uid://cgy03nf8lh35u" path="res://error_CDOxCYm.mp3" id="2_jao7y"]
+[ext_resource type="Script" uid="uid://dnhcbjk5xtiow" path="res://Scripts/rifle.gd" id="1_no7b2"]
+[ext_resource type="AudioStream" uid="uid://cgy03nf8lh35u" path="res://Assets/Sounds/error_CDOxCYm.mp3" id="2_d8g3d"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4flbx"]
 
@@ -9,7 +9,7 @@
 material = SubResource("StandardMaterial3D_4flbx")
 
 [node name="Rifle" type="Node3D"]
-script = ExtResource("1_j33d7")
+script = ExtResource("1_no7b2")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 transform = Transform3D(0.25, 0, 0, 0, -1.09278e-08, -0.25, 0, 0.25, -1.09278e-08, 0, 0, 0)
@@ -17,4 +17,4 @@ mesh = SubResource("CapsuleMesh_onrkg")
 skeleton = NodePath("../..")
 
 [node name="Fire Sound" type="AudioStreamPlayer3D" parent="."]
-stream = ExtResource("2_jao7y")
+stream = ExtResource("2_d8g3d")
