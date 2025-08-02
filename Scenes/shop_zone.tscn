@@ -1,0 +1,22 @@
+[gd_scene load_steps=5 format=3 uid="uid://dulrda5jbt33a"]
+
+[ext_resource type="Script" uid="uid://dkyw73cqa5e5t" path="res://Scripts/shop_zone.gd" id="1_r1chn"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_qmw6q"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_lyres"]
+transparency = 1
+albedo_color = Color(0.669189, 0.665601, 3.85046e-07, 0.403922)
+
+[sub_resource type="SphereMesh" id="SphereMesh_fqem3"]
+material = SubResource("StandardMaterial3D_lyres")
+
+[node name="ShopZone" type="Area3D"]
+transform = Transform3D(5, 0, 0, 0, 5, 0, 0, 0, 5, 0, 0, 0)
+script = ExtResource("1_r1chn")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape3D_qmw6q")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("SphereMesh_fqem3")

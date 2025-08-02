@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3 uid="uid://hmv4dr58x4if"]
+[gd_scene load_steps=17 format=3 uid="uid://hmv4dr58x4if"]
 
 [ext_resource type="Script" uid="uid://cf8moef3pykdp" path="res://Scripts/3d_scene_root.gd" id="1_1rpu5"]
 [ext_resource type="PackedScene" uid="uid://c2dcha7sipp8a" path="res://Scenes/player.tscn" id="1_sxnch"]
@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://ducw325a8ghny" path="res://Scenes/rifle_pickup.tscn" id="4_5rbum"]
 [ext_resource type="PackedScene" uid="uid://tldca8ygc1hw" path="res://Scenes/hud.tscn" id="4_kb1pf"]
 [ext_resource type="PackedScene" uid="uid://mlxqh5iqxvxs" path="res://Scenes/target.tscn" id="5_23mtt"]
+[ext_resource type="PackedScene" uid="uid://dulrda5jbt33a" path="res://Scenes/shop_zone.tscn" id="7_lyres"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_sxnch"]
 size = Vector3(10, 1, 10)
@@ -83,9 +84,10 @@ environment = SubResource("Environment_5rbum")
 [node name="Pistol Pickup" parent="." instance=ExtResource("4_5rbum")]
 weapon_name = "Pistol"
 
+[node name="ShopZone" parent="." instance=ExtResource("7_lyres")]
+transform = Transform3D(5, 0, 0, 0, 5, 0, 0, 0, 5, 0, 0, -10)
+
 [connection signal="death" from="Player" to="." method="_on_player_death"]
-[connection signal="death" from="Player" to="HUD" method="_on_player_death"]
-[connection signal="money_change" from="Player" to="HUD" method="_on_player_money_change"]
 [connection signal="weapon_equipped" from="Player" to="HUD" method="_on_player_weapon_equipped"]
 [connection signal="weapon_reloaded" from="Player" to="HUD" method="_on_player_weapon_reloaded"]
 [connection signal="picked_up" from="Rifle Pickup" to="." method="_on_gun_pickup_picked_up"]

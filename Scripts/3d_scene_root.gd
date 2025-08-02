@@ -4,7 +4,8 @@ extends Node3D
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	pass
+	$ShopZone.player_entered_shop.connect(_on_player_entered_shop)
+	$ShopZone.player_exited_shop.connect(_on_player_exited_shop)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
@@ -20,3 +21,9 @@ func _on_player_death() -> void:
 func _on_gun_pickup_picked_up(weapon_name: String) -> void:
 	# This also shouldn't need to exist...
 	print("World acknowledges that %s was picked up" % weapon_name)
+
+func _on_player_entered_shop(p):
+	$HUD/ShopUI.open_for_player(p)
+
+func _on_player_exited_shop(p):
+	$HUD/ShopUI.visible = false

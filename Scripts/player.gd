@@ -23,7 +23,6 @@ var _inventory : Dictionary = {}
 var _equipped_item_idx : int = 0
 var _weapon_scenes : Dictionary = {}
 var _alive : bool = true
-var _money : int = 0
 
 @export var tilt_lower_limit := deg_to_rad(-90.0)
 @export var tilt_upper_limit := deg_to_rad(90.0)
@@ -31,6 +30,7 @@ var _money : int = 0
 @export var mouse_sensitivity : float = 0.5
 @export var health : int = DEFAULT_HEALTH
 @export var death_deduction : int = 15
+@export var money : int = 0
 
 # Nodes internal to scene
 @onready var right_hand : Node3D = get_node("Pivot/Camera3D/Right Hand")
@@ -122,8 +122,8 @@ func _die() -> void:
 	_inventory = {}
 	
 	# Deduct money
-	_money -= death_deduction
-	money_change.emit(_money)
+	money -= death_deduction
+	money_change.emit(money)
 	
 	# Remove whatever is in the right hand
 	var right_hand_children = right_hand.get_children()
@@ -194,33 +194,69 @@ func _equip_item(idx: int) -> void:
 	weapon_equipped.emit(_items[idx])
 	_equipped_item_idx = idx
 
-# Add an item to the player's inventory (and hand)
-func _add_item(item_name: String):
+# Add an item to the player's inventory (and hand, at least for now)
+func add_item(item_name: String):
 	print("Adding %s..." % item_name)
 	if _weapon_scenes.has(item_name):
-		var new_weapon = _weapon_scenes[item_name].instantiate()
-		right_hand.add_child(new_weapon)
-		_items.append(new_weapon)
-		_inventory[item_name] = new_weapon
-		if _items.size() == 1:
-			_equip_item(0)
+		# Add item if not already owned, otherwise replenish ammo
+		if not _inventory.has(item_name):
+			var new_weapon = _weapon_scenes[item_name].instantiate()
+			right_hand.add_child(new_weapon)
+			_items.append(new_weapon)
+			_inventory[item_name] = new_weapon
+			if _items.size() == 1:
+				_equip_item(0)
+			else:
+				new_weapon.unequip()
+			weapon_picked_up.emit(new_weapon)
 		else:
-			new_weapon.unequip()
-		weapon_picked_up.emit(new_weapon)
+			# Handle weapon acquisition by reloading
+			if _weapon_scenes.has(item_name):
+				var weapon = _inventory[item_name]
+				weapon.load_ammo(weapon.max_ammo)
+				if weapon == _items[_equipped_item_idx]:
+					weapon_reloaded.emit(weapon)
 	else:
 		print("Unknown item %s" % item_name)
 
+func remove_item(item_name: String) -> bool:
+	var removed = true
+	
+	print("Removing %s" % item_name)
+	if _inventory.has(item_name):
+		for i in range(_items.size()):
+			if _items[i] == _inventory[item_name]:
+				_items.remove_at(i)
+				# Equip the next item if possible
+				_equip_item(wrapi(i + 1, 0, _items.size()))
+				break
+		_inventory[item_name].queue_free()
+		_inventory.erase(item_name)
+	else:
+		print("Player does not have %s" % item_name)
+		removed = false
+	
+	return removed
+
 # Handle gun pickups
 func _on_gun_pickup_picked_up(weapon_name: String) -> void:
-	if _inventory.has(weapon_name):
-		var weapon = _inventory[weapon_name]
-		weapon.load_ammo(weapon.max_ammo)
-		if weapon == _items[_equipped_item_idx]:
-			weapon_reloaded.emit(weapon)
-	else:
-		_add_item(weapon_name)
+	add_item(weapon_name)
 	print("Picked up weapon: ", weapon_name)
 
 func _on_target_destroyed(value: int) -> void:
-	_money += value
-	money_change.emit(_money)
+	add_money(value)
+
+func add_money(amount: int) -> void:
+	money += amount
+	money_change.emit(money)
+
+func remove_money(amount: int) -> bool:
+	var successful = true
+	
+	if money - amount >= 0:
+		money -= amount
+		money_change.emit(money)
+	else:
+		successful = false
+	
+	return successful

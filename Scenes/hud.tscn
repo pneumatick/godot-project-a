@@ -1,7 +1,8 @@
-[gd_scene load_steps=4 format=3 uid="uid://tldca8ygc1hw"]
+[gd_scene load_steps=5 format=3 uid="uid://tldca8ygc1hw"]
 
 [ext_resource type="Script" uid="uid://bwsr8lcu0e48x" path="res://Scripts/crosshair.gd" id="1_37p78"]
 [ext_resource type="Script" uid="uid://dnu7pnurodndd" path="res://Scripts/hud.gd" id="1_64ctp"]
+[ext_resource type="Script" uid="uid://b2eigmfm3c46e" path="res://Scripts/shop_ui.gd" id="3_bjfho"]
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_g5xil"]
 
@@ -77,3 +78,57 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("1_37p78")
+
+[node name="ShopUI" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -100.0
+offset_right = 200.0
+offset_bottom = 100.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("3_bjfho")
+
+[node name="Shop Label" type="Label" parent="ShopUI"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -20.0
+offset_right = 20.0
+offset_bottom = 23.0
+grow_horizontal = 2
+text = "Shop"
+
+[node name="VBoxContainer" type="VBoxContainer" parent="ShopUI"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -58.5
+offset_top = -33.0
+offset_right = 58.5
+offset_bottom = 33.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Buy Rifle" type="Button" parent="ShopUI/VBoxContainer"]
+layout_mode = 2
+text = "Buy Rifle - $50"
+
+[node name="Sell Rifle" type="Button" parent="ShopUI/VBoxContainer"]
+layout_mode = 2
+text = "Sell Rifle - $25"
+
+[node name="Close" type="Button" parent="ShopUI"]
+layout_mode = 1
+offset_right = 8.0
+offset_bottom = 8.0
+text = "Close"
