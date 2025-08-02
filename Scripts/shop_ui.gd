@@ -11,16 +11,16 @@ func _ready() -> void:
 func open_for_player(player):
 	visible = true
 	_player = player
+	_player.set_in_menu(true)
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 
 func _on_buy_rifle_pressed():
-	if _player.money >= 50:
-		var has_enough = _player.remove_money(50)
-		if has_enough:
-			_player.add_item("Rifle")
-			print("Player bought a rifle!")
-		else:
-			print("Player does not have enough money")
+	var has_enough = _player.remove_money(50)
+	if has_enough:
+		_player.add_item("Rifle")
+		print("Player bought a rifle!")
+	else:
+		print("Player does not have enough money")
 
 func _on_sell_rifle_pressed():
 	var removed = _player.remove_item("Rifle")
@@ -32,5 +32,6 @@ func _on_sell_rifle_pressed():
 
 func _on_close_pressed():
 	visible = false
+	_player.set_in_menu(false)
 	_player = null
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)

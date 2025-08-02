@@ -23,6 +23,7 @@ var _inventory : Dictionary = {}
 var _equipped_item_idx : int = 0
 var _weapon_scenes : Dictionary = {}
 var _alive : bool = true
+var _in_menu : bool = false
 
 @export var tilt_lower_limit := deg_to_rad(-90.0)
 @export var tilt_upper_limit := deg_to_rad(90.0)
@@ -84,7 +85,7 @@ func _physics_process(delta: float) -> void:
 
 func _input(event):
 	_mouse_input = event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED
-	if _mouse_input :
+	if _mouse_input:
 		_rotation_input = -event.relative.x * mouse_sensitivity
 		_tilt_input = -event.relative.y * mouse_sensitivity
 	elif event.is_action_pressed("previous_item"):
@@ -197,6 +198,7 @@ func _equip_item(idx: int) -> void:
 # Add an item to the player's inventory (and hand, at least for now)
 func add_item(item_name: String):
 	print("Adding %s..." % item_name)
+	# Add weapons
 	if _weapon_scenes.has(item_name):
 		# Add item if not already owned, otherwise replenish ammo
 		if not _inventory.has(item_name):
@@ -211,11 +213,10 @@ func add_item(item_name: String):
 			weapon_picked_up.emit(new_weapon)
 		else:
 			# Handle weapon acquisition by reloading
-			if _weapon_scenes.has(item_name):
-				var weapon = _inventory[item_name]
-				weapon.load_ammo(weapon.max_ammo)
-				if weapon == _items[_equipped_item_idx]:
-					weapon_reloaded.emit(weapon)
+			var weapon = _inventory[item_name]
+			weapon.load_ammo(weapon.max_ammo)
+			if weapon == _items[_equipped_item_idx]:
+				weapon_reloaded.emit(weapon)
 	else:
 		print("Unknown item %s" % item_name)
 
@@ -260,3 +261,9 @@ func remove_money(amount: int) -> bool:
 		successful = false
 	
 	return successful
+
+func set_in_menu(state: bool) -> void:
+	_in_menu = state
+
+func get_in_menu() -> bool:
+	return _in_menu
