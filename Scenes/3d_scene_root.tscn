@@ -91,7 +91,4 @@ environment = SubResource("Environment_5rbum")
 [connection signal="death" from="Player" to="." method="_on_player_death"]
 [connection signal="weapon_equipped" from="Player" to="HUD" method="_on_player_weapon_equipped"]
 [connection signal="weapon_reloaded" from="Player" to="HUD" method="_on_player_weapon_reloaded"]
-[connection signal="picked_up" from="Rifle Pickup" to="." method="_on_gun_pickup_picked_up"]
-[connection signal="picked_up" from="Rifle Pickup" to="Player" method="_on_gun_pickup_picked_up"]
 [connection signal="destroyed" from="Target" to="Player" method="_on_target_destroyed"]
-[connection signal="picked_up" from="Pistol Pickup" to="Player" method="_on_gun_pickup_picked_up"]

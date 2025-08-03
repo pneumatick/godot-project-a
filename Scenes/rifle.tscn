@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://bmh5wgvl4dejy"]
 
-[ext_resource type="Script" uid="uid://dnhcbjk5xtiow" path="res://Scripts/rifle.gd" id="1_no7b2"]
+[ext_resource type="Script" uid="uid://dnhcbjk5xtiow" path="res://Scripts/automatic_firearm.gd" id="1_no7b2"]
 [ext_resource type="AudioStream" uid="uid://cgy03nf8lh35u" path="res://Assets/Sounds/error_CDOxCYm.mp3" id="2_d8g3d"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4flbx"]

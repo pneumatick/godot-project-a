@@ -10,6 +10,7 @@ func _ready() -> void:
 	player.money_change.connect(_on_player_money_change)
 	player.weapon_equipped.connect(_on_player_weapon_equipped)
 	player.hand_empty.connect(_on_player_hand_empty)
+	player.death.connect(_on_player_death)
 	interact_label.visible = false
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -22,6 +23,7 @@ func _on_player_weapon_equipped(weapon: Node) -> void:
 
 func _on_player_death() -> void:
 	ammo_label.text = ""
+	$"Control/Death Counter".text = str(int($"Control/Death Counter".text) + 1)
 
 func _on_player_money_change(current_money: int) -> void:
 	money_label.text = "Money: %s" % str(current_money)

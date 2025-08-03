@@ -79,3 +79,7 @@ throw_item={
 3d_physics/layer_2="enemies"
 3d_physics/layer_3="world"
 3d_physics/layer_4="items"
+
+[physics]
+
+3d/physics_engine="Jolt Physics"

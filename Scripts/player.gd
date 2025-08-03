@@ -41,7 +41,6 @@ var _in_menu : bool = false
 # Nodes external to scene
 @onready var world : Node3D = get_node("/root/3D Scene Root")
 @onready var health_bar : ProgressBar = get_node("/root/3D Scene Root/HUD/Control/Health Bar")
-@onready var death_counter : Label = get_node("/root/3D Scene Root/HUD/Control/Death Counter")
 @onready var money_display : Label = get_node("/root/3D Scene Root/HUD/Control/Money")
 @onready var hit_sound : AudioStreamPlayer3D = $"Hit Sound"
 @onready var death_sound : AudioStreamPlayer3D = $"Death Sound"
@@ -123,15 +122,16 @@ func _die() -> void:
 	set_physics_process(false)
 	visible = false
 	velocity = Vector3.ZERO
-	death_counter.text = str(int(death_counter.text) + 1)
 	
 	# Dump inventory
 	_items = []
 	_inventory = {}
 	
 	# Deduct money
-	money -= death_deduction
-	money_change.emit(money)
+	if money - death_deduction >= 0:
+		remove_money(death_deduction)
+	else:
+		remove_money(money)
 	
 	# Remove whatever is in the right hand
 	var right_hand_children = right_hand.get_children()
