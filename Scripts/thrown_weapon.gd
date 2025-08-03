@@ -15,7 +15,7 @@ func _on_collection_area_body_entered(body: Node3D) -> void:
 		queue_free()
 
 func apply_bullet_force(hit_pos: Vector3, direction: Vector3, force: float):
-	apply_impulse(hit_pos - global_transform.origin, direction * force)
+	apply_impulse(hit_pos - global_transform.origin + direction * force)
 	# HIT SOUND HERE
 	# HIT PARTICLES HERE
 
