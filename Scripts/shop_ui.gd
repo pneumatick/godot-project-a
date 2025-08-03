@@ -1,5 +1,7 @@
 extends Control
 
+signal on_menu_closed()
+
 var _player = null
 
 func _ready() -> void:
@@ -35,3 +37,4 @@ func _on_close_pressed():
 	_player.set_in_menu(false)
 	_player = null
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+	on_menu_closed.emit()

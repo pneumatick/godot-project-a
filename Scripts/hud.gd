@@ -3,10 +3,12 @@ extends CanvasLayer
 @onready var ammo_label = get_node("Control/Ammo")
 @onready var money_label = get_node("Control/Money")
 @onready var player = get_node("../Player")
+@onready var interact_label = get_node("Control/Interact Label")
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	player.money_change.connect(_on_player_money_change)
+	interact_label.visible = false
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
