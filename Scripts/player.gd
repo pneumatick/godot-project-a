@@ -125,6 +125,9 @@ func _die() -> void:
 	visible = false
 	velocity = Vector3.ZERO
 	
+	# Drop items
+	drop_all_items()
+	
 	# Dump inventory
 	_items = []
 	_inventory = {}
@@ -315,5 +318,28 @@ func throw_current_item():
 		thrown.apply_impulse(impulse, forward * 15)
 
 		# Remove the item
-		#remove_item(current_item.name)
 		remove_item(current_item)
+
+func drop_all_items():
+	for item in _items:
+		if _weapon_object_scenes.has(item.name):
+			var thrown = _weapon_object_scenes[item.name].instantiate()
+			thrown.ammo = item.current_ammo
+			thrown.set_new_owner(self)
+			get_parent().add_child(thrown)
+
+			# Determine positiona
+			var muzzle_pos = camera_controller.global_transform.origin
+			var forward = -camera_controller.global_transform.basis.z 
+			thrown.global_transform.origin = muzzle_pos + forward * 1.5
+
+			# Apply impulse
+			var impulse = camera_controller.global_transform.basis.y + -camera_controller.global_transform.basis.z * 5
+			thrown.apply_impulse(impulse, forward * 15)
+
+	# Remove the items (Figure out a way to do this in original loop to optimize)
+	for item in _items:
+		remove_item(item)
+
+func is_alive() -> bool:
+	return _alive

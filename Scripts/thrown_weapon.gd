@@ -10,7 +10,7 @@ var ammo : int = -1
 @export var value : int = 25
 
 func _on_collection_area_body_entered(body: Node3D) -> void:
-	if body.name == "Player":
+	if body.name == "Player" and body.is_alive():
 		body.add_item(item_name, ammo)
 		queue_free()
 
