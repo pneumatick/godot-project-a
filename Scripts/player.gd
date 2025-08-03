@@ -44,6 +44,8 @@ var _in_menu : bool = false
 @onready var money_display : Label = get_node("/root/3D Scene Root/HUD/Control/Money")
 @onready var hit_sound : AudioStreamPlayer3D = $"Hit Sound"
 @onready var death_sound : AudioStreamPlayer3D = $"Death Sound"
+@onready var weapon_pick_up_sound : AudioStreamPlayer3D = $"Weapon Pick Up Sound"
+@onready var weapon_reload_sound : AudioStreamPlayer3D = $"Weapon Reload Sound"
 
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
@@ -206,7 +208,6 @@ func _equip_item(idx: int) -> void:
 	_items[idx].equip()
 	weapon_equipped.emit(_items[idx])
 	_equipped_item_idx = idx
-	
 
 # Add an item to the player's inventory (and hand, at least for now)
 func add_item(item_name: String, amount: int = -1):
@@ -226,10 +227,12 @@ func add_item(item_name: String, amount: int = -1):
 			else:
 				new_weapon.unequip()
 			weapon_picked_up.emit(new_weapon)
+			weapon_pick_up_sound.play()
 		else:
 			# Handle weapon acquisition by reloading
 			var weapon = _inventory[item_name]
 			weapon.load_ammo(weapon.max_ammo)
+			weapon_reload_sound.play()
 			if _equipped_item_idx < _items.size() and weapon == _items[_equipped_item_idx]:
 				weapon_reloaded.emit(weapon)
 	else:
