@@ -36,7 +36,7 @@ func fire():
 	fire_sound.play()
 	
 	# Update ammo label
-	ammo_label.text = str(current_ammo)
+	ammo_label.text = "Ammo: %s" % str(current_ammo)
 	
 	var camera = get_viewport().get_camera_3d()
 	if not camera:
