@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://hmv4dr58x4if"]
+[gd_scene load_steps=18 format=3 uid="uid://hmv4dr58x4if"]
 
 [ext_resource type="Script" uid="uid://cf8moef3pykdp" path="res://Scripts/3d_scene_root.gd" id="1_1rpu5"]
 [ext_resource type="PackedScene" uid="uid://c2dcha7sipp8a" path="res://Scenes/player.tscn" id="1_sxnch"]
@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://tldca8ygc1hw" path="res://Scenes/hud.tscn" id="4_kb1pf"]
 [ext_resource type="PackedScene" uid="uid://mlxqh5iqxvxs" path="res://Scenes/target.tscn" id="5_23mtt"]
 [ext_resource type="PackedScene" uid="uid://dulrda5jbt33a" path="res://Scenes/shop_zone.tscn" id="7_lyres"]
+[ext_resource type="Texture2D" uid="uid://buhhtw8gu5tbk" path="res://Assets/Visuals/Textures/Dirt_20-512x512.png" id="8_fqem3"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_1rpu5"]
 
@@ -21,9 +22,11 @@ material = SubResource("StandardMaterial3D_1rpu5")
 size = Vector3(10, 1, 10)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sxnch"]
-albedo_color = Color(0.177572, 0.503873, 0.139644, 1)
+albedo_texture = ExtResource("8_fqem3")
+uv1_scale = Vector3(50, 50, 50)
 
 [sub_resource type="BoxMesh" id="BoxMesh_1rpu5"]
+lightmap_size_hint = Vector2i(104, 66)
 material = SubResource("StandardMaterial3D_sxnch")
 size = Vector3(10, 1, 10)
 

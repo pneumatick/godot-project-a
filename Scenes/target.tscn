@@ -1,12 +1,17 @@
-[gd_scene load_steps=5 format=3 uid="uid://mlxqh5iqxvxs"]
+[gd_scene load_steps=7 format=3 uid="uid://mlxqh5iqxvxs"]
 
 [ext_resource type="Script" uid="uid://be5xgn6bx24f8" path="res://Scripts/target.gd" id="1_t2jmu"]
+[ext_resource type="Texture2D" uid="uid://b5x2qiaqq4622" path="res://Assets/Visuals/Textures/Metal_13-512x512.png" id="2_2228f"]
 [ext_resource type="AudioStream" uid="uid://ci27g0a66i72e" path="res://Assets/Sounds/anime-wow-sound-effect-mp3cut.mp3" id="2_e1yvt"]
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_kb1pf"]
 height = 0.02
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ww0yb"]
+albedo_texture = ExtResource("2_2228f")
+
 [sub_resource type="CylinderMesh" id="CylinderMesh_7mpes"]
+material = SubResource("StandardMaterial3D_ww0yb")
 height = 0.02
 
 [node name="Target" type="StaticBody3D"]
