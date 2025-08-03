@@ -1,12 +1,15 @@
-[gd_scene load_steps=5 format=3 uid="uid://uy35jjjtt7f2"]
+[gd_scene load_steps=6 format=3 uid="uid://uy35jjjtt7f2"]
 
 [ext_resource type="Script" uid="uid://caftax4sau71h" path="res://Scripts/thrown_weapon.gd" id="1_8u2dq"]
+[ext_resource type="PackedScene" uid="uid://rgdi4qdn3jiq" path="res://Assets/Visuals/Models/Luger/Luger.fbx" id="2_vt57d"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_5clpd"]
+size = Vector3(0.0414734, 0.153198, 0.233246)
 
 [sub_resource type="BoxMesh" id="BoxMesh_enecq"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_0eyra"]
+size = Vector3(0.101212, 0.160797, 0.344238)
 
 [node name="Pistol Object" type="RigidBody3D"]
 collision_layer = 12
@@ -15,16 +18,21 @@ script = ExtResource("1_8u2dq")
 item_name = "Pistol"
 value = 5
 
+[node name="Luger" parent="." instance=ExtResource("2_vt57d")]
+
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0302277, -0.000549316, 0.0545807)
 shape = SubResource("BoxShape3D_5clpd")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+visible = false
 mesh = SubResource("BoxMesh_enecq")
 
 [node name="Collection Area" type="Area3D" parent="."]
 transform = Transform3D(1.1, 0, 0, 0, 1.1, 0, 0, 0, 1.1, 0, 0, 0)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Collection Area"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0264816, 0.00367736, 0.0419922)
 shape = SubResource("BoxShape3D_0eyra")
 
 [connection signal="body_entered" from="Collection Area" to="." method="_on_collection_area_body_entered"]

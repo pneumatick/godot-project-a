@@ -9,6 +9,18 @@ var _available : bool = true
 
 func _ready():
 	body_entered.connect(_on_body_entered)
+	
+	var new_node
+	if weapon_name == "Rifle":
+		new_node = load("res://Assets/Visuals/Models/AK-47/AK47.fbx").instantiate()
+	elif weapon_name == "Pistol":
+		new_node = load("res://Assets/Visuals/Models/Luger/Luger.fbx").instantiate()
+	else:
+		print("Unknown pickup item %s" % weapon_name)
+		new_node.erase()
+		return
+	
+	add_child(new_node)
 
 func _process(delta):
 	pass

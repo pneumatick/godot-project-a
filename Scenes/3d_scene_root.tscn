@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://cf8moef3pykdp" path="res://Scripts/3d_scene_root.gd" id="1_1rpu5"]
 [ext_resource type="PackedScene" uid="uid://c2dcha7sipp8a" path="res://Scenes/player.tscn" id="1_sxnch"]
 [ext_resource type="Script" uid="uid://bpumr1tul6w4p" path="res://Scripts/death_cube.gd" id="3_g5xil"]
-[ext_resource type="PackedScene" uid="uid://ducw325a8ghny" path="res://Scenes/rifle_pickup.tscn" id="4_5rbum"]
+[ext_resource type="PackedScene" uid="uid://ducw325a8ghny" path="res://Scenes/weapon_pickup.tscn" id="4_5rbum"]
 [ext_resource type="PackedScene" uid="uid://tldca8ygc1hw" path="res://Scenes/hud.tscn" id="4_kb1pf"]
 [ext_resource type="PackedScene" uid="uid://mlxqh5iqxvxs" path="res://Scenes/target.tscn" id="5_23mtt"]
 [ext_resource type="PackedScene" uid="uid://dulrda5jbt33a" path="res://Scenes/shop_zone.tscn" id="7_lyres"]
