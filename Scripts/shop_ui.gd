@@ -25,7 +25,7 @@ func _on_buy_rifle_pressed():
 		print("Player does not have enough money")
 
 func _on_sell_rifle_pressed():
-	var removed = _player.remove_item("Rifle")
+	var removed = _player.remove_item(null, "Rifle")
 	if removed:
 		_player.add_money(25)
 		print("Player sold a rifle!")

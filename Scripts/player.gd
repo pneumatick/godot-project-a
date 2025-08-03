@@ -6,6 +6,7 @@ signal weapon_equipped
 signal weapon_reloaded
 signal weapon_picked_up
 signal money_change
+signal hand_empty
 
 const SPEED = 5.0
 const JUMP_VELOCITY = 4.5
@@ -53,6 +54,7 @@ func _ready() -> void:
 	_weapon_scenes["Rifle"] = preload("res://Scenes/rifle.tscn")
 	_weapon_scenes["Pistol"] = preload("res://Scenes/pistol.tscn")
 	_weapon_object_scenes["Rifle"] = preload("res://Scenes/rifle_object.tscn")
+	_weapon_object_scenes["Pistol"] = preload("res://Scenes/pistol_object.tscn")
 	
 	spawn.emit()						# Probably not supposed to be here...
 
@@ -91,10 +93,11 @@ func _input(event):
 		_rotation_input = -event.relative.x * mouse_sensitivity
 		_tilt_input = -event.relative.y * mouse_sensitivity
 	elif event.is_action_pressed("previous_item"):
-		if len(_items) > 0:
+		if _items.size() > 0:
 			_equip_item(_equipped_item_idx - 1)
 	elif event.is_action_pressed("next_item"):
-		_equip_item(_equipped_item_idx + 1)
+		if _items.size() > 0:
+			_equip_item(_equipped_item_idx + 1)
 	elif event.is_action_pressed("throw_item"):
 		throw_current_item()
 
@@ -190,14 +193,20 @@ func _on_damage_timer_timeout():
 
 # Equip held item
 func _equip_item(idx: int) -> void:
-	# Unequip current item if necessary
-	if _items.size() > 1:
-		_items[_equipped_item_idx].unequip()
+	if _items.size() == 0:
+		hand_empty.emit()
+		return
 	
+	if _items.size() > 1:
+		# Unequip (previously) equipped item
+		_items[_equipped_item_idx].unequip()
+		
+	# Equip item
 	idx = wrapi(idx, 0, _items.size())
 	_items[idx].equip()
 	weapon_equipped.emit(_items[idx])
 	_equipped_item_idx = idx
+	
 
 # Add an item to the player's inventory (and hand, at least for now)
 func add_item(item_name: String, amount: int = -1):
@@ -226,22 +235,34 @@ func add_item(item_name: String, amount: int = -1):
 	else:
 		print("Unknown item %s" % item_name)
 
-func remove_item(item_name: String) -> bool:
-	var removed = true
+#func remove_item(item_name: String) -> bool:
+func remove_item(item: Node3D = null, name: String = "") -> bool:
+	var removed = false
+	
+	var item_name : String
+	if name != "":
+		item_name = name
+	elif item:
+		item_name = item.name
+	else:
+		print("Error: Item removal without specifying item node or name")
+		return false
 	
 	print("Removing %s" % item_name)
-	if _inventory.has(item_name):
-		for i in range(_items.size()):
-			if _items[i] == _inventory[item_name]:
-				_items.remove_at(i)
-				# Equip the next item if possible
-				_equip_item(wrapi(i + 1, 0, _items.size()))
-				break
+	for i in range(_items.size()):
+		if _items[i] == _inventory[item_name]:
+			_items.remove_at(i)
+			removed = true
+			# Equip the next item if possible
+			#_equip_item(wrapi(i + 1, 0, _items.size()))
+			break
+	
+	if removed:
 		_inventory[item_name].queue_free()
 		_inventory.erase(item_name)
-	else:
-		print("Player does not have %s" % item_name)
-		removed = false
+		
+		# Assume hand remains empty after removal
+		hand_empty.emit()
 	
 	return removed
 
@@ -291,4 +312,5 @@ func throw_current_item():
 		thrown.apply_impulse(impulse, forward * 15)
 
 		# Remove the item
-		remove_item(current_item.name)
+		#remove_item(current_item.name)
+		remove_item(current_item)
