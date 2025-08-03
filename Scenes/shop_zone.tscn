@@ -13,6 +13,8 @@ material = SubResource("StandardMaterial3D_lyres")
 
 [node name="ShopZone" type="Area3D"]
 transform = Transform3D(5, 0, 0, 0, 5, 0, 0, 0, 5, 0, 0, 0)
+collision_layer = 0
+collision_mask = 9
 script = ExtResource("1_r1chn")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]

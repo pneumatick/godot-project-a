@@ -12,6 +12,10 @@ func _on_body_entered(body):
 	if body.name == "Player":
 		print("Player entered shop")
 		emit_signal("player_entered_shop", body)
+	elif body.type == "Weapon":
+		if body.prev_owner:
+			body.prev_owner.add_money(body.value)
+			body.queue_free()
 
 func _on_body_exited(body):
 	if body.name == "Player":

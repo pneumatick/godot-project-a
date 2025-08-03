@@ -49,7 +49,7 @@ func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	health_bar.value = health
 	
-	# Prepare weapon scenes dictionary
+	# Prepare weapon scenes dictionaries
 	_weapon_scenes["Rifle"] = preload("res://Scenes/rifle.tscn")
 	_weapon_scenes["Pistol"] = preload("res://Scenes/pistol.tscn")
 	_weapon_object_scenes["Rifle"] = preload("res://Scenes/rifle_object.tscn")
@@ -277,10 +277,11 @@ func throw_current_item():
 	var current_item = _items[_equipped_item_idx]
 	if _weapon_object_scenes.has(current_item.name):
 		var thrown = _weapon_object_scenes[current_item.name].instantiate()
-		thrown.name = current_item.name
 		thrown.ammo = current_item.current_ammo
+		thrown.prev_owner = self
 		get_parent().add_child(thrown)
 
+		# Determine positiona
 		var muzzle_pos = camera_controller.global_transform.origin
 		var forward = -camera_controller.global_transform.basis.z 
 		thrown.global_transform.origin = muzzle_pos + forward * 1.5
