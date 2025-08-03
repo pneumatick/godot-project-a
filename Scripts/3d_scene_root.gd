@@ -18,8 +18,12 @@ func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("exit"):
 		get_tree().quit()
 	elif event.is_action_pressed("interact") and _player_in_shop:
-		$HUD/ShopUI.open_for_player(player)
-		$"HUD/Control/Interact Label".visible = false
+		if $"HUD/Control/Interact Label".visible == true:
+			$HUD/ShopUI.open_for_player(player)
+			$"HUD/Control/Interact Label".visible = false
+		else:
+			$HUD/ShopUI.close_for_player(player)
+			$"HUD/Control/Interact Label".visible = true
 
 func _on_player_death() -> void:
 	print("World acknowledges that the player has died.")

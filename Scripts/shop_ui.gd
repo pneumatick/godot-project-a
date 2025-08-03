@@ -16,6 +16,9 @@ func open_for_player(player):
 	_player.set_in_menu(true)
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 
+func close_for_player(player):
+	_on_close_pressed()
+
 func _on_buy_rifle_pressed():
 	var has_enough = _player.remove_money(50)
 	if has_enough:
