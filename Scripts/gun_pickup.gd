@@ -17,7 +17,7 @@ func _on_body_entered(body):
 	if body.name == "Player" and _available:  # Or use `is Player` if using a player class
 		_available = false
 		visible = false
-		picked_up.emit(weapon_name)
+		body.add_item(weapon_name)
 		await get_tree().create_timer(respawn_time).timeout
 		_available = true
 		visible = true

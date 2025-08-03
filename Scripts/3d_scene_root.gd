@@ -24,10 +24,6 @@ func _input(event: InputEvent) -> void:
 func _on_player_death() -> void:
 	print("World acknowledges that the player has died.")
 
-func _on_gun_pickup_picked_up(weapon_name: String) -> void:
-	# This also shouldn't need to exist...
-	print("World acknowledges that %s was picked up" % weapon_name)
-
 func _on_player_entered_shop(p):
 	_player_in_shop = true
 	$"HUD/Control/Interact Label".text = "[Interact] Open Shop Menu"

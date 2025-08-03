@@ -22,6 +22,7 @@ var _items : Array = []
 var _inventory : Dictionary = {}
 var _equipped_item_idx : int = 0
 var _weapon_scenes : Dictionary = {}
+var _weapon_object_scenes : Dictionary = {}
 var _alive : bool = true
 var _in_menu : bool = false
 
@@ -51,6 +52,7 @@ func _ready() -> void:
 	# Prepare weapon scenes dictionary
 	_weapon_scenes["Rifle"] = preload("res://Scenes/rifle.tscn")
 	_weapon_scenes["Pistol"] = preload("res://Scenes/pistol.tscn")
+	_weapon_object_scenes["Rifle"] = preload("res://Scenes/rifle_object.tscn")
 	
 	spawn.emit()						# Probably not supposed to be here...
 
@@ -93,6 +95,8 @@ func _input(event):
 			_equip_item(_equipped_item_idx - 1)
 	elif event.is_action_pressed("next_item"):
 		_equip_item(_equipped_item_idx + 1)
+	elif event.is_action_pressed("throw_item"):
+		throw_current_item()
 
 func _update_camera(delta: float) -> void:
 	_mouse_rotation.x += _tilt_input * delta
@@ -196,13 +200,15 @@ func _equip_item(idx: int) -> void:
 	_equipped_item_idx = idx
 
 # Add an item to the player's inventory (and hand, at least for now)
-func add_item(item_name: String):
+func add_item(item_name: String, amount: int = -1):
 	print("Adding %s..." % item_name)
 	# Add weapons
 	if _weapon_scenes.has(item_name):
 		# Add item if not already owned, otherwise replenish ammo
 		if not _inventory.has(item_name):
 			var new_weapon = _weapon_scenes[item_name].instantiate()
+			if amount != -1:
+				new_weapon.current_ammo = amount
 			right_hand.add_child(new_weapon)
 			_items.append(new_weapon)
 			_inventory[item_name] = new_weapon
@@ -239,11 +245,6 @@ func remove_item(item_name: String) -> bool:
 	
 	return removed
 
-# Handle gun pickups
-func _on_gun_pickup_picked_up(weapon_name: String) -> void:
-	add_item(weapon_name)
-	print("Picked up weapon: ", weapon_name)
-
 func _on_target_destroyed(value: int) -> void:
 	add_money(value)
 
@@ -267,3 +268,26 @@ func set_in_menu(state: bool) -> void:
 
 func get_in_menu() -> bool:
 	return _in_menu
+
+func throw_current_item():
+	if _items.size() == 0:
+		return
+
+	# Create a physics copy of the items
+	var current_item = _items[_equipped_item_idx]
+	if _weapon_object_scenes.has(current_item.name):
+		var thrown = _weapon_object_scenes[current_item.name].instantiate()
+		thrown.name = current_item.name
+		thrown.ammo = current_item.current_ammo
+		get_parent().add_child(thrown)
+
+		var muzzle_pos = camera_controller.global_transform.origin
+		var forward = -camera_controller.global_transform.basis.z 
+		thrown.global_transform.origin = muzzle_pos + forward * 1.5
+
+		# Apply impulse
+		var impulse = camera_controller.global_transform.basis.y + -camera_controller.global_transform.basis.z * 5
+		thrown.apply_impulse(impulse, forward * 15)
+
+		# Remove the item
+		remove_item(current_item.name)
