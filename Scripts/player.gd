@@ -230,7 +230,7 @@ func add_item(item_name: String, amount: int = -1):
 			# Handle weapon acquisition by reloading
 			var weapon = _inventory[item_name]
 			weapon.load_ammo(weapon.max_ammo)
-			if weapon == _items[_equipped_item_idx]:
+			if _equipped_item_idx < _items.size() and weapon == _items[_equipped_item_idx]:
 				weapon_reloaded.emit(weapon)
 	else:
 		print("Unknown item %s" % item_name)
@@ -299,7 +299,7 @@ func throw_current_item():
 	if _weapon_object_scenes.has(current_item.name):
 		var thrown = _weapon_object_scenes[current_item.name].instantiate()
 		thrown.ammo = current_item.current_ammo
-		thrown.prev_owner = self
+		thrown.set_new_owner(self)
 		get_parent().add_child(thrown)
 
 		# Determine positiona
