@@ -1,12 +1,15 @@
-[gd_scene load_steps=5 format=3 uid="uid://de4qck4lwu5n8"]
+[gd_scene load_steps=6 format=3 uid="uid://de4qck4lwu5n8"]
 
 [ext_resource type="Script" uid="uid://caftax4sau71h" path="res://Scripts/thrown_weapon.gd" id="1_6c3u6"]
+[ext_resource type="PackedScene" uid="uid://dqqdjkk6s0mqt" path="res://Assets/Visuals/Models/AK-47/AK47.fbx" id="2_enecq"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_5clpd"]
+size = Vector3(0.05, 0.256866, 0.874786)
 
 [sub_resource type="BoxMesh" id="BoxMesh_enecq"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_0eyra"]
+size = Vector3(0.127045, 0.30481, 0.857666)
 
 [node name="Rifle Object" type="RigidBody3D"]
 collision_layer = 12
@@ -14,16 +17,22 @@ collision_mask = 4
 script = ExtResource("1_6c3u6")
 item_name = "Rifle"
 
+[node name="AK47" parent="." instance=ExtResource("2_enecq")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.15)
+
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.083786, -0.0296173)
 shape = SubResource("BoxShape3D_5clpd")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+visible = false
 mesh = SubResource("BoxMesh_enecq")
 
 [node name="Collection Area" type="Area3D" parent="."]
 transform = Transform3D(1.1, 0, 0, 0, 1.1, 0, 0, 0, 1.1, 0, 0, 0)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Collection Area"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0130463, -0.0789185, -0.0257568)
 shape = SubResource("BoxShape3D_0eyra")
 
 [connection signal="body_entered" from="Collection Area" to="." method="_on_collection_area_body_entered"]

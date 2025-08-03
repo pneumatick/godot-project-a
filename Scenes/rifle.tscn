@@ -1,7 +1,8 @@
-[gd_scene load_steps=5 format=3 uid="uid://bmh5wgvl4dejy"]
+[gd_scene load_steps=6 format=3 uid="uid://bmh5wgvl4dejy"]
 
 [ext_resource type="Script" uid="uid://dnhcbjk5xtiow" path="res://Scripts/automatic_firearm.gd" id="1_no7b2"]
 [ext_resource type="AudioStream" uid="uid://dvshokm6ifske" path="res://Assets/Sounds/556 Single MP3.mp3" id="2_no7b2"]
+[ext_resource type="PackedScene" uid="uid://dqqdjkk6s0mqt" path="res://Assets/Visuals/Models/AK-47/AK47.fbx" id="3_d8g3d"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4flbx"]
 
@@ -13,9 +14,13 @@ script = ExtResource("1_no7b2")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 transform = Transform3D(0.25, 0, 0, 0, -1.09278e-08, -0.25, 0, 0.25, -1.09278e-08, 0, 0, 0)
+visible = false
 mesh = SubResource("CapsuleMesh_onrkg")
 skeleton = NodePath("../..")
 
 [node name="Fire Sound" type="AudioStreamPlayer3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 0, 0)
 stream = ExtResource("2_no7b2")
+
+[node name="AK47" parent="." instance=ExtResource("3_d8g3d")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.25)

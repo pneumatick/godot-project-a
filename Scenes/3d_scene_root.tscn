@@ -68,6 +68,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0, -3)
 transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 5, 1.5, 0)
 
 [node name="Pistol Pickup" parent="." instance=ExtResource("4_5rbum")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, -3)
 weapon_name = "Pistol"
 
 [node name="ShopZone" parent="." instance=ExtResource("7_lyres")]
