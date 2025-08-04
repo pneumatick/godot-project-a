@@ -94,11 +94,11 @@ func _physics_process(delta: float) -> void:
 				if velocity.length() > SPEED:
 					velocity = velocity.normalized() * SPEED
 		else:
-			_ground_movement(delta)
+			_apply_friction(delta)
 		
 	_accelerate(direction, ACCEL, SPEED, delta)
 	
-	print(velocity.x, " ", velocity.z)
+	print("Speed: " + str(velocity.length()))
 	move_and_slide()
 
 func _input(event):
@@ -139,7 +139,7 @@ func _air_control(direction: Vector3, delta: float):
 	if dot > 0:
 		velocity += direction * k * speed
 
-func _ground_movement(delta):
+func _apply_friction(delta):
 	var speed = velocity.length()
 	if speed < 0.1:
 		velocity = Vector3.ZERO
@@ -149,7 +149,6 @@ func _ground_movement(delta):
 	var drop = FRICTION * delta
 	
 	var new_speed = max(speed - drop, 0)
-	print(new_speed)
 	velocity = velocity.normalized() * new_speed
 
 func _update_camera(delta: float) -> void:
