@@ -8,8 +8,12 @@ signal weapon_picked_up
 signal money_change
 signal hand_empty
 
-const SPEED = 5.0
+const SPEED = 7.5
+const ACCEL = 1.0
+const AIR_CONTROL = 0.3
 const JUMP_VELOCITY = 4.5
+const STOP_SPEED = 100
+const FRICTION = 25
 const DEFAULT_HEALTH = 100
 
 var _mouse_input : bool = false
@@ -71,21 +75,30 @@ func _physics_process(delta: float) -> void:
 	if position.y < -10:
 		position = Vector3(0.0, 0.0, 0.0)
 
-	# Handle jump.
-	if Input.is_action_just_pressed("ui_accept") and is_on_floor():
-		velocity.y = JUMP_VELOCITY
-
-	# Get the input direction and handle the movement/deceleration.
-	# As good practice, you should replace UI actions with custom gameplay actions.
+	# Handle movement
 	var input_dir := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
 	var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
-	if direction:
-		velocity.x = direction.x * SPEED
-		velocity.z = direction.z * SPEED
-	else:
-		velocity.x = move_toward(velocity.x, 0, SPEED)
-		velocity.z = move_toward(velocity.z, 0, SPEED)
-
+	var jumping = false
+	if Input.is_action_pressed("jump"):
+		if is_on_floor():
+			velocity.y = JUMP_VELOCITY
+		
+		jumping = true
+		if direction:
+			_air_control(direction, delta)
+	elif is_on_floor():
+		jumping = false
+		if direction:
+			if not jumping:
+				velocity = direction * SPEED
+				if velocity.length() > SPEED:
+					velocity = velocity.normalized() * SPEED
+		else:
+			_ground_movement(delta)
+		
+	_accelerate(direction, ACCEL, SPEED, delta)
+	
+	print(velocity.x, " ", velocity.z)
 	move_and_slide()
 
 func _input(event):
@@ -101,6 +114,43 @@ func _input(event):
 			_equip_item(_equipped_item_idx + 1)
 	elif event.is_action_pressed("throw_item"):
 		throw_current_item()
+
+func _accelerate(direction: Vector3, accel: float, max_speed: float, delta: float):
+	var current_speed = velocity.dot(direction)
+	var add_speed = max_speed - current_speed
+	if add_speed <= 0:
+		# Max speed reached in the given direction
+		return
+	
+	var accel_speed = accel * delta * max_speed
+	accel_speed = min(accel_speed, add_speed)
+	
+	velocity += direction * accel_speed
+
+func _air_control(direction: Vector3, delta: float):
+	# Prevent backward movement
+	if abs(direction.dot(velocity.normalized())) < 0:
+		return
+	
+	var speed = velocity.length()
+	var dot = velocity.normalized().dot(direction)
+	var k = AIR_CONTROL * dot * dot * delta
+	
+	if dot > 0:
+		velocity += direction * k * speed
+
+func _ground_movement(delta):
+	var speed = velocity.length()
+	if speed < 0.1:
+		velocity = Vector3.ZERO
+		return
+	
+	var control = max(speed, STOP_SPEED)
+	var drop = FRICTION * delta
+	
+	var new_speed = max(speed - drop, 0)
+	print(new_speed)
+	velocity = velocity.normalized() * new_speed
 
 func _update_camera(delta: float) -> void:
 	_mouse_rotation.x += _tilt_input * delta
@@ -315,6 +365,8 @@ func throw_current_item():
 
 		# Apply impulse
 		var impulse = camera_controller.global_transform.basis.y + -camera_controller.global_transform.basis.z * 5
+		if velocity != Vector3.ZERO:
+			impulse += Vector3(velocity.x, 0, velocity.z)
 		thrown.apply_impulse(impulse, forward * 15)
 
 		# Remove the item
