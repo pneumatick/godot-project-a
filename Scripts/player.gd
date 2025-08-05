@@ -128,7 +128,7 @@ func _input(event):
 	elif event.is_action_pressed("kill"):
 		_die()
 	elif event.is_action_pressed("interact") and seen_object:
-		if seen_object.has_method("interact"):
+		if seen_object.is_in_group("interactables"):
 			seen_object.interact(self)
 
 func _accelerate(direction: Vector3, accel: float, max_speed: float, delta: float):
