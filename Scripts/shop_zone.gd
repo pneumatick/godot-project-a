@@ -12,6 +12,7 @@ func _on_body_entered(body):
 	if body.name == "Player":
 		print("Player entered shop")
 		emit_signal("player_entered_shop", body)
+		body.in_shop = true
 	elif body.type == "Weapon":
 		if body.prev_owner:
 			body.prev_owner.add_money(body.value)
@@ -19,6 +20,7 @@ func _on_body_entered(body):
 
 func _on_body_exited(body):
 	if body.name == "Player":
+		body.in_shop = false
 		print("Player exited shop")
 		emit_signal("player_exited_shop", body)
 		body.set_in_menu(false)

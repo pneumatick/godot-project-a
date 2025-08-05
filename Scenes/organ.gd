@@ -7,7 +7,10 @@ var prev_owner : CharacterBody3D
 @export var value : int = 25
 @export var condition : int = 100
 
-func _on_collection_area_body_entered(body: Node3D) -> void:
+func _ready() -> void:
+	self.add_to_group("interactables")
+
+func _on_collection_area_body_entered(body: Node3D) -> void:		# Placholder: May not get equivalent (TBD)
 	if body.name == "Player" and body.is_alive():
 		#body.add_item(item_name)
 		print("Player collected %s" % item_name)

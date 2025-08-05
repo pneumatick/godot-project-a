@@ -37,8 +37,11 @@ func _on_player_hand_empty() -> void:
 	ammo_label.text = ""
 
 func _display_interaction_label(object = null) -> void:
-	if not object:
+	if not object and not player.in_shop:
 		interact_label.visible = false
-	else:
-		interact_label.text = "[Interact] %s" % object.item_name
+	elif not player.get_in_menu():
+		if object:
+			interact_label.text = "[Interact] %s" % object.item_name
+		elif player.in_shop:
+			interact_label.text = "[Interact] Open Shop Menu"
 		interact_label.visible = true

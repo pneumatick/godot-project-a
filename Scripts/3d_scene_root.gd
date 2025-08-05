@@ -1,7 +1,5 @@
 extends Node3D
 
-var _player_in_shop : bool = false
-
 @onready var player = $Player
 
 # Called when the node enters the scene tree for the first time.
@@ -17,28 +15,28 @@ func _process(delta: float) -> void:
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("exit"):
 		get_tree().quit()
-	elif event.is_action_pressed("interact") and _player_in_shop:
-		if not player.object_seen:
+	elif event.is_action_pressed("interact") and player.in_shop:
+		if not player.seen_object:
 			if $"HUD/Control/Interact Label".visible == true:
-				$HUD/ShopUI.open_for_player(player)
+				$HUD/ShopUI.open_for_player()
 				$"HUD/Control/Interact Label".visible = false
 			else:
-				$HUD/ShopUI.close_for_player(player)
+				$HUD/ShopUI.close_for_player()
 				$"HUD/Control/Interact Label".visible = true
 
 func _on_player_death() -> void:
 	print("World acknowledges that the player has died.")
 
 func _on_player_entered_shop(p):
-	_player_in_shop = true
+	player.in_shop = true
 	$"HUD/Control/Interact Label".text = "[Interact] Open Shop Menu"
 	$"HUD/Control/Interact Label".visible = true
 
 func _on_player_exited_shop(p):
-	_player_in_shop = false
+	player.in_shop = false
 	$HUD/ShopUI.visible = false
 	$"HUD/Control/Interact Label".visible = false
 
 func _on_shop_menu_closed():
-	if _player_in_shop:
+	if player.in_shop:
 		$"HUD/Control/Interact Label".visible = true

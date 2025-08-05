@@ -34,6 +34,7 @@ var _alive : bool = true
 var _in_menu : bool = false
 
 var seen_object = null
+var in_shop : bool = false
 
 @export var tilt_lower_limit := deg_to_rad(-90.0)
 @export var tilt_upper_limit := deg_to_rad(90.0)
@@ -109,7 +110,6 @@ func _physics_process(delta: float) -> void:
 		
 	_accelerate(direction, ACCEL, SPEED, delta)
 	
-	print("Speed: " + str(velocity.length()))
 	move_and_slide()
 
 func _input(event):
@@ -447,7 +447,7 @@ func _check_interact_target():
 		)
 	)
 	
-	if result and result.collider and result.collider.has_method("interact"):
+	if result and result.collider and result.collider.is_in_group("interactables"):
 		seen_object = result.collider
 		viewing.emit(result.collider)
 	else:
