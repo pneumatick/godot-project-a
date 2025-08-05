@@ -28,6 +28,7 @@ var _inventory : Dictionary = {}
 var _equipped_item_idx : int = 0
 var _weapon_scenes : Dictionary = {}
 var _weapon_object_scenes : Dictionary = {}
+var _organ_scenes : Dictionary = {}
 var _alive : bool = true
 var _in_menu : bool = false
 
@@ -60,6 +61,9 @@ func _ready() -> void:
 	_weapon_scenes["Pistol"] = preload("res://Scenes/pistol.tscn")
 	_weapon_object_scenes["Rifle"] = preload("res://Scenes/rifle_object.tscn")
 	_weapon_object_scenes["Pistol"] = preload("res://Scenes/pistol_object.tscn")
+	
+	# Prepare organ scenes dictionary
+	_organ_scenes["Heart"] = preload("res://Scenes/heart.tscn")
 	
 	spawn.emit()						# Probably not supposed to be here...
 
@@ -114,6 +118,8 @@ func _input(event):
 			_equip_item(_equipped_item_idx + 1)
 	elif event.is_action_pressed("throw_item"):
 		throw_current_item()
+	elif event.is_action_pressed("kill"):
+		_die()
 
 func _accelerate(direction: Vector3, accel: float, max_speed: float, delta: float):
 	var current_speed = velocity.dot(direction)
@@ -180,6 +186,9 @@ func _die() -> void:
 	# Dump inventory
 	_items = []
 	_inventory = {}
+	
+	# Spawn organs
+	_spawn_organs()
 	
 	# Deduct money
 	if money - death_deduction >= 0:
@@ -357,14 +366,14 @@ func throw_current_item():
 		thrown.set_new_owner(self)
 		get_parent().add_child(thrown)
 
-		# Determine positiona
+		# Determine position
 		var muzzle_pos = camera_controller.global_transform.origin
 		var forward = -camera_controller.global_transform.basis.z 
 		thrown.global_transform.origin = muzzle_pos + forward * 1.5
 
 		# Apply impulse
 		var impulse = camera_controller.global_transform.basis.y + -camera_controller.global_transform.basis.z * 5
-		# Check if the throw is along the direction of movement
+		# Apply additional force if the throw is not against the direction of velocity
 		var with_movement : bool = forward.dot(velocity) >= 0
 		if velocity != Vector3.ZERO and with_movement:
 			impulse += Vector3(velocity.x, 0, velocity.z)
@@ -381,7 +390,7 @@ func drop_all_items():
 			thrown.set_new_owner(self)
 			get_parent().add_child(thrown)
 
-			# Determine positiona
+			# Determine position
 			var muzzle_pos = camera_controller.global_transform.origin
 			var forward = -camera_controller.global_transform.basis.z 
 			thrown.global_transform.origin = muzzle_pos + forward * 1.5
@@ -396,3 +405,17 @@ func drop_all_items():
 
 func is_alive() -> bool:
 	return _alive
+
+func _spawn_organs() -> void:
+	for name in _organ_scenes.keys():
+		var scene = _organ_scenes[name]
+		var organ = scene.instantiate()
+		organ.position = position
+		get_parent().add_child(organ)
+		
+		# Apply impulse
+		var forward = -camera_controller.global_transform.basis.z 
+		var impulse = camera_controller.global_transform.basis.y + -camera_controller.global_transform.basis.z * 5
+		if velocity != Vector3.ZERO:
+			impulse += velocity
+		organ.apply_impulse(impulse, forward)

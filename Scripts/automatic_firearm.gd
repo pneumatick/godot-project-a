@@ -64,7 +64,7 @@ func fire():
 			var hit_pos = result.position
 			var direction = (to - from).normalized()
 			var force = 100.0
-			result.collider.apply_bullet_force(hit_pos, direction, force)
+			result.collider.apply_bullet_force(hit_pos, direction, force, damage)
 			result.collider.set_new_owner(player)
 
 # Load ammo into the weapon
