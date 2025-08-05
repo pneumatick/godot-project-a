@@ -7,6 +7,7 @@ signal weapon_reloaded
 signal weapon_picked_up
 signal money_change
 signal hand_empty
+signal viewing
 
 const SPEED = 7.5
 const ACCEL = 1.0
@@ -32,6 +33,8 @@ var _organ_scenes : Dictionary = {}
 var _alive : bool = true
 var _in_menu : bool = false
 
+var seen_object = null
+
 @export var tilt_lower_limit := deg_to_rad(-90.0)
 @export var tilt_upper_limit := deg_to_rad(90.0)
 @export var camera_controller : Camera3D
@@ -39,6 +42,7 @@ var _in_menu : bool = false
 @export var health : int = DEFAULT_HEALTH
 @export var death_deduction : int = 15
 @export var money : int = 0
+@export var interaction_range : float = 3.0
 
 # Nodes internal to scene
 @onready var right_hand : Node3D = get_node("Pivot/Camera3D/Right Hand")
@@ -70,6 +74,9 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	# Update the camera view
 	_update_camera(delta)
+	
+	# Check for interactable objects in the player's view
+	_check_interact_target()
 	
 	# Add the gravity.
 	if not is_on_floor():
@@ -120,6 +127,9 @@ func _input(event):
 		throw_current_item()
 	elif event.is_action_pressed("kill"):
 		_die()
+	elif event.is_action_pressed("interact") and seen_object:
+		if seen_object.has_method("interact"):
+			seen_object.interact(self)
 
 func _accelerate(direction: Vector3, accel: float, max_speed: float, delta: float):
 	var current_speed = velocity.dot(direction)
@@ -296,6 +306,8 @@ func add_item(item_name: String, amount: int = -1):
 			weapon_reload_sound.play()
 			if _equipped_item_idx < _items.size() and weapon == _items[_equipped_item_idx]:
 				weapon_reloaded.emit(weapon)
+	elif _organ_scenes.has(item_name):
+		print("Picked up %s" % item_name)
 	else:
 		print("Unknown item %s" % item_name)
 
@@ -407,9 +419,10 @@ func is_alive() -> bool:
 	return _alive
 
 func _spawn_organs() -> void:
-	for name in _organ_scenes.keys():
-		var scene = _organ_scenes[name]
+	for item_name in _organ_scenes.keys():
+		var scene = _organ_scenes[item_name]
 		var organ = scene.instantiate()
+		organ.item_name = item_name
 		organ.position = position
 		get_parent().add_child(organ)
 		
@@ -419,3 +432,24 @@ func _spawn_organs() -> void:
 		if velocity != Vector3.ZERO:
 			impulse += velocity
 		organ.apply_impulse(impulse, forward)
+
+func _check_interact_target():
+	var space_state = get_world_3d().direct_space_state
+	var from = camera_controller.global_transform.origin
+	var to = from + -camera_controller.global_transform.basis.z * interaction_range
+
+	var result = space_state.intersect_ray(
+		PhysicsRayQueryParameters3D.create(
+			from, 
+			to, 
+			0xFFFFFFFF,			  # Default value
+			[self]
+		)
+	)
+	
+	if result and result.collider and result.collider.has_method("interact"):
+		seen_object = result.collider
+		viewing.emit(result.collider)
+	else:
+		seen_object = null
+		viewing.emit()

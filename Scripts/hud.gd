@@ -11,6 +11,8 @@ func _ready() -> void:
 	player.weapon_equipped.connect(_on_player_weapon_equipped)
 	player.hand_empty.connect(_on_player_hand_empty)
 	player.death.connect(_on_player_death)
+	player.viewing.connect(_display_interaction_label)
+	
 	interact_label.visible = false
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -33,3 +35,10 @@ func _on_player_weapon_reloaded(weapon: Node) -> void:
 
 func _on_player_hand_empty() -> void:
 	ammo_label.text = ""
+
+func _display_interaction_label(object = null) -> void:
+	if not object:
+		interact_label.visible = false
+	else:
+		interact_label.text = "[Interact] %s" % object.item_name
+		interact_label.visible = true

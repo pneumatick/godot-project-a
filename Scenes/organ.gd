@@ -34,3 +34,7 @@ func _apply_damage(damage: int) -> void:
 		queue_free()
 	else:
 		condition -= damage
+
+func interact(player: CharacterBody3D) -> void:
+	player.add_item(name)
+	queue_free()
