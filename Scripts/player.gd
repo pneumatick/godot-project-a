@@ -364,7 +364,9 @@ func throw_current_item():
 
 		# Apply impulse
 		var impulse = camera_controller.global_transform.basis.y + -camera_controller.global_transform.basis.z * 5
-		if velocity != Vector3.ZERO:
+		# Check if the throw is along the direction of movement
+		var with_movement : bool = forward.dot(velocity) >= 0
+		if velocity != Vector3.ZERO and with_movement:
 			impulse += Vector3(velocity.x, 0, velocity.z)
 		thrown.apply_impulse(impulse, forward * 15)
 
