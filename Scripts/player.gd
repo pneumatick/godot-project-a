@@ -285,33 +285,36 @@ func add_item(item_name: String, amount: int = -1):
 	print("Adding %s..." % item_name)
 	# Add weapons
 	if _weapon_scenes.has(item_name):
-		# Add item if not already owned, otherwise replenish ammo
+		var new_weapon = _weapon_scenes[item_name].instantiate()
+		new_weapon.item_name = item_name
+		if amount != -1:
+			new_weapon.current_ammo = amount
+		_items.append(new_weapon)
+		right_hand.add_child(new_weapon)
 		if not _inventory.has(item_name):
-			var new_weapon = _weapon_scenes[item_name].instantiate()
-			if amount != -1:
-				new_weapon.current_ammo = amount
-			right_hand.add_child(new_weapon)
-			_items.append(new_weapon)
-			_inventory[item_name] = new_weapon
-			if _items.size() == 1:
-				_equip_item(0)
-			else:
-				new_weapon.unequip()
-			weapon_picked_up.emit(new_weapon)
-			weapon_pick_up_sound.play()
+			_inventory[item_name] = [new_weapon]
 		else:
 			# Handle weapon acquisition by reloading
+			'''
 			var weapon = _inventory[item_name]
 			weapon.load_ammo(weapon.max_ammo)
 			weapon_reload_sound.play()
 			if _equipped_item_idx < _items.size() and weapon == _items[_equipped_item_idx]:
 				weapon_reloaded.emit(weapon)
+			'''
+			_inventory[item_name].append(new_weapon)
+		if _items.size() == 1:
+			_equip_item(0)
+		else:
+			new_weapon.unequip()
+		weapon_picked_up.emit(new_weapon)
+		weapon_pick_up_sound.play()
+	# Add organs
 	elif _organ_scenes.has(item_name):
 		print("Picked up %s" % item_name)
 	else:
 		print("Unknown item %s" % item_name)
 
-#func remove_item(item_name: String) -> bool:
 func remove_item(item: Node3D = null, name: String = "") -> bool:
 	var removed = false
 	
@@ -319,14 +322,25 @@ func remove_item(item: Node3D = null, name: String = "") -> bool:
 	if name != "":
 		item_name = name
 	elif item:
-		item_name = item.name
+		item_name = item.item_name
 	else:
 		print("Error: Item removal without specifying item node or name")
 		return false
 	
 	print("Removing %s" % item_name)
+	# Remove item from _items
 	for i in range(_items.size()):
-		if _items[i] == _inventory[item_name]:
+		if _items[i] == item:
+			# Remove item from _inventory
+			if _inventory[item_name].size() == 1:
+				_inventory[item_name][0].queue_free()
+				_inventory.erase(item_name)
+			else:
+				for j in range(_inventory[item_name].size()):
+					if _inventory[item_name][j] == item:
+						_inventory[item_name][j].queue_free()
+						_inventory[item_name].remove_at(j)
+						break
 			_items.remove_at(i)
 			removed = true
 			# Equip the next item if possible
@@ -334,11 +348,11 @@ func remove_item(item: Node3D = null, name: String = "") -> bool:
 			break
 	
 	if removed:
-		_inventory[item_name].queue_free()
-		_inventory.erase(item_name)
-		
 		# Assume hand remains empty after removal
 		hand_empty.emit()
+		print("%s removed" % item_name)
+	else:
+		print("%s not removed" % item_name)
 	
 	return removed
 
@@ -372,8 +386,8 @@ func throw_current_item():
 
 	# Create a physics copy of the items
 	var current_item = _items[_equipped_item_idx]
-	if _weapon_object_scenes.has(current_item.name):
-		var thrown = _weapon_object_scenes[current_item.name].instantiate()
+	if _weapon_object_scenes.has(current_item.item_name):
+		var thrown = _weapon_object_scenes[current_item.item_name].instantiate()
 		thrown.ammo = current_item.current_ammo
 		thrown.set_new_owner(self)
 		get_parent().add_child(thrown)
@@ -396,8 +410,8 @@ func throw_current_item():
 
 func drop_all_items():
 	for item in _items:
-		if _weapon_object_scenes.has(item.name):
-			var thrown = _weapon_object_scenes[item.name].instantiate()
+		if _weapon_object_scenes.has(item.item_name):
+			var thrown = _weapon_object_scenes[item.item_name].instantiate()
 			thrown.ammo = item.current_ammo
 			thrown.set_new_owner(self)
 			get_parent().add_child(thrown)

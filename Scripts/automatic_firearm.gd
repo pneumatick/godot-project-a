@@ -5,6 +5,7 @@ extends Node3D
 @export var max_distance: float = 1000.0
 @export var damage: int = 25
 @export var current_ammo = max_ammo
+@export var item_name : String
 
 @onready var player = get_node("/root/3D Scene Root/Player")
 @onready var ammo_label = get_node("/root/3D Scene Root/HUD/Control/Ammo")
