@@ -1,0 +1,25 @@
+[gd_scene load_steps=4 format=3 uid="uid://7hsaa8ln0seb"]
+
+[ext_resource type="Script" uid="uid://bwjbbihsjtmjc" path="res://Scenes/organ.gd" id="1_2go6t"]
+[ext_resource type="PackedScene" uid="uid://b78xro5r0pldq" path="res://Assets/Visuals/Models/Organs/brain.fbx" id="2_2go6t"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_amr6p"]
+radius = 2.07835
+height = 5.08648
+
+[node name="Brain" type="RigidBody3D"]
+collision_layer = 12
+collision_mask = 4
+script = ExtResource("1_2go6t")
+
+[node name="brain" parent="." instance=ExtResource("2_2go6t")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.6, -1.5, -1)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0.0297395, -0.169983)
+shape = SubResource("CapsuleShape3D_amr6p")
+
+[node name="Timer" type="Timer" parent="."]
+autostart = true
+
+[connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
