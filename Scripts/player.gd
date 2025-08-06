@@ -123,7 +123,7 @@ func _input(event):
 	elif event.is_action_pressed("previous_item"):
 			_equip_item(wrapi(_equipped_item_idx - 1, 0, _items.size()))
 	elif event.is_action_pressed("next_item"):
-			_equip_item(wrapi(_equipped_item_idx - 1, 0, _items.size()))
+			_equip_item(wrapi(_equipped_item_idx + 1, 0, _items.size()))
 	elif event.is_action_pressed("throw_item"):
 		throw_current_item()
 	elif event.is_action_pressed("kill"):
@@ -273,21 +273,20 @@ func _equip_item(idx: int) -> void:
 	if _items[_equipped_item_idx]:
 		_items[_equipped_item_idx].unequip()
 	
-	# Handle case where empty item slot is selected
-	if _items[idx] == null:
-		_equipped_item_idx = idx
-		hand_empty.emit()
-		return
-	
 	# Equip item
-	_items[idx].equip()
-	weapon_equipped.emit(_items[idx])
+	if not _items[idx]:
+		hand_empty.emit()
+	else:
+		print("Weapon equipped...")
+		_items[idx].equip()
+		weapon_equipped.emit(_items[idx])
+	
 	_equipped_item_idx = idx
+	print(_equipped_item_idx)
 
 # Add an item to the player's inventory (and hand, at least for now)
 func add_item(item_name: String, amount: int = -1) -> void:
 	print("Adding %s..." % item_name)
-	print(_items)
 	# Add weapons
 	if _weapon_scenes.has(item_name):
 		var new_weapon = _weapon_scenes[item_name].instantiate()
@@ -303,6 +302,7 @@ func add_item(item_name: String, amount: int = -1) -> void:
 				if _items[_equipped_item_idx] == new_weapon:
 					_equip_item(i)
 				else:
+					print("Unequipping %s at " % item_name, i)
 					new_weapon.unequip()
 				weapon_picked_up.emit(new_weapon)
 				weapon_pick_up_sound.play()
@@ -330,6 +330,8 @@ func add_item(item_name: String, amount: int = -1) -> void:
 		print("Picked up %s" % item_name)
 	else:
 		print("Unknown item %s" % item_name)
+	
+	print(_items)
 
 func remove_item(item: Node3D = null, name: String = "") -> bool:
 	var removed = false
@@ -423,6 +425,8 @@ func throw_current_item():
 
 		# Remove the item
 		remove_item(current_item)
+		
+		print(_items)
 
 func drop_all_items():
 	for item in _items:

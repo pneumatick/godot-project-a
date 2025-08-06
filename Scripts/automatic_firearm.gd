@@ -18,13 +18,12 @@ var _equipped : bool
 func _ready() -> void:
 	# Set default position relative to camera (center of view being origin)
 	position = Vector3(0.5, -0.25, -0.25)
-	
 	_can_fire = true
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
 	var in_menu = player.get_in_menu()
-	if Input.is_action_pressed("fire") and _can_fire and current_ammo > 0 and not in_menu:
+	if Input.is_action_pressed("fire") and _equipped and _can_fire and current_ammo > 0 and not in_menu:
 		fire()
 		_can_fire = false
 		await get_tree().create_timer(fire_rate).timeout
@@ -32,6 +31,9 @@ func _process(delta: float) -> void:
 
 # Fire the weapon
 func fire():
+	if not _can_fire:
+		return
+	
 	current_ammo -= 1
 	print("Bang! Ammo: ", current_ammo)
 	fire_sound.play()
@@ -76,13 +78,16 @@ func load_ammo(amount: int):
 		current_ammo += amount
 
 func equip() -> void:
+	print("Equip acknowledged from weapon")
 	_equipped = true
 	visible = true
+	_can_fire = true
 	set_process(true)
 	set_process_input(true)		# Probably not necessary
 
 func unequip() -> void:
 	_equipped = false
 	visible = false
+	_can_fire = false
 	set_process(false)
 	set_process_input(false)	# Probably not necessary

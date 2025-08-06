@@ -24,7 +24,7 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	if Input.is_action_pressed("fire"):
 		var in_menu = player.get_in_menu()
-		if _can_fire and current_ammo > 0 and not in_menu:
+		if _can_fire and _equipped and current_ammo > 0 and not in_menu:
 			fire()
 			_can_fire = false
 	elif !_can_fire:
@@ -32,6 +32,9 @@ func _process(delta: float) -> void:
 
 # Fire the weapon
 func fire():
+	if not _can_fire:
+		return
+	
 	current_ammo -= 1
 	print("Bang! Ammo: ", current_ammo)
 	fire_sound.play()
@@ -78,11 +81,13 @@ func load_ammo(amount: int):
 func equip() -> void:
 	_equipped = true
 	visible = true
+	_can_fire = true
 	set_process(true)
 	set_process_input(true)		# Probably not necessary
 
 func unequip() -> void:
 	_equipped = false
 	visible = false
+	_can_fire = false
 	set_process(false)
 	set_process_input(false)	# Probably not necessary
