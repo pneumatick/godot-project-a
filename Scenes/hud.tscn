@@ -127,22 +127,37 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -58.5
-offset_top = -33.0
-offset_right = 58.5
-offset_bottom = 33.0
+offset_left = -200.0
+offset_top = -50.5
+offset_right = 200.0
+offset_bottom = 50.5
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Buy Rifle" type="Button" parent="ShopUI/VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="ShopUI/VBoxContainer"]
+layout_mode = 2
+
+[node name="Buys" type="VBoxContainer" parent="ShopUI/VBoxContainer/HBoxContainer"]
+layout_direction = 2
+layout_mode = 2
+size_flags_horizontal = 2
+size_flags_vertical = 0
+
+[node name="Buy Rifle" type="Button" parent="ShopUI/VBoxContainer/HBoxContainer/Buys"]
 layout_mode = 2
 text = "Buy Rifle - $50"
 
-[node name="Sell Rifle" type="Button" parent="ShopUI/VBoxContainer"]
+[node name="Sells" type="VBoxContainer" parent="ShopUI/VBoxContainer/HBoxContainer"]
+layout_direction = 3
+layout_mode = 2
+size_flags_horizontal = 10
+size_flags_vertical = 0
+
+[node name="Sell Rifle" type="Button" parent="ShopUI/VBoxContainer/HBoxContainer/Sells"]
 layout_mode = 2
 text = "Sell Rifle - $25"
 
-[node name="Sell Organs" type="Button" parent="ShopUI/VBoxContainer"]
+[node name="Sell Organs" type="Button" parent="ShopUI/VBoxContainer/HBoxContainer/Sells"]
 layout_mode = 2
 text = "Sell All Organs"
 

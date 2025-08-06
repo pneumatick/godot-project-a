@@ -6,9 +6,9 @@ signal on_menu_closed()
 
 func _ready() -> void:
 	visible = false
-	$"VBoxContainer/Buy Rifle".pressed.connect(_on_buy_rifle_pressed)
-	$"VBoxContainer/Sell Rifle".pressed.connect(_on_sell_rifle_pressed)
-	$"VBoxContainer/Sell Organs".pressed.connect(_on_sell_organs_pressed)
+	$"VBoxContainer/HBoxContainer/Buys/Buy Rifle".pressed.connect(_on_buy_rifle_pressed)
+	$"VBoxContainer/HBoxContainer/Sells/Sell Rifle".pressed.connect(_on_sell_rifle_pressed)
+	$"VBoxContainer/HBoxContainer/Sells/Sell Organs".pressed.connect(_on_sell_organs_pressed)
 	$Close.pressed.connect(_on_close_pressed)
 
 func open_for_player():
@@ -27,6 +27,7 @@ func _on_buy_rifle_pressed():
 	else:
 		print("Player does not have enough money")
 
+'''NOTE: This has broken due to the fact that multiple of the same item can be held in _items and _inventory'''
 func _on_sell_rifle_pressed():
 	var removed = player.remove_item(null, "Rifle")
 	if removed:
