@@ -4,7 +4,7 @@ var type : String = "Organ"
 var prev_owner : CharacterBody3D
 
 @export var item_name : String
-@export var value : int = 25
+@export var value : int = 30
 @export var condition : int = 100
 
 func _ready() -> void:

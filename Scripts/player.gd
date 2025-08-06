@@ -72,6 +72,7 @@ func _ready() -> void:
 	
 	# Prepare organ scenes dictionary
 	_organ_scenes["Heart"] = preload("res://Scenes/heart.tscn")
+	_organ_scenes["Liver"] = preload("res://Scenes/liver.tscn")
 	
 	spawn.emit()						# Probably not supposed to be here...
 
