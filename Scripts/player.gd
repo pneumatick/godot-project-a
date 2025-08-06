@@ -455,7 +455,6 @@ func drop_all_items():
 				var weapon = _weapon_object_scenes[item.item_name].instantiate()
 				weapon.ammo = item.current_ammo
 				weapon.set_new_owner(self)
-				get_parent().add_child(weapon)
 				drop_item(weapon)	# Drop item into world
 				remove_item(item)	# Remove item from items/inventory
 	

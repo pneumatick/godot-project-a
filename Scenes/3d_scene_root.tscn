@@ -93,6 +93,5 @@ transform = Transform3D(1, 0, 0, 0, 0.0871558, 0.996195, 0, -0.996195, 0.0871558
 environment = SubResource("Environment_5rbum")
 
 [connection signal="death" from="Player" to="." method="_on_player_death"]
-[connection signal="weapon_equipped" from="Player" to="HUD" method="_on_player_weapon_equipped"]
 [connection signal="weapon_reloaded" from="Player" to="HUD" method="_on_player_weapon_reloaded"]
 [connection signal="destroyed" from="Target" to="Player" method="_on_target_destroyed"]
