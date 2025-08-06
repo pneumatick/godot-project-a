@@ -287,51 +287,68 @@ func _equip_item(idx: int) -> void:
 # Add an item to the player's inventory (and hand, at least for now)
 func add_item(item_name: String, amount: int = -1) -> void:
 	print("Adding %s..." % item_name)
+	
 	# Add weapons
+	var added = false
 	if _weapon_scenes.has(item_name):
-		var new_weapon = _weapon_scenes[item_name].instantiate()
-		new_weapon.item_name = item_name
-		if amount != -1:
-			new_weapon.current_ammo = amount
-		# Check if items is at max capacity before adding
-		var items_full = true
-		for i in range(_items.size()):
-			if _items[i] == null:
-				items_full = false
-				_items[i] = new_weapon
-				if _items[_equipped_item_idx] == new_weapon:
-					_equip_item(i)
-				else:
-					print("Unequipping %s at " % item_name, i)
-					new_weapon.unequip()
-				weapon_picked_up.emit(new_weapon)
-				weapon_pick_up_sound.play()
-				break
-		if items_full:
-			print("Items full!")
-			return
-		# Add held item scene to hand
-		right_hand.add_child(new_weapon)
-		# Add item to inventory
-		if not _inventory.has(item_name):
-			_inventory[item_name] = [new_weapon]
-		else:
-			# Handle weapon acquisition by reloading
-			'''
-			var weapon = _inventory[item_name]
-			weapon.load_ammo(weapon.max_ammo)
-			weapon_reload_sound.play()
-			if _equipped_item_idx < _items.size() and weapon == _items[_equipped_item_idx]:
-				weapon_reloaded.emit(weapon)
-			'''
-			_inventory[item_name].append(new_weapon)
+		added = _add_weapon(item_name, amount)
 	# Add organs
 	elif _organ_scenes.has(item_name):
-		print("Picked up %s" % item_name)
+		added = _add_organ(item_name, amount)
 	else:
 		print("Unknown item %s" % item_name)
 	
+	if added:
+		print("Picked up %s" % item_name)
+	else:
+		print("Failed to pick up %s" % item_name)
+	
 	print(_items)
+
+func _add_weapon(item_name: String, amount = -1) -> bool:
+	# Initialize weapon
+	var new_weapon = _weapon_scenes[item_name].instantiate()
+	new_weapon.item_name = item_name
+	if amount != -1:
+		new_weapon.current_ammo = amount
+	
+	# Check if items is at max capacity before adding to it
+	var items_full = true
+	for i in range(_items.size()):
+		if _items[i] == null:
+			items_full = false
+			_items[i] = new_weapon
+			if _items[_equipped_item_idx] == new_weapon:
+				_equip_item(i)
+			else:
+				print("Unequipping %s at " % item_name, i)
+				new_weapon.unequip()
+			weapon_picked_up.emit(new_weapon)
+			weapon_pick_up_sound.play()
+			break
+	
+	# Get rid of instantiated weapon if item cannot be added
+	if items_full:
+		print("Items full!")
+		new_weapon.queue_free
+		return false
+	
+	# Add held item scene to hand and inventory
+	right_hand.add_child(new_weapon)
+	if not _inventory.has(item_name):
+		_inventory[item_name] = [new_weapon]
+	else:
+		_inventory[item_name].append(new_weapon)
+	
+	return true
+
+func _add_organ(organ_name, condition = 100) -> bool:
+	if not _inventory.has(organ_name):
+		_inventory["Organs"] = [[organ_name, condition]]
+	else:
+		_inventory["Organs"].append([organ_name, condition])
+	
+	return true
 
 func remove_item(item: Node3D = null, name: String = "") -> bool:
 	var removed = false
@@ -429,26 +446,42 @@ func throw_current_item():
 		print(_items)
 
 func drop_all_items():
+	# Drop equippable items
 	for item in _items:
 		if item:
 			if _weapon_object_scenes.has(item.item_name):
-				var thrown = _weapon_object_scenes[item.item_name].instantiate()
-				thrown.ammo = item.current_ammo
-				thrown.set_new_owner(self)
-				get_parent().add_child(thrown)
+				# Instantiate item object
+				var weapon = _weapon_object_scenes[item.item_name].instantiate()
+				weapon.ammo = item.current_ammo
+				weapon.set_new_owner(self)
+				get_parent().add_child(weapon)
+				drop_item(weapon)	# Drop item into world
+				remove_item(item)	# Remove item from items/inventory
+	
+	# Drop held organs
+	if _inventory.has("Organs"):
+		for organ in _inventory["Organs"]:
+			if _organ_scenes.has(organ[0]):
+				# Instantiate organ object
+				var organ_obj = _organ_scenes[organ[0]].instantiate()
+				organ_obj.item_name = organ[0]
+				organ_obj.condition = organ[1]
+				drop_item(organ_obj)	# Drop item into world
+		_inventory.erase("Organs")
 
-				# Determine position
-				var muzzle_pos = camera_controller.global_transform.origin
-				var forward = -camera_controller.global_transform.basis.z 
-				thrown.global_transform.origin = muzzle_pos + forward * 1.5
+func drop_item(item):
+	# Add item to world
+	get_parent().add_child(item)
 
-				# Apply impulse
-				var impulse = camera_controller.global_transform.basis.y + -camera_controller.global_transform.basis.z * 5
-				thrown.apply_impulse(impulse, forward * 15)
+	# Determine position
+	var muzzle_pos = camera_controller.global_transform.origin
+	var forward = -camera_controller.global_transform.basis.z 
+	item.global_transform.origin = muzzle_pos + forward * 1.5
 
-	# Remove the items (Figure out a way to do this in original loop to optimize)
-	for item in _items:
-		remove_item(item)
+	# Apply impulse
+	var impulse = camera_controller.global_transform.basis.y + -camera_controller.global_transform.basis.z * 5
+	item.apply_impulse(impulse, forward * 15)
+	
 
 func is_alive() -> bool:
 	return _alive
