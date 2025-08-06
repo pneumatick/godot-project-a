@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://7hsaa8ln0seb"]
 
-[ext_resource type="Script" uid="uid://bwjbbihsjtmjc" path="res://Scenes/organ.gd" id="1_2go6t"]
+[ext_resource type="Script" uid="uid://bwjbbihsjtmjc" path="res://Scripts/organ.gd" id="1_2go6t"]
 [ext_resource type="PackedScene" uid="uid://b78xro5r0pldq" path="res://Assets/Visuals/Models/Organs/brain.fbx" id="2_2go6t"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_amr6p"]
@@ -11,6 +11,7 @@ height = 5.08648
 collision_layer = 12
 collision_mask = 4
 script = ExtResource("1_2go6t")
+value = 50
 
 [node name="brain" parent="." instance=ExtResource("2_2go6t")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.6, -1.5, -1)

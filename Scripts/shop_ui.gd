@@ -41,12 +41,13 @@ func _on_sell_organs_pressed():
 	
 	if organs != []:
 		for organ in organs:
+			print(organ)
 			# Adjust price according to condition
 			var organ_name : String = organ[0]
 			var condition : int = organ[1]
-			var value : int
+			var value : int = organ[2]
 			if condition > 20:
-				value = floori(50.0 * (float(condition) / 100.0))
+				value = floori(value * (float(condition) / 100.0))
 			else:
 				value = 5
 			# Give money to player

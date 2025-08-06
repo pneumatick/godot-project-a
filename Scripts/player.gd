@@ -287,7 +287,7 @@ func _equip_item(idx: int) -> void:
 	print(_equipped_item_idx)
 
 # Add an item to the player's inventory (and hand, at least for now)
-func add_item(item_name: String, amount: int = -1) -> void:
+func add_item(item_name: String, amount: int = -1, value = -1) -> void:
 	print("Adding %s..." % item_name)
 	
 	# Add weapons
@@ -296,7 +296,7 @@ func add_item(item_name: String, amount: int = -1) -> void:
 		added = _add_weapon(item_name, amount)
 	# Add organs
 	elif _organ_scenes.has(item_name):
-		added = _add_organ(item_name, amount)
+		added = _add_organ(item_name, amount, value)
 		print(_inventory["Organs"])
 	else:
 		print("Unknown item %s" % item_name)
@@ -345,11 +345,11 @@ func _add_weapon(item_name: String, amount = -1) -> bool:
 	
 	return true
 
-func _add_organ(organ_name, condition = 100) -> bool:
+func _add_organ(organ_name, condition = 100, value = 50) -> bool:
 	if not _inventory.has("Organs"):
-		_inventory["Organs"] = [[organ_name, condition]]
+		_inventory["Organs"] = [[organ_name, condition, value]]
 	else:
-		_inventory["Organs"].append([organ_name, condition])
+		_inventory["Organs"].append([organ_name, condition, value])
 	
 	return true
 
