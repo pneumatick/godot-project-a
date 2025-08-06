@@ -295,6 +295,7 @@ func add_item(item_name: String, amount: int = -1) -> void:
 	# Add organs
 	elif _organ_scenes.has(item_name):
 		added = _add_organ(item_name, amount)
+		print(_inventory["Organs"])
 	else:
 		print("Unknown item %s" % item_name)
 	
@@ -343,7 +344,7 @@ func _add_weapon(item_name: String, amount = -1) -> bool:
 	return true
 
 func _add_organ(organ_name, condition = 100) -> bool:
-	if not _inventory.has(organ_name):
+	if not _inventory.has("Organs"):
 		_inventory["Organs"] = [[organ_name, condition]]
 	else:
 		_inventory["Organs"].append([organ_name, condition])
@@ -461,6 +462,7 @@ func drop_all_items():
 	# Drop held organs
 	if _inventory.has("Organs"):
 		for organ in _inventory["Organs"]:
+			print("Dropping organ...")
 			if _organ_scenes.has(organ[0]):
 				# Instantiate organ object
 				var organ_obj = _organ_scenes[organ[0]].instantiate()
