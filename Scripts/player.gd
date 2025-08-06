@@ -523,3 +523,11 @@ func _check_interact_target():
 	else:
 		seen_object = null
 		viewing.emit()
+
+func sell_all_organs() -> Array:
+	if _inventory.has("Organs"):
+		var organs = _inventory["Organs"]
+		_inventory.erase("Organs")
+		return organs
+	
+	return []

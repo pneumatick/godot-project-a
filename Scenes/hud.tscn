@@ -142,6 +142,10 @@ text = "Buy Rifle - $50"
 layout_mode = 2
 text = "Sell Rifle - $25"
 
+[node name="Sell Organs" type="Button" parent="ShopUI/VBoxContainer"]
+layout_mode = 2
+text = "Sell All Organs"
+
 [node name="Close" type="Button" parent="ShopUI"]
 layout_mode = 1
 offset_right = 8.0

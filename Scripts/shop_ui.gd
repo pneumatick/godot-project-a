@@ -8,6 +8,7 @@ func _ready() -> void:
 	visible = false
 	$"VBoxContainer/Buy Rifle".pressed.connect(_on_buy_rifle_pressed)
 	$"VBoxContainer/Sell Rifle".pressed.connect(_on_sell_rifle_pressed)
+	$"VBoxContainer/Sell Organs".pressed.connect(_on_sell_organs_pressed)
 	$Close.pressed.connect(_on_close_pressed)
 
 func open_for_player():
@@ -33,6 +34,23 @@ func _on_sell_rifle_pressed():
 		print("Player sold a rifle!")
 	else:
 		print("Rifle sale unsuccessful")
+
+func _on_sell_organs_pressed():
+	var organs = player.sell_all_organs()
+	
+	if organs != []:
+		for organ in organs:
+			# Adjust price according to condition
+			var organ_name : String = organ[0]
+			var condition : int = organ[1]
+			var value : int
+			if condition > 20:
+				value = floori(50.0 * (float(condition) / 100.0))
+			else:
+				value = 5
+			# Give money to player
+			player.add_money(value)
+			print("%s with condition %s sold for %s" % [organ_name, str(condition), str(value)])
 
 func _on_close_pressed():
 	visible = false
