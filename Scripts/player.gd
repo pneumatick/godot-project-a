@@ -44,6 +44,7 @@ var in_shop : bool = false
 @export var death_deduction : int = 15
 @export var money : int = 0
 @export var interaction_range : float = 3.0
+@export var item_capacity : int = 6
 
 # Nodes internal to scene
 @onready var right_hand : Node3D = get_node("Pivot/Camera3D/Right Hand")
@@ -60,6 +61,8 @@ var in_shop : bool = false
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	health_bar.value = health
+	for i in range(item_capacity):
+		_items.append(null)
 	
 	# Prepare weapon scenes dictionaries
 	_weapon_scenes["Rifle"] = preload("res://Scenes/rifle.tscn")
@@ -118,11 +121,9 @@ func _input(event):
 		_rotation_input = -event.relative.x * mouse_sensitivity
 		_tilt_input = -event.relative.y * mouse_sensitivity
 	elif event.is_action_pressed("previous_item"):
-		if _items.size() > 0:
-			_equip_item(_equipped_item_idx - 1)
+			_equip_item(wrapi(_equipped_item_idx - 1, 0, _items.size()))
 	elif event.is_action_pressed("next_item"):
-		if _items.size() > 0:
-			_equip_item(_equipped_item_idx + 1)
+			_equip_item(wrapi(_equipped_item_idx - 1, 0, _items.size()))
 	elif event.is_action_pressed("throw_item"):
 		throw_current_item()
 	elif event.is_action_pressed("kill"):
@@ -195,6 +196,8 @@ func _die() -> void:
 	
 	# Dump inventory
 	_items = []
+	for i in range(item_capacity):
+		_items.append(null)
 	_inventory = {}
 	
 	# Spawn organs
@@ -266,31 +269,50 @@ func _on_damage_timer_timeout():
 
 # Equip held item
 func _equip_item(idx: int) -> void:
-	if _items.size() == 0:
+	# Unequip (previously) equipped item
+	if _items[_equipped_item_idx]:
+		_items[_equipped_item_idx].unequip()
+	
+	# Handle case where empty item slot is selected
+	if _items[idx] == null:
+		_equipped_item_idx = idx
 		hand_empty.emit()
 		return
 	
-	if _items.size() > 1:
-		# Unequip (previously) equipped item
-		_items[_equipped_item_idx].unequip()
-		
 	# Equip item
-	idx = wrapi(idx, 0, _items.size())
 	_items[idx].equip()
 	weapon_equipped.emit(_items[idx])
 	_equipped_item_idx = idx
 
 # Add an item to the player's inventory (and hand, at least for now)
-func add_item(item_name: String, amount: int = -1):
+func add_item(item_name: String, amount: int = -1) -> void:
 	print("Adding %s..." % item_name)
+	print(_items)
 	# Add weapons
 	if _weapon_scenes.has(item_name):
 		var new_weapon = _weapon_scenes[item_name].instantiate()
 		new_weapon.item_name = item_name
 		if amount != -1:
 			new_weapon.current_ammo = amount
-		_items.append(new_weapon)
+		# Check if items is at max capacity before adding
+		var items_full = true
+		for i in range(_items.size()):
+			if _items[i] == null:
+				items_full = false
+				_items[i] = new_weapon
+				if _items[_equipped_item_idx] == new_weapon:
+					_equip_item(i)
+				else:
+					new_weapon.unequip()
+				weapon_picked_up.emit(new_weapon)
+				weapon_pick_up_sound.play()
+				break
+		if items_full:
+			print("Items full!")
+			return
+		# Add held item scene to hand
 		right_hand.add_child(new_weapon)
+		# Add item to inventory
 		if not _inventory.has(item_name):
 			_inventory[item_name] = [new_weapon]
 		else:
@@ -303,12 +325,6 @@ func add_item(item_name: String, amount: int = -1):
 				weapon_reloaded.emit(weapon)
 			'''
 			_inventory[item_name].append(new_weapon)
-		if _items.size() == 1:
-			_equip_item(0)
-		else:
-			new_weapon.unequip()
-		weapon_picked_up.emit(new_weapon)
-		weapon_pick_up_sound.play()
 	# Add organs
 	elif _organ_scenes.has(item_name):
 		print("Picked up %s" % item_name)
@@ -341,7 +357,7 @@ func remove_item(item: Node3D = null, name: String = "") -> bool:
 						_inventory[item_name][j].queue_free()
 						_inventory[item_name].remove_at(j)
 						break
-			_items.remove_at(i)
+			_items[i] = null
 			removed = true
 			# Equip the next item if possible
 			#_equip_item(wrapi(i + 1, 0, _items.size()))
@@ -381,7 +397,7 @@ func get_in_menu() -> bool:
 	return _in_menu
 
 func throw_current_item():
-	if _items.size() == 0:
+	if _items[_equipped_item_idx] == null:
 		return
 
 	# Create a physics copy of the items
@@ -410,20 +426,21 @@ func throw_current_item():
 
 func drop_all_items():
 	for item in _items:
-		if _weapon_object_scenes.has(item.item_name):
-			var thrown = _weapon_object_scenes[item.item_name].instantiate()
-			thrown.ammo = item.current_ammo
-			thrown.set_new_owner(self)
-			get_parent().add_child(thrown)
+		if item:
+			if _weapon_object_scenes.has(item.item_name):
+				var thrown = _weapon_object_scenes[item.item_name].instantiate()
+				thrown.ammo = item.current_ammo
+				thrown.set_new_owner(self)
+				get_parent().add_child(thrown)
 
-			# Determine position
-			var muzzle_pos = camera_controller.global_transform.origin
-			var forward = -camera_controller.global_transform.basis.z 
-			thrown.global_transform.origin = muzzle_pos + forward * 1.5
+				# Determine position
+				var muzzle_pos = camera_controller.global_transform.origin
+				var forward = -camera_controller.global_transform.basis.z 
+				thrown.global_transform.origin = muzzle_pos + forward * 1.5
 
-			# Apply impulse
-			var impulse = camera_controller.global_transform.basis.y + -camera_controller.global_transform.basis.z * 5
-			thrown.apply_impulse(impulse, forward * 15)
+				# Apply impulse
+				var impulse = camera_controller.global_transform.basis.y + -camera_controller.global_transform.basis.z * 5
+				thrown.apply_impulse(impulse, forward * 15)
 
 	# Remove the items (Figure out a way to do this in original loop to optimize)
 	for item in _items:
