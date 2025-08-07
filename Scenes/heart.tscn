@@ -1,6 +1,5 @@
-[gd_scene load_steps=4 format=3 uid="uid://gmymq12f6240"]
+[gd_scene load_steps=3 format=3 uid="uid://gmymq12f6240"]
 
-[ext_resource type="Script" uid="uid://bwjbbihsjtmjc" path="res://Scripts/organ.gd" id="1_452e1"]
 [ext_resource type="PackedScene" uid="uid://bl7kuirpsiw84" path="res://Assets/Visuals/Models/Organs/Heart.fbx" id="2_v4aiu"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_84jsi"]
@@ -10,7 +9,6 @@ height = 0.465888
 [node name="Heart" type="RigidBody3D"]
 collision_layer = 12
 collision_mask = 4
-script = ExtResource("1_452e1")
 
 [node name="Heart" parent="." instance=ExtResource("2_v4aiu")]
 transform = Transform3D(0.05, 0, 0, 0, 0.05, 0, 0, 0, 0.05, 0, 0, 0)

@@ -29,7 +29,7 @@ var _inventory : Dictionary = {}
 var _equipped_item_idx : int = 0
 var _weapon_scenes : Dictionary = {}
 var _weapon_object_scenes : Dictionary = {}
-var _organ_scenes : Dictionary = {}
+var _organs : Dictionary = {}
 var _alive : bool = true
 var _in_menu : bool = false
 
@@ -70,10 +70,10 @@ func _ready() -> void:
 	_weapon_object_scenes["Rifle"] = preload("res://Scenes/rifle_object.tscn")
 	_weapon_object_scenes["Pistol"] = preload("res://Scenes/pistol_object.tscn")
 	
-	# Prepare organ scenes dictionary
-	_organ_scenes["Heart"] = preload("res://Scenes/heart.tscn")
-	_organ_scenes["Liver"] = preload("res://Scenes/liver.tscn")
-	_organ_scenes["Brain"] = preload("res://Scenes/brain.tscn")
+	# Prepare organ dictionary
+	_organs["Heart"] = Heart
+	_organs["Brain"] = Brain
+	_organs["Liver"] = Liver
 	
 	spawn.emit()						# Probably not supposed to be here...
 
@@ -132,7 +132,7 @@ func _input(event):
 		_die()
 	elif event.is_action_pressed("interact") and seen_object:
 		if seen_object.is_in_group("interactables"):
-			seen_object.interact(self)
+			seen_object.get_parent().interact(self)
 
 func _accelerate(direction: Vector3, accel: float, max_speed: float, delta: float):
 	var current_speed = velocity.dot(direction)
@@ -296,8 +296,9 @@ func add_item(item) -> void:
 	if _weapon_scenes.has(item_name):
 		added = _add_weapon(item)
 	# Add organs
-	elif _organ_scenes.has(item_name):
+	elif _organs.has(item.item_name):
 		added = _add_organ(item)
+		print("%s %s %s" % [item.item_name, item.condition, item.value])
 		print(_inventory["Organs"])
 	elif item is Drug:
 		added = _add_drug(item)
@@ -351,11 +352,11 @@ func _add_weapon(properties: Dictionary) -> bool:
 	
 	return true
 
-func _add_organ(properties: Dictionary) -> bool:
+func _add_organ(organ: Organ) -> bool:
 	if not _inventory.has("Organs"):
-		_inventory["Organs"] = [properties]
+		_inventory["Organs"] = [organ]
 	else:
-		_inventory["Organs"].append(properties)
+		_inventory["Organs"].append(organ)
 	
 	return true
 
@@ -476,15 +477,11 @@ func drop_all_items():
 	
 	# Drop held organs
 	if _inventory.has("Organs"):
-		for properties in _inventory["Organs"]:
-			var organ_name = properties["Name"]
-			print("Dropping organ %s..." % organ_name)
-			if _organ_scenes.has(organ_name):
-				# Instantiate organ object
-				var organ_obj = _organ_scenes[organ_name].instantiate()
-				organ_obj.item_name = organ_name
-				organ_obj.condition = properties["Condition"]
-				drop_item(organ_obj)	# Drop item into world
+		for organ in _inventory["Organs"]:
+			print("Dropping organ %s..." % organ.item_name)
+			# Instantiate organ scene
+			organ.instantiate()
+			drop_item(organ)	# Drop organ into world
 		_inventory.erase("Organs")
 
 func drop_item(item):
@@ -498,26 +495,25 @@ func drop_item(item):
 
 	# Apply impulse
 	var impulse = camera_controller.global_transform.basis.y + -camera_controller.global_transform.basis.z * 5
-	item.apply_impulse(impulse, forward * 15)
+	item.get_child(0).apply_impulse(impulse, forward * 15)
 	
 
 func is_alive() -> bool:
 	return _alive
 
 func _spawn_organs() -> void:
-	for item_name in _organ_scenes.keys():
-		var scene = _organ_scenes[item_name]
-		var organ = scene.instantiate()
-		organ.item_name = item_name
-		organ.position = position
-		get_parent().add_child(organ)
+	for organ in _organs.keys():
+		var new_organ = _organs[organ].new()
+		new_organ.instantiate()
+		new_organ.position = position
+		get_parent().add_child(new_organ)
 		
 		# Apply impulse
 		var forward = -camera_controller.global_transform.basis.z 
 		var impulse = camera_controller.global_transform.basis.y + -camera_controller.global_transform.basis.z * 5
 		if velocity != Vector3.ZERO:
 			impulse += velocity
-		organ.apply_impulse(impulse, forward)
+		new_organ.get_child(0).apply_impulse(impulse, forward)
 
 func _check_interact_target():
 	var space_state = get_world_3d().direct_space_state

@@ -43,17 +43,18 @@ func _on_sell_organs_pressed():
 	if organs != []:
 		for organ in organs:
 			print(organ)
-			# Adjust price according to condition
-			var organ_name : String = organ["Name"]
-			var condition : int = organ["Condition"]
-			var value : int = organ["Value"]
-			if condition > 20:
-				value = floori(value * (float(condition) / 100.0))
+			var value : int
+			if organ.condition > 20:
+				value = floori(organ.value * (float(organ.condition) / 100.0))
 			else:
 				value = 5
 			# Give money to player
 			player.add_money(value)
-			print("%s with condition %s sold for %s" % [organ_name, str(condition), str(value)])
+			print(
+				"%s with condition %s sold for %s" % [organ.item_name, 
+														str(organ.condition), 
+														str(value)]
+			)
 
 func _on_buy_crack_pressed():
 	var has_enough = player.remove_money(0)

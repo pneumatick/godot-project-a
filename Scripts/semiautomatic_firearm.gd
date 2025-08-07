@@ -1,4 +1,5 @@
 extends Node3D
+class_name Pistol
 
 @export var max_ammo: int = 17
 @export var max_distance: float = 1000.0

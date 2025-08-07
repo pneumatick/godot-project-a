@@ -1,4 +1,5 @@
 extends Node3D
+class_name Rifle
 
 @export var fire_rate: float = 0.1
 @export var max_ammo: int = 100

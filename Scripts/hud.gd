@@ -36,12 +36,12 @@ func _on_player_weapon_reloaded(weapon: Node) -> void:
 func _on_player_hand_empty() -> void:
 	ammo_label.text = ""
 
-func _display_interaction_label(object = null) -> void:
-	if not object and not player.in_shop:
+func _display_interaction_label(scene = null) -> void:
+	if not scene and not player.in_shop:
 		interact_label.visible = false
 	elif not player.get_in_menu():
-		if object:
-			interact_label.text = "[Interact] %s" % object.item_name
+		if scene:
+			interact_label.text = "[Interact] %s" % scene.get_parent().item_name
 		elif player.in_shop:
 			interact_label.text = "[Interact] Open Shop Menu"
 		interact_label.visible = true
