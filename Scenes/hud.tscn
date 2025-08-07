@@ -147,6 +147,13 @@ size_flags_vertical = 0
 layout_mode = 2
 text = "Buy Rifle - $50"
 
+[node name="Drugs" type="VBoxContainer" parent="ShopUI/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="Buy Crack" type="Button" parent="ShopUI/VBoxContainer/HBoxContainer/Drugs"]
+layout_mode = 2
+text = "Buy Crack"
+
 [node name="Sells" type="VBoxContainer" parent="ShopUI/VBoxContainer/HBoxContainer"]
 layout_direction = 3
 layout_mode = 2

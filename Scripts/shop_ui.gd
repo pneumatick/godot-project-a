@@ -9,6 +9,7 @@ func _ready() -> void:
 	$"VBoxContainer/HBoxContainer/Buys/Buy Rifle".pressed.connect(_on_buy_rifle_pressed)
 	$"VBoxContainer/HBoxContainer/Sells/Sell Rifle".pressed.connect(_on_sell_rifle_pressed)
 	$"VBoxContainer/HBoxContainer/Sells/Sell Organs".pressed.connect(_on_sell_organs_pressed)
+	$"VBoxContainer/HBoxContainer/Drugs/Buy Crack".pressed.connect(_on_buy_crack_pressed)
 	$Close.pressed.connect(_on_close_pressed)
 
 func open_for_player():
@@ -53,6 +54,14 @@ func _on_sell_organs_pressed():
 			# Give money to player
 			player.add_money(value)
 			print("%s with condition %s sold for %s" % [organ_name, str(condition), str(value)])
+
+func _on_buy_crack_pressed():
+	var has_enough = player.remove_money(0)
+	if has_enough:
+		player.add_item({
+			"Name": "Drug",
+			"Resource": Crack.new()
+		})
 
 func _on_close_pressed():
 	visible = false
