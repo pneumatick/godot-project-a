@@ -349,14 +349,10 @@ func _add_weapon(properties: Dictionary) -> bool:
 	return true
 
 func _add_organ(properties: Dictionary) -> bool:
-	var organ_name = properties["Name"]
-	var condition = properties["Condition"]
-	var value = properties["Value"]
-	
 	if not _inventory.has("Organs"):
-		_inventory["Organs"] = [[organ_name, condition, value]]
+		_inventory["Organs"] = [properties]
 	else:
-		_inventory["Organs"].append([organ_name, condition, value])
+		_inventory["Organs"].append(properties)
 	
 	return true
 
@@ -469,13 +465,14 @@ func drop_all_items():
 	
 	# Drop held organs
 	if _inventory.has("Organs"):
-		for organ in _inventory["Organs"]:
-			print("Dropping organ...")
-			if _organ_scenes.has(organ[0]):
+		for properties in _inventory["Organs"]:
+			var organ_name = properties["Name"]
+			print("Dropping organ %s..." % organ_name)
+			if _organ_scenes.has(organ_name):
 				# Instantiate organ object
-				var organ_obj = _organ_scenes[organ[0]].instantiate()
-				organ_obj.item_name = organ[0]
-				organ_obj.condition = organ[1]
+				var organ_obj = _organ_scenes[organ_name].instantiate()
+				organ_obj.item_name = organ_name
+				organ_obj.condition = properties["Condition"]
 				drop_item(organ_obj)	# Drop item into world
 		_inventory.erase("Organs")
 
