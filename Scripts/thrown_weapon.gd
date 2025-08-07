@@ -13,7 +13,8 @@ var ammo : int = -1
 
 func _on_collection_area_body_entered(body: Node3D) -> void:
 	if body.name == "Player" and body.is_alive():
-		body.add_item(item_name, ammo)
+		var properties = {"Name": item_name, "Ammo": ammo}
+		body.add_item(properties)
 		queue_free()
 
 func apply_bullet_force(hit_pos: Vector3, direction: Vector3, force: float, damage: int):

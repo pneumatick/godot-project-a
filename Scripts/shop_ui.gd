@@ -22,7 +22,7 @@ func close_for_player():
 func _on_buy_rifle_pressed():
 	var has_enough = player.remove_money(50)
 	if has_enough:
-		player.add_item("Rifle")
+		player.add_item({"Name": "Rifle"})
 		print("Player bought a rifle!")
 	else:
 		print("Player does not have enough money")

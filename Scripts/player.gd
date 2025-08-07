@@ -287,16 +287,17 @@ func _equip_item(idx: int) -> void:
 	print(_equipped_item_idx)
 
 # Add an item to the player's inventory (and hand, at least for now)
-func add_item(item_name: String, amount: int = -1, value = -1) -> void:
+func add_item(properties: Dictionary) -> void:
+	var item_name = properties["Name"]
 	print("Adding %s..." % item_name)
 	
 	# Add weapons
 	var added = false
 	if _weapon_scenes.has(item_name):
-		added = _add_weapon(item_name, amount)
+		added = _add_weapon(properties)
 	# Add organs
 	elif _organ_scenes.has(item_name):
-		added = _add_organ(item_name, amount, value)
+		added = _add_organ(properties)
 		print(_inventory["Organs"])
 	else:
 		print("Unknown item %s" % item_name)
@@ -308,12 +309,14 @@ func add_item(item_name: String, amount: int = -1, value = -1) -> void:
 	
 	print(_items)
 
-func _add_weapon(item_name: String, amount = -1) -> bool:
+func _add_weapon(properties: Dictionary) -> bool:
 	# Initialize weapon
+	var item_name = properties["Name"]
 	var new_weapon = _weapon_scenes[item_name].instantiate()
 	new_weapon.item_name = item_name
-	if amount != -1:
-		new_weapon.current_ammo = amount
+	# Add less ammo if ammo value is provided (ie when not max ammo)
+	if properties.has("Ammo"):
+		new_weapon.current_ammo = properties["Ammo"]
 	
 	# Check if items is at max capacity before adding to it
 	var items_full = true
@@ -345,7 +348,11 @@ func _add_weapon(item_name: String, amount = -1) -> bool:
 	
 	return true
 
-func _add_organ(organ_name, condition = 100, value = 50) -> bool:
+func _add_organ(properties: Dictionary) -> bool:
+	var organ_name = properties["Name"]
+	var condition = properties["Condition"]
+	var value = properties["Value"]
+	
 	if not _inventory.has("Organs"):
 		_inventory["Organs"] = [[organ_name, condition, value]]
 	else:
