@@ -287,20 +287,20 @@ func _equip_item(idx: int) -> void:
 	print(_equipped_item_idx)
 
 # Add an item to the player's inventory (and hand, at least for now)
-func add_item(properties: Dictionary) -> void:
-	var item_name = properties["Name"]
+func add_item(item) -> void:
+	var item_name = item.item_name
 	print("Adding %s..." % item_name)
 	
 	# Add weapons
 	var added = false
 	if _weapon_scenes.has(item_name):
-		added = _add_weapon(properties)
+		added = _add_weapon(item)
 	# Add organs
 	elif _organ_scenes.has(item_name):
-		added = _add_organ(properties)
+		added = _add_organ(item)
 		print(_inventory["Organs"])
-	elif item_name == "Drug":
-		added = _add_drug(properties)
+	elif item is Drug:
+		added = _add_drug(item)
 		print(_inventory["Drugs"])
 	else:
 		print("Unknown item %s" % item_name)
@@ -359,9 +359,7 @@ func _add_organ(properties: Dictionary) -> bool:
 	
 	return true
 
-func _add_drug(properties: Dictionary) -> bool:
-	var drug: Drug = properties["Drug"]
-	
+func _add_drug(drug: Drug) -> bool:
 	if not _inventory.has("Drugs"):
 		_inventory["Drugs"] = [drug]
 	else:

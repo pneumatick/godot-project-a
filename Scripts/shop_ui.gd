@@ -58,10 +58,7 @@ func _on_sell_organs_pressed():
 func _on_buy_crack_pressed():
 	var has_enough = player.remove_money(0)
 	if has_enough:
-		player.add_item({
-			"Name": "Drug",
-			"Drug": Crack.new()
-		})
+		player.add_item(Crack.new())
 
 func _on_close_pressed():
 	visible = false
