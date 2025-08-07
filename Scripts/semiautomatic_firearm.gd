@@ -5,7 +5,7 @@ class_name Pistol
 @export var max_distance: float = 1000.0
 @export var damage: int = 20
 @export var current_ammo = max_ammo
-@export var item_name : String
+@export var item_name : String = "Pistol"
 
 @onready var player = get_node("/root/3D Scene Root/Player")
 @onready var ammo_label = get_node("/root/3D Scene Root/HUD/Control/Ammo")
@@ -13,6 +13,9 @@ class_name Pistol
 
 var _can_fire : bool
 var _equipped : bool
+
+var held_scene = load("res://Scenes/pistol.tscn")
+var object_scene = load("res://Scenes/pistol_object.tscn")
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -92,3 +95,15 @@ func unequip() -> void:
 	_can_fire = false
 	set_process(false)
 	set_process_input(false)	# Probably not necessary
+
+# Instantiate the scene that represents the held weapon
+func instantiate_held_scene() -> void:
+	var scene = held_scene.instantiate()
+	for node in scene.get_children():
+		if node.name == "Fire Sound":
+			fire_sound = node
+	add_child(scene)
+
+# Free the scene that represents the held weapon
+func free_held_scene() -> void:
+	get_child(0).queue_free()

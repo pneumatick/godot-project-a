@@ -6,11 +6,16 @@ class_name Rifle
 @export var max_distance: float = 1000.0
 @export var damage: int = 25
 @export var current_ammo = max_ammo
-@export var item_name : String
+@export var item_name : String = "Rifle"
+@export var condition : int = 100
+@export var value : int = 25
 
 @onready var player = get_node("/root/3D Scene Root/Player")
 @onready var ammo_label = get_node("/root/3D Scene Root/HUD/Control/Ammo")
-@onready var fire_sound = $"Fire Sound"
+@onready var fire_sound : AudioStreamPlayer3D
+
+var held_scene : PackedScene = preload("res://Scenes/rifle.tscn")
+var object_scene : PackedScene = preload("res://Scenes/rifle_object.tscn")
 
 var _can_fire : bool
 var _equipped : bool
@@ -92,3 +97,22 @@ func unequip() -> void:
 	_can_fire = false
 	set_process(false)
 	set_process_input(false)	# Probably not necessary
+
+# Instantiate the scene that represents the held weapon
+func instantiate_held_scene() -> void:
+	var scene = held_scene.instantiate()
+	for node in scene.get_children():
+		if node.name == "Fire Sound":
+			fire_sound = node
+	_equipped = true
+	add_child(scene)
+
+func instantiate_object_scene() -> Node3D:
+	var scene = object_scene.instantiate()
+	add_child(scene)
+	return scene
+
+# Free the scene that represents the held weapon
+func free_held_scene() -> void:
+	get_child(0).queue_free()
+	_equipped = false

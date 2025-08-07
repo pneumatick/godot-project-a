@@ -11,10 +11,17 @@ var ammo : int = -1
 @export var condition : int = 100
 @export var resistance : int = 5
 
+func _ready() -> void:
+	var parent = get_parent()
+	item_name = parent.item_name
+	value = parent.value
+	condition = parent.condition
+
 func _on_collection_area_body_entered(body: Node3D) -> void:
 	if body.name == "Player" and body.is_alive():
-		var properties = {"Name": item_name, "Ammo": ammo}
-		body.add_item(properties)
+		get_parent().get_parent().remove_child(get_parent())
+		body.add_item(get_parent())
+		# Free weapon object scene
 		queue_free()
 
 func apply_bullet_force(hit_pos: Vector3, direction: Vector3, force: float, damage: int):
@@ -29,6 +36,6 @@ func set_new_owner(new_owner: CharacterBody3D):
 
 func _apply_damage(damage: int) -> void:
 	if condition - damage <= 0:
-		queue_free()
+		get_parent().queue_free()
 	else:
 		condition -= damage

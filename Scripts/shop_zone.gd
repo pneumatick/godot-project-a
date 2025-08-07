@@ -14,6 +14,8 @@ func _on_body_entered(body):
 		emit_signal("player_entered_shop", body)
 		body.in_shop = true
 	elif body.type == "Weapon":
+		print("Weapon in shipt")
+		print(body)
 		if body.prev_owner:
 			body.prev_owner.add_money(body.value)
 			body.queue_free()
