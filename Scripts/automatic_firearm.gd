@@ -114,5 +114,5 @@ func instantiate_object_scene() -> Node3D:
 
 # Free the scene that represents the held weapon
 func free_held_scene() -> void:
-	get_child(0).queue_free()
+	get_child(0).free()
 	_equipped = false

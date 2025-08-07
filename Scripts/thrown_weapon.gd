@@ -7,7 +7,7 @@ var prev_owner : CharacterBody3D
 var ammo : int = -1
 
 @export var item_name : String
-@export var value : int = 25
+@export var value : int = 15
 @export var condition : int = 100
 @export var resistance : int = 5
 
@@ -19,10 +19,12 @@ func _ready() -> void:
 
 func _on_collection_area_body_entered(body: Node3D) -> void:
 	if body.name == "Player" and body.is_alive():
+		# Remove weapon root node from world's ownership
 		get_parent().get_parent().remove_child(get_parent())
-		body.add_item(get_parent())
 		# Free weapon object scene
 		queue_free()
+		# Add weapon to the player that entered the collection area
+		body.add_item(get_parent())
 
 func apply_bullet_force(hit_pos: Vector3, direction: Vector3, force: float, damage: int):
 	apply_impulse(hit_pos - global_transform.origin + direction * force)

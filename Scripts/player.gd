@@ -454,10 +454,13 @@ func drop_all_items():
 	# Drop equippable items
 	for item in _items:
 		if item:
-			# Instantiate item object
-			item.instantiate_object_scene()
-			drop_item(item)	# Drop item into world
 			remove_item(item)	# Remove item from items/inventory
+			
+			# Instantiate item object
+			item.free_held_scene()
+			var obj_scene = item.instantiate_object_scene()
+			obj_scene.prev_owner = self
+			drop_item(item)		# Drop item into world
 	
 	# Drop held organs
 	if _inventory.has("Organs"):
@@ -475,7 +478,7 @@ func drop_item(item):
 	# Determine position
 	var muzzle_pos = camera_controller.global_transform.origin
 	var forward = -camera_controller.global_transform.basis.z 
-	item.global_transform.origin = muzzle_pos + forward * 1.5
+	item.get_child(0).global_transform.origin = muzzle_pos + forward * 1.5
 
 	# Apply impulse
 	var impulse = camera_controller.global_transform.basis.y + -camera_controller.global_transform.basis.z * 5
