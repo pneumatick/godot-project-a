@@ -301,6 +301,7 @@ func add_item(properties: Dictionary) -> void:
 		print(_inventory["Organs"])
 	elif item_name == "Drug":
 		added = _add_drug(properties)
+		print(_inventory["Drugs"])
 	else:
 		print("Unknown item %s" % item_name)
 	
@@ -355,6 +356,16 @@ func _add_organ(properties: Dictionary) -> bool:
 		_inventory["Organs"] = [properties]
 	else:
 		_inventory["Organs"].append(properties)
+	
+	return true
+
+func _add_drug(properties: Dictionary) -> bool:
+	var drug: Drug = properties["Drug"]
+	
+	if not _inventory.has("Drugs"):
+		_inventory["Drugs"] = [drug]
+	else:
+		_inventory["Drugs"].append(drug)
 	
 	return true
 
@@ -538,9 +549,3 @@ func sell_all_organs() -> Array:
 		return organs
 	
 	return []
-
-func _add_drug(properties: Dictionary) -> bool:
-	var drug: Drug = properties["Resource"]
-	drug.use()
-	
-	return true

@@ -60,7 +60,7 @@ func _on_buy_crack_pressed():
 	if has_enough:
 		player.add_item({
 			"Name": "Drug",
-			"Resource": Crack.new()
+			"Drug": Crack.new()
 		})
 
 func _on_close_pressed():
