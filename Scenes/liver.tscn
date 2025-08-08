@@ -1,14 +1,17 @@
-[gd_scene load_steps=3 format=3 uid="uid://d2btngd0i47e0"]
+[gd_scene load_steps=4 format=3 uid="uid://d2btngd0i47e0"]
 
+[ext_resource type="Script" uid="uid://dnkl5lva81xvv" path="res://Scripts/liver.gd" id="1_1re1y"]
 [ext_resource type="ArrayMesh" uid="uid://1ny7opfc2fwr" path="res://Assets/Visuals/Models/Organs/hepatitis liver.obj" id="2_1re1y"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_84jsi"]
 radius = 0.316586
 height = 1.15965
 
-[node name="Liver" type="RigidBody3D"]
-collision_layer = 12
-collision_mask = 4
+[node name="Liver" type="RigidBody3D" node_paths=PackedStringArray("_timer")]
+collision_layer = 8
+collision_mask = 12
+script = ExtResource("1_1re1y")
+_timer = NodePath("Timer")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(0.5, 0, 0, 0, -2.18557e-08, -0.5, 0, 0.5, -2.18557e-08, 0, 0.0297395, 0.0889311)
@@ -20,5 +23,3 @@ mesh = ExtResource("2_1re1y")
 
 [node name="Timer" type="Timer" parent="."]
 autostart = true
-
-[connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]

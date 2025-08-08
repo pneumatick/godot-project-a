@@ -1,14 +1,17 @@
-[gd_scene load_steps=3 format=3 uid="uid://gmymq12f6240"]
+[gd_scene load_steps=4 format=3 uid="uid://gmymq12f6240"]
 
+[ext_resource type="Script" uid="uid://dpg0okc63ia7d" path="res://Scripts/heart.gd" id="1_v4aiu"]
 [ext_resource type="PackedScene" uid="uid://bl7kuirpsiw84" path="res://Assets/Visuals/Models/Organs/Heart.fbx" id="2_v4aiu"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_84jsi"]
 radius = 0.164124
 height = 0.465888
 
-[node name="Heart" type="RigidBody3D"]
-collision_layer = 12
-collision_mask = 4
+[node name="Heart" type="RigidBody3D" node_paths=PackedStringArray("_timer")]
+collision_layer = 8
+collision_mask = 12
+script = ExtResource("1_v4aiu")
+_timer = NodePath("Timer")
 
 [node name="Heart" parent="." instance=ExtResource("2_v4aiu")]
 transform = Transform3D(0.05, 0, 0, 0, 0.05, 0, 0, 0, 0.05, 0, 0, 0)
@@ -19,5 +22,3 @@ shape = SubResource("CapsuleShape3D_84jsi")
 
 [node name="Timer" type="Timer" parent="."]
 autostart = true
-
-[connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
