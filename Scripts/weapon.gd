@@ -116,3 +116,4 @@ func instantiate_object_scene() -> Node3D:
 func free_held_scene() -> void:
 	get_child(0).free()
 	_equipped = false
+	visible = true		# Too hacky? Made to handle drop_all_items() as expected. Consider...
