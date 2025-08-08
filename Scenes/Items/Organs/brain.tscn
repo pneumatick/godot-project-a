@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://7hsaa8ln0seb"]
 
-[ext_resource type="PackedScene" uid="uid://b78xro5r0pldq" path="res://Assets/Visuals/Models/Organs/brain.fbx" id="2_2go6t"]
+[ext_resource type="PackedScene" uid="uid://b78xro5r0pldq" path="res://Assets/Visuals/Models/Organs/brain.fbx" id="1_phyq6"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_amr6p"]
 radius = 2.07835
@@ -10,7 +10,7 @@ height = 5.08648
 collision_layer = 8
 collision_mask = 12
 
-[node name="brain" parent="." instance=ExtResource("2_2go6t")]
+[node name="brain" parent="." instance=ExtResource("1_phyq6")]
 transform = Transform3D(0.1, 0, 0, 0, 0.1, 0, 0, 0, 0.1, 0.0763244, -0.126693, -0.110545)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]

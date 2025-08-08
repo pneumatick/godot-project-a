@@ -1,7 +1,7 @@
 extends "drug.gd"
 class_name Crack
 
-@export var scene : PackedScene = preload("res://Scenes/crack.tscn")
+@export var scene : PackedScene = preload("res://Scenes/Items/Drugs/crack.tscn")
 
 func _init() -> void:
 	item_name = "Crack"

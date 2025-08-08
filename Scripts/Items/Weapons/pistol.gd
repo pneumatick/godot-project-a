@@ -12,8 +12,8 @@ func _init(i_owner: CharacterBody3D = null) -> void:
 	condition = 100
 	value = 25
 
-	held_scene = preload("res://Scenes/pistol.tscn")
-	object_scene = preload("res://Scenes/pistol_object.tscn")
+	held_scene = preload("res://Scenes/Items/Weapons/pistol.tscn")
+	object_scene = preload("res://Scenes/Items/Weapons/pistol_object.tscn")
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta: float) -> void:

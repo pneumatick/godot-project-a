@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3 uid="uid://bmh5wgvl4dejy"]
 
-[ext_resource type="AudioStream" uid="uid://dvshokm6ifske" path="res://Assets/Sounds/556 Single MP3.mp3" id="2_no7b2"]
-[ext_resource type="PackedScene" uid="uid://dqqdjkk6s0mqt" path="res://Assets/Visuals/Models/AK-47/AK47.fbx" id="3_d8g3d"]
+[ext_resource type="AudioStream" uid="uid://dvshokm6ifske" path="res://Assets/Sounds/556 Single MP3.mp3" id="1_30uwv"]
+[ext_resource type="PackedScene" uid="uid://dqqdjkk6s0mqt" path="res://Assets/Visuals/Models/AK-47/AK47.fbx" id="2_usja4"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4flbx"]
 
@@ -18,7 +18,7 @@ skeleton = NodePath("../..")
 
 [node name="Fire Sound" type="AudioStreamPlayer3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 0, 0)
-stream = ExtResource("2_no7b2")
+stream = ExtResource("1_30uwv")
 
-[node name="AK47" parent="." instance=ExtResource("3_d8g3d")]
+[node name="AK47" parent="." instance=ExtResource("2_usja4")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.25)

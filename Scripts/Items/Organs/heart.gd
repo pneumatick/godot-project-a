@@ -7,4 +7,4 @@ func _init(p_owner: CharacterBody3D = null) -> void:
 	item_name = "Heart"
 	value = 55
 	condition = 100
-	scene = load("res://Scenes/heart.tscn")
+	scene = load("res://Scenes/Items/Organs/heart.tscn")

@@ -14,8 +14,8 @@ class_name Weapon
 @onready var ammo_label = get_node("/root/3D Scene Root/HUD/Control/Ammo")
 @onready var fire_sound : AudioStreamPlayer3D
 
-var held_scene : PackedScene = preload("res://Scenes/rifle.tscn")
-var object_scene : PackedScene = preload("res://Scenes/rifle_object.tscn")
+var held_scene : PackedScene
+var object_scene : PackedScene
 
 var _can_fire : bool
 var _equipped : bool

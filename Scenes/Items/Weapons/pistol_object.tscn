@@ -1,7 +1,7 @@
 [gd_scene load_steps=6 format=3 uid="uid://uy35jjjtt7f2"]
 
-[ext_resource type="Script" uid="uid://caftax4sau71h" path="res://Scripts/Items/Weapons/thrown_weapon.gd" id="1_8u2dq"]
-[ext_resource type="PackedScene" uid="uid://rgdi4qdn3jiq" path="res://Assets/Visuals/Models/Luger/Luger.fbx" id="2_vt57d"]
+[ext_resource type="Script" uid="uid://caftax4sau71h" path="res://Scripts/Items/Weapons/thrown_weapon.gd" id="1_f4sev"]
+[ext_resource type="PackedScene" uid="uid://rgdi4qdn3jiq" path="res://Assets/Visuals/Models/Luger/Luger.fbx" id="2_i2wvx"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_5clpd"]
 size = Vector3(0.0414734, 0.153198, 0.233246)
@@ -14,11 +14,11 @@ size = Vector3(0.101212, 0.160797, 0.344238)
 [node name="Pistol Object" type="RigidBody3D"]
 collision_layer = 8
 collision_mask = 4
-script = ExtResource("1_8u2dq")
+script = ExtResource("1_f4sev")
 item_name = "Pistol"
 value = 5
 
-[node name="Luger" parent="." instance=ExtResource("2_vt57d")]
+[node name="Luger" parent="." instance=ExtResource("2_i2wvx")]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0302277, -0.000549316, 0.0545807)
