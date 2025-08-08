@@ -24,9 +24,9 @@ var _player_rotation : Vector3
 var _camera_rotation : Vector3
 var _damaging_bodies : Dictionary = {}
 var _items : Array = []
-var _inventory : Dictionary = {}
+var _inventory : Dictionary = {}	# {String: Array[Items]}
 var _equipped_item_idx : int = 0
-var _organs : Dictionary = {}
+var _organs : Dictionary = {}		# {String: Organ}
 var _alive : bool = true
 var _in_menu : bool = false
 
@@ -58,6 +58,8 @@ var in_shop : bool = false
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	health_bar.value = health
+	
+	# Prepare items array
 	for i in range(item_capacity):
 		_items.append(null)
 	
@@ -480,8 +482,12 @@ func drop_item(item):
 	item.get_child(0).global_transform.origin = muzzle_pos + forward * 1.5
 
 	# Apply impulse
-	var impulse = camera_controller.global_transform.basis.y + -camera_controller.global_transform.basis.z * 5
-	item.get_child(0).apply_impulse(impulse, forward * 15)
+	var rand_dir = Vector3(randf_range(-1.0, 1.0), randf_range(-1.0, 1.0), randf_range(-1.0, 1.0))
+	var impulse = camera_controller.global_transform.basis.y + -camera_controller.global_transform.basis.z * 15
+	if velocity != Vector3.ZERO:
+			impulse += velocity
+	impulse *= rand_dir
+	item.get_child(0).apply_impulse(impulse)
 	
 
 func is_alive() -> bool:
@@ -495,13 +501,12 @@ func _spawn_organs() -> void:
 		get_parent().add_child(new_organ)
 		
 		# Apply impulse
-		var forward = -camera_controller.global_transform.basis.z 
-		var impulse = camera_controller.global_transform.basis.y + -camera_controller.global_transform.basis.z * 5
+		var rand_dir = Vector3(randf_range(-1.0, 1.0), randf_range(-1.0, 1.0), randf_range(-1.0, 1.0))
+		var impulse = camera_controller.global_transform.basis.y + -camera_controller.global_transform.basis.z * 15
 		if velocity != Vector3.ZERO:
 			impulse += velocity
-		print("Parent ", new_organ)
-		print("Type ", new_organ.get_child(0))
-		new_organ.get_child(0).apply_impulse(impulse, forward)
+		impulse *= rand_dir
+		new_organ.get_child(0).apply_impulse(impulse)
 
 func _check_interact_target():
 	var space_state = get_world_3d().direct_space_state
