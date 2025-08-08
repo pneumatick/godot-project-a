@@ -1,5 +1,6 @@
 extends Control
 
+signal on_menu_opened()
 signal on_menu_closed()
 
 @onready var player = $"../../Player"
@@ -16,6 +17,7 @@ func open_for_player():
 	visible = true
 	player.set_in_menu(true)
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+	on_menu_opened.emit()
 
 func close_for_player():
 	_on_close_pressed()

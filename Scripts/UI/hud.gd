@@ -12,6 +12,18 @@ func _ready() -> void:
 	player.hand_empty.connect(_on_player_hand_empty)
 	player.death.connect(_on_player_death)
 	player.viewing.connect(_display_interaction_label)
+	$ShopUI.on_menu_opened.connect(_on_menu_opened)
+	$ShopUI.on_menu_closed.connect(_on_menu_closed)
+	$"../ShopZone".player_entered_shop.connect(_on_player_entered_shop)
+	$"../ShopZone".player_exited_shop.connect(_on_player_exited_shop)
+
+func _input(event: InputEvent) -> void:
+	if event.is_action_pressed("interact"):
+		if not player.seen_object and player.in_shop:
+			if !player.get_in_menu():
+				$ShopUI.open_for_player()
+			else:
+				$ShopUI.close_for_player()
 
 func _on_player_weapon_equipped(weapon: Node) -> void:
 	print("HUD received weapon equipped signal")
@@ -44,3 +56,19 @@ func _display_interaction_label(scene = null) -> void:
 				interact_label.text = ""
 		elif player.in_shop:
 			interact_label.text = "[Interact] Open Shop Menu"
+	else:
+		interact_label.text = ""
+
+func _on_menu_opened() -> void:
+	$Control/Crosshair.visible = false
+
+func _on_menu_closed() -> void:
+	$Control/Crosshair.visible = true
+
+func _on_player_entered_shop(p):
+	player.in_shop = true
+	$"Control/Interact Label".text = "[Interact] Open Shop Menu"
+
+func _on_player_exited_shop(p):
+	player.in_shop = false
+	$ShopUI.visible = false
