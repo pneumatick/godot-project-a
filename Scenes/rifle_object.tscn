@@ -1,6 +1,6 @@
 [gd_scene load_steps=6 format=3 uid="uid://de4qck4lwu5n8"]
 
-[ext_resource type="Script" uid="uid://caftax4sau71h" path="res://Scripts/thrown_weapon.gd" id="1_6c3u6"]
+[ext_resource type="Script" uid="uid://caftax4sau71h" path="res://Scripts/Items/Weapons/thrown_weapon.gd" id="1_6c3u6"]
 [ext_resource type="PackedScene" uid="uid://dqqdjkk6s0mqt" path="res://Assets/Visuals/Models/AK-47/AK47.fbx" id="2_enecq"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_5clpd"]

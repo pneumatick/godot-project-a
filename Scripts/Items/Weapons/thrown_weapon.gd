@@ -5,24 +5,25 @@ var prev_owner : CharacterBody3D
 # These variables are manually set upon instantiation in the Player script 
 # (at least for now)
 var ammo : int = -1
+var parent : Weapon
 
 @export var item_name : String
 @export var value : int = 15
 @export var resistance : int = 5
 
 func _ready() -> void:
-	var parent = get_parent()
+	parent = get_parent()
 	item_name = parent.item_name
 	value = parent.value
 
 func _on_collection_area_body_entered(body: Node3D) -> void:
 	if body.name == "Player" and body.is_alive():
 		# Remove weapon root node from world's ownership
-		get_parent().get_parent().remove_child(get_parent())
+		parent.get_parent().remove_child(parent)
 		# Free weapon object scene
 		queue_free()
 		# Add weapon to the player that entered the collection area
-		body.add_item(get_parent())
+		body.add_item(parent)
 
 func apply_bullet_force(hit_pos: Vector3, direction: Vector3, force: float, damage: int):
 	apply_impulse(hit_pos - global_transform.origin + direction * force)

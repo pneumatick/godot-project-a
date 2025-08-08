@@ -58,14 +58,15 @@ func fire():
 	
 	if result:
 		print("Hit: ", result.collider)
-		# Cause entity to take damage (NOTE: probably should be done in next method)
+		# Players and targets use "take_damage" 
+		# NOTE: consider merging with below which applies to everything else
 		if result.collider.has_method("take_damage"):
 			result.collider.take_damage(damage)
-		var entity
 		# Determine relevant entity and apply bullet force
+		var entity
 		if result.collider.has_method("apply_bullet_force"):
 			entity = result.collider
-		elif result.collider.name == "Organ":
+		elif result.collider.get_parent().has_method("apply_bullet_force"):
 			entity = result.collider.get_parent()
 		if entity:
 			var hit_pos = result.position

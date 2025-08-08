@@ -1,8 +1,8 @@
 [gd_scene load_steps=5 format=3 uid="uid://tldca8ygc1hw"]
 
-[ext_resource type="Script" uid="uid://bwsr8lcu0e48x" path="res://Scripts/crosshair.gd" id="1_37p78"]
-[ext_resource type="Script" uid="uid://dnu7pnurodndd" path="res://Scripts/hud.gd" id="1_64ctp"]
-[ext_resource type="Script" uid="uid://b2eigmfm3c46e" path="res://Scripts/shop_ui.gd" id="3_bjfho"]
+[ext_resource type="Script" uid="uid://bwsr8lcu0e48x" path="res://Scripts/UI/crosshair.gd" id="1_37p78"]
+[ext_resource type="Script" uid="uid://dnu7pnurodndd" path="res://Scripts/UI/hud.gd" id="1_64ctp"]
+[ext_resource type="Script" uid="uid://b2eigmfm3c46e" path="res://Scripts/UI/shop_ui.gd" id="3_bjfho"]
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_g5xil"]
 

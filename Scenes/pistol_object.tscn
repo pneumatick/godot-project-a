@@ -1,6 +1,6 @@
 [gd_scene load_steps=6 format=3 uid="uid://uy35jjjtt7f2"]
 
-[ext_resource type="Script" uid="uid://caftax4sau71h" path="res://Scripts/thrown_weapon.gd" id="1_8u2dq"]
+[ext_resource type="Script" uid="uid://caftax4sau71h" path="res://Scripts/Items/Weapons/thrown_weapon.gd" id="1_8u2dq"]
 [ext_resource type="PackedScene" uid="uid://rgdi4qdn3jiq" path="res://Assets/Visuals/Models/Luger/Luger.fbx" id="2_vt57d"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_5clpd"]
