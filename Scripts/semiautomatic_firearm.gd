@@ -68,14 +68,23 @@ func fire():
 	
 	if result:
 		print("Hit: ", result.collider)
+		# Cause entity to take damage (NOTE: probably should be done in next method)
 		if result.collider.has_method("take_damage"):
 			result.collider.take_damage(damage)
+		var entity
+		# Determine relevant entity and apply bullet force
 		if result.collider.has_method("apply_bullet_force"):
+			entity = result.collider
+		elif result.collider.name == "Organ":
+			entity = result.collider.get_parent()
+		if entity:
 			var hit_pos = result.position
 			var direction = (to - from).normalized()
 			var force = 10.0
-			result.collider.apply_bullet_force(hit_pos, direction, force, damage)
-			result.collider.set_new_owner(player)
+			entity.apply_bullet_force(hit_pos, direction, force, damage)
+			# Set the shooter to be the new owner
+			if entity.has_method("set_new_owner"):
+				entity.set_new_owner(player)
 
 # Load ammo into the weapon
 func load_ammo(amount: int):
