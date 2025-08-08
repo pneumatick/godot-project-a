@@ -17,7 +17,13 @@ func _on_body_entered(body):
 		pass
 	elif body.type == "Weapon":
 		if body.prev_owner:
-			body.prev_owner.add_money(body.value)
+			var parent = body.get_parent()
+			var value
+			if parent.condition > 20:
+				value = floori(parent.value * (float(parent.condition) / 100.0))
+			else:
+				value = 5
+			parent.prev_owner.add_money(value)
 			body.queue_free()
 
 func _on_body_exited(body):
