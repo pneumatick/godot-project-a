@@ -489,7 +489,7 @@ func is_alive() -> bool:
 
 func _spawn_organs() -> void:
 	for organ in _organs.keys():
-		var new_organ = _organs[organ].new()
+		var new_organ : Organ = _organs[organ].new()
 		new_organ.instantiate()
 		new_organ.position = position
 		get_parent().add_child(new_organ)
@@ -499,6 +499,8 @@ func _spawn_organs() -> void:
 		var impulse = camera_controller.global_transform.basis.y + -camera_controller.global_transform.basis.z * 5
 		if velocity != Vector3.ZERO:
 			impulse += velocity
+		print("Parent ", new_organ)
+		print("Type ", new_organ.get_child(0))
 		new_organ.get_child(0).apply_impulse(impulse, forward)
 
 func _check_interact_target():

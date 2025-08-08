@@ -1,4 +1,4 @@
-extends RigidBody3D
+extends Node3D
 class_name Organ
 
 var type : String = "Organ"
@@ -9,6 +9,7 @@ var prev_owner : CharacterBody3D
 @export var condition : int = 100
 @export var scene : PackedScene
 @export var _timer : Timer
+@export var organ_body : RigidBody3D
 
 func _on_collection_area_body_entered(body: Node3D) -> void:		# Placholder: May not get equivalent (TBD)
 	if body.name == "Player" and body.is_alive():
@@ -17,7 +18,7 @@ func _on_collection_area_body_entered(body: Node3D) -> void:		# Placholder: May 
 		queue_free()
 
 func apply_bullet_force(hit_pos: Vector3, direction: Vector3, force: float, damage: int):
-	apply_impulse(hit_pos - global_transform.origin + direction * force)
+	organ_body.apply_impulse(hit_pos - global_transform.origin + direction * force)
 	_apply_damage(damage)
 	# HIT SOUND HERE
 	# HIT PARTICLES HERE
