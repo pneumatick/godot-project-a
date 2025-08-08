@@ -309,12 +309,12 @@ func add_item(item) -> void:
 func _add_weapon(weapon: Node3D) -> bool:
 	# Initialize weapon
 	var item_name = weapon.item_name
-	weapon.instantiate_held_scene()
 	
 	# Check if items is at max capacity before adding to it
 	var items_full = true
 	for i in range(_items.size()):
 		if _items[i] == null:
+			weapon.instantiate_held_scene()
 			items_full = false
 			_items[i] = weapon
 			if _items[_equipped_item_idx] == weapon:
@@ -329,7 +329,7 @@ func _add_weapon(weapon: Node3D) -> bool:
 	# Get rid of instantiated weapon if item cannot be added
 	if items_full:
 		print("Items full!")
-		weapon.free_held_scene()
+		#weapon.free_held_scene()
 		return false
 	
 	# Add held item scene to hand and inventory
@@ -522,9 +522,10 @@ func _check_interact_target():
 		)
 	)
 	
-	if result and result.collider and result.collider.is_in_group("interactables"):
-		seen_object = result.collider
-		viewing.emit(result.collider)
+	if result and result.collider:
+		if result.collider.is_in_group("interactables") or result.collider is RigidBody3D:
+			seen_object = result.collider
+			viewing.emit(result.collider)
 	else:
 		seen_object = null
 		viewing.emit()

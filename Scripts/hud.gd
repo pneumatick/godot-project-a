@@ -37,7 +37,13 @@ func _display_interaction_label(scene = null) -> void:
 		interact_label.visible = false
 	elif not player.get_in_menu():
 		if scene:
-			interact_label.text = "[Interact] %s" % scene.get_parent().item_name
+			var parent = scene.get_parent()
+			if parent is Organ:
+					interact_label.text = "[Interact] %s\nCondition: %s" % [parent.item_name, str(parent.condition)]
+			elif parent is Weapon:
+					interact_label.text = "%s\nCondition: %s" % [parent.item_name, str(parent.condition)]
+			else:
+				return
 		elif player.in_shop:
 			interact_label.text = "[Interact] Open Shop Menu"
 		interact_label.visible = true
