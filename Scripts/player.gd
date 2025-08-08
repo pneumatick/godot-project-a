@@ -286,7 +286,7 @@ func add_item(item) -> void:
 	
 	# Add weapons
 	var added = false
-	if item is Rifle or item is Pistol:
+	if item is Weapon:
 		added = _add_weapon(item)
 	# Add organs
 	elif item is Organ:
