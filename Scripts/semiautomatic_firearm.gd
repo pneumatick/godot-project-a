@@ -27,7 +27,7 @@ func _ready() -> void:
 	_can_fire = true
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	if Input.is_action_pressed("fire"):
 		var in_menu = player.get_in_menu()
 		if _can_fire and _equipped and current_ammo > 0 and not in_menu:

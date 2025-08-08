@@ -11,14 +11,6 @@ var health = DEFAULT_HEALTH
 @onready var collision_shape = $CollisionShape3D
 @onready var hit_sound = $"Hit Sound"
 
-# Called when the node enters the scene tree for the first time.
-func _ready() -> void:
-	pass # Replace with function body.
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
-	pass
-
 func take_damage(amount: int) -> void:
 	health -= amount
 	print("Target health now %s" % health)

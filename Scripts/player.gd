@@ -3,7 +3,6 @@ extends CharacterBody3D
 signal spawn
 signal death
 signal weapon_equipped
-signal weapon_reloaded
 signal weapon_picked_up
 signal money_change
 signal hand_empty

@@ -8,10 +8,6 @@ func _ready() -> void:
 	$ShopZone.player_exited_shop.connect(_on_player_exited_shop)
 	$HUD/ShopUI.on_menu_closed.connect(_on_shop_menu_closed)
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
-	pass
-
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("exit"):
 		get_tree().quit()

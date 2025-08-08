@@ -15,10 +15,6 @@ func _ready() -> void:
 	
 	interact_label.visible = false
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
-	pass
-
 func _on_player_weapon_equipped(weapon: Node) -> void:
 	print("HUD received weapon equipped signal")
 	ammo_label.text = "Ammo: %s" % str(weapon.current_ammo)

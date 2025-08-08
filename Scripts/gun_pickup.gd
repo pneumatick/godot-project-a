@@ -1,7 +1,5 @@
 extends Area3D
 
-signal picked_up
-
 var _available : bool = true
 var _weapon
 
@@ -24,9 +22,6 @@ func _ready():
 		return
 	
 	add_child(new_node)
-
-func _process(delta):
-	pass
 
 func _on_body_entered(body):
 	if body.name == "Player" and _available:  # Or use `is Player` if using a player class
