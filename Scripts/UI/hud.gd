@@ -12,8 +12,6 @@ func _ready() -> void:
 	player.hand_empty.connect(_on_player_hand_empty)
 	player.death.connect(_on_player_death)
 	player.viewing.connect(_display_interaction_label)
-	
-	interact_label.visible = false
 
 func _on_player_weapon_equipped(weapon: Node) -> void:
 	print("HUD received weapon equipped signal")
@@ -34,7 +32,7 @@ func _on_player_hand_empty() -> void:
 
 func _display_interaction_label(scene = null) -> void:
 	if not scene and not player.in_shop:
-		interact_label.visible = false
+		interact_label.text = ""
 	elif not player.get_in_menu():
 		if scene:
 			var parent = scene.get_parent()
@@ -43,7 +41,6 @@ func _display_interaction_label(scene = null) -> void:
 			elif parent is Weapon:
 					interact_label.text = "%s\nCondition: %s" % [parent.item_name, str(parent.condition)]
 			else:
-				return
+				interact_label.text = ""
 		elif player.in_shop:
 			interact_label.text = "[Interact] Open Shop Menu"
-		interact_label.visible = true

@@ -70,12 +70,13 @@ func _ready() -> void:
 	
 	spawn.emit()						# Probably not supposed to be here...
 
+func _process(delta: float) -> void:
+	# Check for interactable objects in the player's view
+	_check_interact_target()
+
 func _physics_process(delta: float) -> void:
 	# Update the camera view
 	_update_camera(delta)
-	
-	# Check for interactable objects in the player's view
-	_check_interact_target()
 	
 	# Add the gravity.
 	if not is_on_floor():
@@ -182,6 +183,7 @@ func _update_camera(delta: float) -> void:
 # Handle player death logic
 func _die() -> void:
 	_alive = false
+	set_process(false)
 	set_physics_process(false)
 	visible = false
 	velocity = Vector3.ZERO
@@ -222,6 +224,7 @@ func _respawn(respawn_position: Vector3) -> void:
 	health_bar.value = health
 	visible = true
 	_alive = true
+	set_process(true)
 	set_physics_process(true)
 	spawn.emit()
 
@@ -522,10 +525,13 @@ func _check_interact_target():
 		)
 	)
 	
-	if result and result.collider:
+	if result and result.collider and _alive:
 		if result.collider.is_in_group("interactables") or result.collider is RigidBody3D:
 			seen_object = result.collider
 			viewing.emit(result.collider)
+		else:
+			seen_object = null
+			viewing.emit()
 	else:
 		seen_object = null
 		viewing.emit()
