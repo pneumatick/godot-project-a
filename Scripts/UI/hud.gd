@@ -32,7 +32,7 @@ func _on_player_weapon_equipped(weapon: Node) -> void:
 
 func _on_player_death() -> void:
 	ammo_label.text = ""
-	$"Control/Death Counter".text = str(int($"Control/Death Counter".text) + 1)
+	$"Control/Death Counter".text = "Deaths: " + str(int($"Control/Death Counter".text) + 1)
 
 func _on_player_money_change(current_money: int) -> void:
 	money_label.text = "Money: %s" % str(current_money)
@@ -50,7 +50,7 @@ func _display_interaction_label(scene = null) -> void:
 		if scene:
 			var parent = scene.get_parent()
 			if parent is Organ:
-					interact_label.text = "[Interact] %s\nCondition: %s" % [parent.item_name, str(parent.condition)]
+					interact_label.text = "[Interact] %s\nCondition: %s\nDrugs Present: %s" % [parent.item_name, str(parent.condition), str(parent.num_drugs)]
 			elif parent is Weapon:
 					interact_label.text = "%s\nCondition: %s" % [parent.item_name, str(parent.condition)]
 			else:
