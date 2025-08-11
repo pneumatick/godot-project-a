@@ -42,6 +42,7 @@ var in_shop : bool = false
 @export var money : int = 0
 @export var interaction_range : float = 3.0
 @export var item_capacity : int = 6
+@export var drug_limit : int = 2
 
 # Nodes internal to scene
 @onready var right_hand : Node3D = get_node("Pivot/Camera3D/Right Hand")
@@ -555,3 +556,7 @@ func use_item(item) -> void:
 		remove_item(item)
 		$"Active Drugs".add_child(item)
 		item.use(self)
+		
+		# Overdose
+		if $"Active Drugs".get_child_count() > drug_limit:
+			_die()
