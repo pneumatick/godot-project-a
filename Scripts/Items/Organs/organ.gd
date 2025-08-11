@@ -53,6 +53,6 @@ func instantiate() -> void:
 		if node.name == "Timer":
 			_timer = node
 			node.timeout.connect(_on_timer_timeout)
-			node.start()
+			_timer.call_deferred("start")
 	child_scene.add_to_group("interactables")
 	add_child(child_scene)
