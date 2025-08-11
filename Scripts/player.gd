@@ -214,6 +214,11 @@ func _die() -> void:
 	for child in right_hand_children:
 		child.queue_free()
 	
+	# Remove active drugs
+	var drugs = $"Active Drugs".get_children()
+	for drug in drugs:
+		drug.queue_free()
+	
 	death_sound.play()
 	death.emit()
 	
@@ -501,6 +506,7 @@ func _spawn_organs() -> void:
 		var new_organ : Organ = _organs[organ].new()
 		new_organ.instantiate()
 		new_organ.position = position
+		new_organ.num_drugs = $"Active Drugs".get_child_count()
 		get_parent().add_child(new_organ)
 		
 		# Apply impulse

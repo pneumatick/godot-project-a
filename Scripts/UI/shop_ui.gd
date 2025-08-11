@@ -45,16 +45,14 @@ func _on_sell_organs_pressed():
 	if organs != []:
 		for organ in organs:
 			print(organ)
-			var value : int
-			if organ.condition > 20:
-				value = floori(organ.value * (float(organ.condition) / 100.0))
-			else:
-				value = 5
+			var drug_deduct = floori(organ.value * 0.20 * organ.num_drugs)
+			var value = floori((organ.value - drug_deduct) * (float(organ.condition) / 100.0))
 			# Give money to player
 			player.add_money(value)
 			print(
-				"%s with condition %s sold for %s" % [organ.item_name, 
-														str(organ.condition), 
+				"%s with condition %s and %s drugs present sold for %s" % [organ.item_name, 
+														str(organ.condition),
+														str(organ.num_drugs), 
 														str(value)]
 			)
 

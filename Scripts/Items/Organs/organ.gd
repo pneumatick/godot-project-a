@@ -3,6 +3,7 @@ class_name Organ
 
 var type : String = "Organ"
 var prev_owner : CharacterBody3D
+var num_drugs : int = 0
 
 @export var item_name : String
 @export var value : int = 40
@@ -44,6 +45,7 @@ func interact(player: CharacterBody3D) -> void:
 	var new_organ: Organ = new()
 	new_organ.prev_owner = prev_owner
 	new_organ.condition = condition
+	new_organ.num_drugs = num_drugs
 	player.add_item(new_organ)
 	queue_free()
 
