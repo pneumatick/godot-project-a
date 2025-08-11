@@ -50,7 +50,7 @@ func interact(player: CharacterBody3D) -> void:
 func instantiate() -> void:
 	var child_scene = scene.instantiate()
 	for node in child_scene.get_children():
-		if node.name == "Timer":
+		if node is Timer:
 			_timer = node
 			node.timeout.connect(_on_timer_timeout)
 			_timer.call_deferred("start")

@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://ck610abr6ujd" path="res://Scripts/player.gd" id="1_4flbx"]
 [ext_resource type="AudioStream" uid="uid://m02ydh4m0xlk" path="res://Assets/Sounds/steve-old-hurt-sound_XKZxUk4.mp3" id="2_onrkg"]
-[ext_resource type="AudioStream" uid="uid://bdrr5ckf2evlb" path="res://Assets/Sounds/you goat a fuckin hell.wav" id="3_i3pqv"]
+[ext_resource type="AudioStream" uid="uid://67elqndirrrt" path="res://Assets/Sounds/ralsei-splat.mp3" id="3_fkybt"]
 [ext_resource type="AudioStream" uid="uid://b2eedtiyn06se" path="res://Assets/Sounds/Collectable_08.wav" id="4_vgqql"]
 [ext_resource type="AudioStream" uid="uid://dsqqq7munx4o7" path="res://Assets/Sounds/AR Reload Part 2 MP3.mp3" id="5_fkybt"]
 
@@ -47,13 +47,15 @@ shape = SubResource("CapsuleShape3D_4flbx")
 stream = ExtResource("2_onrkg")
 
 [node name="Death Sound" type="AudioStreamPlayer3D" parent="."]
-stream = ExtResource("3_i3pqv")
+stream = ExtResource("3_fkybt")
 
 [node name="Weapon Pick Up Sound" type="AudioStreamPlayer3D" parent="."]
 stream = ExtResource("4_vgqql")
 
 [node name="Weapon Reload Sound" type="AudioStreamPlayer3D" parent="."]
 stream = ExtResource("5_fkybt")
+
+[node name="Active Drugs" type="Node3D" parent="."]
 
 [connection signal="body_entered" from="MobDetector" to="." method="_on_mob_detector_body_entered"]
 [connection signal="body_exited" from="MobDetector" to="." method="_on_mob_detector_body_exited"]

@@ -124,9 +124,12 @@ func _input(event):
 		throw_current_item()
 	elif event.is_action_pressed("kill"):
 		_die()
-	elif event.is_action_pressed("interact") and seen_object:
-		if seen_object.is_in_group("interactables"):
+	elif event.is_action_pressed("interact"):
+		if seen_object and seen_object.is_in_group("interactables"):
 			seen_object.get_parent().interact(self)
+		else:
+			var item = _items[_equipped_item_idx]
+			use_item(item)
 
 func _accelerate(direction: Vector3, accel: float, max_speed: float, delta: float):
 	var current_speed = velocity.dot(direction)
@@ -229,14 +232,16 @@ func _respawn(respawn_position: Vector3) -> void:
 	spawn.emit()
 
 func _take_damage(amount: int) -> void:
-	if health > 0:
-		health -= amount
-		health_bar.value = health
-		print("The player was hit, health now %s" % [str(health)])
-		if health <= 0 and _alive:
-			_die()
-		else:
-			hit_sound.play()
+	health -= amount
+	health_bar.value = health
+	print("The player was hit, health now %s" % [str(health)])
+	if health <= 0 and _alive:
+		_die()
+	else:
+		hit_sound.play()
+
+func apply_damage(amount: int) -> void:
+	_take_damage(amount)
 
 func _on_mob_detector_body_entered(body: Node3D) -> void:
 	print("%s entered..." % [body.name])
@@ -247,11 +252,10 @@ func _on_mob_detector_body_entered(body: Node3D) -> void:
 		
 		# Do the initial damage, and set the timer to continue doing damage
 		# so long as the player remains in the body.
-		if $DamageTimer.is_stopped():
+		if $DamageTimer.is_stopped() and _alive:
 			_take_damage(damage_amount)
-			if _alive:
-				print("Starting damage timer...")
-				$DamageTimer.start(0.5)
+			print("Starting damage timer...")
+			$DamageTimer.start(0.5)
 
 func _on_mob_detector_body_exited(body: Node3D) -> void:
 	if _damaging_bodies.has(body):
@@ -263,7 +267,8 @@ func _on_mob_detector_body_exited(body: Node3D) -> void:
 # Accumulate damage when the damage timer times out
 func _on_damage_timer_timeout():
 	for body in _damaging_bodies.keys():
-		_take_damage(_damaging_bodies[body])
+		if _alive:
+			_take_damage(_damaging_bodies[body])
 
 # Equip held item
 func _equip_item(idx: int) -> void:
@@ -298,7 +303,7 @@ func add_item(item) -> void:
 		print(_inventory["Organs"])
 	elif item is Drug:
 		added = _add_drug(item)
-		print(_inventory["Drugs"])
+		print(_inventory)
 	else:
 		print("Unknown item %s" % item_name)
 	
@@ -353,12 +358,7 @@ func _add_organ(organ: Organ) -> bool:
 	return true
 
 func _add_drug(drug: Drug) -> bool:
-	if not _inventory.has("Drugs"):
-		_inventory["Drugs"] = [drug]
-	else:
-		_inventory["Drugs"].append(drug)
-	
-	return true
+	return _add_weapon(drug)
 
 func remove_item(item: Node3D = null, name: String = "") -> bool:
 	var removed = false
@@ -543,3 +543,9 @@ func sell_all_organs() -> Array:
 		return organs
 	
 	return []
+
+func use_item(item) -> void:
+	if item is Drug:
+		remove_item(item)
+		$"Active Drugs".add_child(item)
+		item.use(self)

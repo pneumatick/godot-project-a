@@ -8,6 +8,8 @@ material = SubResource("StandardMaterial3D_4flbx")
 [node name="Crack" type="Node3D"]
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
-transform = Transform3D(0.25, 0, 0, 0, -1.09278e-08, -0.25, 0, 0.25, -1.09278e-08, 0, 0, 0)
+transform = Transform3D(0.25, 0, 0, 0, -1.09278e-08, -0.25, 0, 0.25, -1.09278e-08, 0.393306, 0, -0.833452)
 mesh = SubResource("CapsuleMesh_onrkg")
 skeleton = NodePath("../..")
+
+[node name="Timer" type="Timer" parent="."]
