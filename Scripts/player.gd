@@ -43,6 +43,7 @@ var in_shop : bool = false
 @export var interaction_range : float = 3.0
 @export var item_capacity : int = 6
 @export var drug_limit : int = 2
+var spray_texture : ImageTexture
 
 # Nodes internal to scene
 @onready var right_hand : Node3D = get_node("Pivot/Camera3D/Right Hand")
@@ -68,6 +69,9 @@ func _ready() -> void:
 	_organs["Heart"] = Heart
 	_organs["Brain"] = Brain
 	_organs["Liver"] = Liver
+	
+	var spray_image = Image.load_from_file("res://Assets/Sprays/spray.jpg")
+	spray_texture = ImageTexture.create_from_image(spray_image)
 	
 	spawn.emit()						# Probably not supposed to be here...
 
@@ -131,6 +135,8 @@ func _input(event):
 		else:
 			var item = _items[_equipped_item_idx]
 			use_item(item)
+	elif event.is_action_pressed("spray"):
+		place_spray(spray_texture)
 
 func _accelerate(direction: Vector3, accel: float, max_speed: float, delta: float):
 	var current_speed = velocity.dot(direction)
@@ -560,3 +566,32 @@ func use_item(item) -> void:
 		# Overdose
 		if $"Active Drugs".get_child_count() > drug_limit:
 			_die()
+
+func place_spray(image: ImageTexture):
+	print("Spraying...")
+	var space_state = get_world_3d().direct_space_state
+	var from = camera_controller.global_position
+	var to = from + camera_controller.global_transform.basis.z * -interaction_range # forward ray
+	
+	var result = space_state.intersect_ray(
+		PhysicsRayQueryParameters3D.create(
+			from, 
+			to, 
+			0xFFFFFFFF,			  # Default value
+			[self]
+		)
+	)
+	print(result)
+	if result:
+		var spray = Decal.new()
+		result.collider.get_parent().add_child(spray)
+		
+		# Set spray texture
+		spray.texture_albedo = image
+		spray.size = Vector3(1.0, 1.0, 1.0) # width, height, depth of projection box
+		spray.position = result.position + result.normal * 0.01
+		
+		# Align decal to surface
+		#spray.look_at(result.position + result.normal)
+		
+		print("Sprayed")
