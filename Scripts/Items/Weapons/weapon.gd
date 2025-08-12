@@ -16,6 +16,7 @@ class_name Weapon
 
 var held_scene : PackedScene
 var object_scene : PackedScene
+var icon : Texture2D
 
 var _can_fire : bool
 var _equipped : bool

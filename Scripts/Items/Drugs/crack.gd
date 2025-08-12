@@ -18,6 +18,14 @@ func _init() -> void:
 	value = 55
 	held_scene = held
 	object_scene = object
+	
+		# Set up icon
+	var image = Image.new()
+	var error = image.load("res://Assets/Visuals/Icons/drug.PNG")
+	if error != OK:
+		print("Error loading image: ", error)
+		return
+	icon = ImageTexture.create_from_image(image)
 
 func use(player: CharacterBody3D):
 	print("%s used" % item_name)

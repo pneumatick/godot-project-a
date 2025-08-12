@@ -7,6 +7,7 @@ signal weapon_picked_up
 signal money_change
 signal hand_empty
 signal viewing
+signal items_changed
 
 const SPEED = 7.5
 const ACCEL = 1.0
@@ -297,6 +298,7 @@ func _equip_item(idx: int) -> void:
 		weapon_equipped.emit(_items[idx])
 	
 	_equipped_item_idx = idx
+	items_changed.emit(_items, _equipped_item_idx)
 	print(_equipped_item_idx)
 
 # Add an item to the player's inventory (and hand, at least for now)
@@ -321,6 +323,7 @@ func add_item(item) -> void:
 	
 	if added:
 		print("Picked up %s" % item_name)
+		items_changed.emit(_items, _equipped_item_idx)
 	else:
 		print("Failed to pick up %s" % item_name)
 	
@@ -407,6 +410,7 @@ func remove_item(item: Node3D = null, name: String = "") -> bool:
 	if removed:
 		# Assume hand remains empty after removal
 		hand_empty.emit()
+		items_changed.emit(_items, _equipped_item_idx)
 		print("%s removed" % item_name)
 	else:
 		print("%s not removed" % item_name)

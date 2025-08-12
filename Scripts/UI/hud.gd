@@ -12,6 +12,7 @@ func _ready() -> void:
 	player.hand_empty.connect(_on_player_hand_empty)
 	player.death.connect(_on_player_death)
 	player.viewing.connect(_display_interaction_label)
+	player.items_changed.connect(_update_hotbar)
 	$ShopUI.on_menu_opened.connect(_on_menu_opened)
 	$ShopUI.on_menu_closed.connect(_on_menu_closed)
 	$"../ShopZone".player_entered_shop.connect(_on_player_entered_shop)
@@ -73,3 +74,17 @@ func _on_player_entered_shop(p):
 func _on_player_exited_shop(p):
 	player.in_shop = false
 	$ShopUI.visible = false
+
+func _update_hotbar(items: Array, equipped_index: int):
+	for i in range($Control/Hotbar.get_child_count()):
+		var slot = $Control/Hotbar.get_child(i) as TextureRect
+		if i < items.size() and items[i] != null:
+			slot.texture = items[i].icon
+		else:
+			slot.texture = null
+		
+		# Highlight equipped slot
+		if i == equipped_index:
+			slot.modulate = Color(1, 1, 1) # Normal color
+		else:
+			slot.modulate = Color(0.5, 0.5, 0.5) # Dimmed

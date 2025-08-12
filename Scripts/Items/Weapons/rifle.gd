@@ -14,8 +14,17 @@ func _init(i_owner: CharacterBody3D = null) -> void:
 	condition = 100
 	value = 35
 	
+	# Preload scenes
 	held_scene = preload("res://Scenes/Items/Weapons/rifle.tscn")
 	object_scene = preload("res://Scenes/Items/Weapons/rifle_object.tscn")
+	
+	# Set up icon
+	var image = Image.new()
+	var error = image.load("res://Assets/Visuals/Icons/rifle.PNG")
+	if error != OK:
+		print("Error loading image: ", error)
+		return
+	icon = ImageTexture.create_from_image(image)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta: float) -> void:

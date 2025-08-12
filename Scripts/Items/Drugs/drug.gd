@@ -8,6 +8,8 @@ class_name Drug
 @export var held_scene : PackedScene
 @export var object_scene : PackedScene
 
+var icon : Texture2D
+
 var _timer : Timer
 
 func use(player: CharacterBody3D): pass
