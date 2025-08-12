@@ -100,4 +100,5 @@ func _update_hotbar(items: Array, equipped_index: int):
 
 func _on_hotbar_slot_pressed(item_index: int) -> void:
 	print("Clicked item %s" % str(item_index))
-	slot_clicked.emit(item_index)
+	if player.in_shop and player.get_in_menu():
+		slot_clicked.emit(item_index)
