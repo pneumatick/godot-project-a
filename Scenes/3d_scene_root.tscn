@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3 uid="uid://hmv4dr58x4if"]
+[gd_scene load_steps=23 format=3 uid="uid://hmv4dr58x4if"]
 
 [ext_resource type="Script" uid="uid://cf8moef3pykdp" path="res://Scripts/3d_scene_root.gd" id="1_1rpu5"]
 [ext_resource type="PackedScene" uid="uid://c2dcha7sipp8a" path="res://Scenes/player.tscn" id="1_sxnch"]
@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://mlxqh5iqxvxs" path="res://Scenes/target.tscn" id="5_23mtt"]
 [ext_resource type="PackedScene" uid="uid://dulrda5jbt33a" path="res://Scenes/shop_zone.tscn" id="7_lyres"]
 [ext_resource type="Texture2D" uid="uid://buhhtw8gu5tbk" path="res://Assets/Visuals/Textures/Dirt_20-512x512.png" id="8_fqem3"]
+[ext_resource type="Texture2D" uid="uid://cp0yvea54ymu6" path="res://Assets/Sprays/spray.jpg" id="9_riqsv"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_1rpu5"]
 
@@ -43,6 +44,10 @@ ambient_light_color = Color(0.617455, 0.617455, 0.617455, 1)
 [sub_resource type="BoxShape3D" id="BoxShape3D_fqem3"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_riqsv"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_fqem3"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_riqsv"]
 
 [node name="3D Scene Root" type="Node3D"]
 script = ExtResource("1_1rpu5")
@@ -106,6 +111,32 @@ shape = SubResource("BoxShape3D_fqem3")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D"]
 mesh = SubResource("BoxMesh_riqsv")
+
+[node name="StaticBody3D2" type="StaticBody3D" parent="."]
+transform = Transform3D(6, 0, 0, 0, 1, 0, 0, 0, 6, 0, 2.59356, 12.5135)
+collision_layer = 4
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.822712)
+shape = SubResource("BoxShape3D_fqem3")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.822712)
+mesh = SubResource("BoxMesh_riqsv")
+
+[node name="StaticBody3D3" type="StaticBody3D" parent="."]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 5.46593, 1.36307, 3.59003)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D3"]
+shape = SubResource("SphereShape3D_fqem3")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D3"]
+mesh = SubResource("SphereMesh_riqsv")
+
+[node name="Test Decal" type="Decal" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.12077, 2.27356, 5.78955)
+texture_albedo = ExtResource("9_riqsv")
 
 [connection signal="death" from="Player" to="." method="_on_player_death"]
 [connection signal="destroyed" from="Target" to="Player" method="_on_target_destroyed"]

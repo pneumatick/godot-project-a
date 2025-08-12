@@ -584,14 +584,27 @@ func place_spray(image: ImageTexture):
 	print(result)
 	if result:
 		var spray = Decal.new()
+		# Make spray child of sprayed object (consider pros/cons of making it 
+		# a child of the world, as most people seem to
 		result.collider.get_parent().add_child(spray)
 		
 		# Set spray texture
 		spray.texture_albedo = image
-		spray.size = Vector3(1.0, 1.0, 1.0) # width, height, depth of projection box
-		spray.position = result.position + result.normal * 0.01
+		spray.size = Vector3(1.0, 0.1, 1.0) # width, height, depth of projection box
+		spray.global_position = result.position + result.normal * 0.01
 		
 		# Align decal to surface
-		#spray.look_at(result.position + result.normal)
-		
-		print("Sprayed")
+		# NOTE: This blows but it's literally the only thing that would work
+		if result.normal == Vector3.BACK:
+			spray.rotate(Vector3.RIGHT, PI/2)
+		elif result.normal == Vector3.FORWARD:
+			spray.rotate(Vector3.RIGHT, PI/2)
+			spray.rotate(Vector3.UP, PI)
+		elif result.normal == Vector3.LEFT:
+			spray.rotate(Vector3.RIGHT, PI/2)
+			spray.rotate(Vector3.UP, -PI/2)
+		elif result.normal == Vector3.RIGHT:
+			spray.rotate(Vector3.RIGHT, PI/2)
+			spray.rotate(Vector3.UP, PI/2)
+		elif result.normal == Vector3.DOWN:
+			spray.rotate(Vector3.RIGHT, PI)
