@@ -2,7 +2,7 @@ extends Throwable
 class_name Grenade
 
 @export var fuse_time: float = 3.0
-@export var explosion_radius: float = 5.0
+@export var explosion_radius: float = 20.0
 @export var explosion_damage: float = 100.0
 @export var explosion_force: float = 20.0
 
@@ -43,12 +43,16 @@ func explode():
 
 	# Damage logic
 	var explosion_area = $"Grenade Object/Explosion Area"
-	explosion_area.get_child(0).shape.radius = explosion_radius
+	var explosion_collider = explosion_area.get_child(0)
+	explosion_collider.shape.radius = explosion_radius
 	
 	var results = explosion_area.get_overlapping_bodies()
 	for result in results:
+		if result == get_child(0):
+			continue
 		var body = result
 		print("Grenade explosion hit ", body)
+		
 		var entity
 		if body.has_method("apply_bullet_force"):
 			entity = body
@@ -57,12 +61,19 @@ func explode():
 		if entity:
 			var hit_pos = result.position
 			var direction = (hit_pos - position).normalized()
-			entity.apply_bullet_force(hit_pos, direction, explosion_force, explosion_damage)
+			var proportion = 1 - (explosion_area.global_position.distance_to(result.global_position) / explosion_radius)
+			var damage = floori(explosion_damage * proportion)
+			entity.apply_bullet_force(hit_pos, direction, explosion_force, damage)
 			# Set the damager to be the new owner
 			if entity.has_method("set_new_owner"):
 				entity.set_new_owner(prev_owner)
 		elif body.has_method("apply_damage"):
-			body.apply_damage(explosion_damage)
+			var hit_pos = result.position
+			print(explosion_area.global_position.distance_to(result.global_position))
+			var proportion = 1 - (explosion_area.global_position.distance_to(result.global_position) / explosion_radius)
+			print(proportion)
+			var damage = floori(explosion_damage * proportion)
+			body.apply_damage(damage)
 	queue_free()
 
 '''
