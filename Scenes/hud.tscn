@@ -107,24 +107,6 @@ offset_right = 20.0
 grow_horizontal = 2
 grow_vertical = 0
 
-[node name="TextureRect" type="TextureRect" parent="Control/Hotbar"]
-layout_mode = 2
-
-[node name="TextureRect2" type="TextureRect" parent="Control/Hotbar"]
-layout_mode = 2
-
-[node name="TextureRect3" type="TextureRect" parent="Control/Hotbar"]
-layout_mode = 2
-
-[node name="TextureRect4" type="TextureRect" parent="Control/Hotbar"]
-layout_mode = 2
-
-[node name="TextureRect5" type="TextureRect" parent="Control/Hotbar"]
-layout_mode = 2
-
-[node name="TextureRect6" type="TextureRect" parent="Control/Hotbar"]
-layout_mode = 2
-
 [node name="ShopUI" type="Control" parent="."]
 layout_mode = 3
 anchors_preset = 8

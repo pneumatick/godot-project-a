@@ -17,6 +17,10 @@ func _ready() -> void:
 	$ShopUI.on_menu_closed.connect(_on_menu_closed)
 	$"../ShopZone".player_entered_shop.connect(_on_player_entered_shop)
 	$"../ShopZone".player_exited_shop.connect(_on_player_exited_shop)
+	
+	# Set up item slots
+	for i in range(player.item_capacity):
+		$"Control/Hotbar".add_child(TextureButton.new())
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("interact"):
@@ -77,11 +81,11 @@ func _on_player_exited_shop(p):
 
 func _update_hotbar(items: Array, equipped_index: int):
 	for i in range($Control/Hotbar.get_child_count()):
-		var slot = $Control/Hotbar.get_child(i) as TextureRect
+		var slot = $Control/Hotbar.get_child(i)
 		if i < items.size() and items[i] != null:
-			slot.texture = items[i].icon
+			slot.texture_normal = items[i].icon
 		else:
-			slot.texture = null
+			slot.texture_normal = null
 		
 		# Highlight equipped slot
 		if i == equipped_index:
