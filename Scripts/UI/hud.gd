@@ -2,6 +2,8 @@ extends CanvasLayer
 
 signal slot_clicked
 
+@export var hotbar_icon_size : Vector2i = Vector2i(100, 100)
+
 @onready var ammo_label = get_node("Control/Ammo")
 @onready var money_label = get_node("Control/Money")
 @onready var player = get_node("../Player")
@@ -89,6 +91,7 @@ func _update_hotbar(items: Array, equipped_index: int):
 		var slot = $Control/Hotbar.get_child(i)
 		if i < items.size() and items[i] != null:
 			slot.texture_normal = items[i].icon
+			slot.texture_normal.set_size_override(hotbar_icon_size)
 		else:
 			slot.texture_normal = null
 		

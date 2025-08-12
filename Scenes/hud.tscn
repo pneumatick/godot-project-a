@@ -8,6 +8,7 @@
 
 [node name="HUD" type="CanvasLayer"]
 script = ExtResource("1_64ctp")
+hotbar_icon_size = Vector2i(75, 75)
 
 [node name="Control" type="Control" parent="."]
 layout_mode = 3
