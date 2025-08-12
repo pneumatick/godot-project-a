@@ -453,7 +453,7 @@ func throw_current_item():
 	# Create the thrown object
 	current_item.free_held_scene()
 	var thrown = current_item.instantiate_object_scene()
-	thrown.prev_owner = self
+	thrown.get_parent().prev_owner = self
 	get_parent().add_child(current_item)
 
 	# Determine position

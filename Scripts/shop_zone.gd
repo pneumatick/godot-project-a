@@ -15,9 +15,9 @@ func _on_body_entered(body):
 		body.in_shop = true
 	elif body.name == "Organ":
 		pass
-	elif body.type == "Weapon":
-		if body.prev_owner:
-			var parent = body.get_parent()
+	elif body.get_parent() is Weapon:
+		var parent = body.get_parent()
+		if parent.prev_owner:
 			var value
 			if parent.condition > 20:
 				value = floori(parent.value * (float(parent.condition) / 100.0))

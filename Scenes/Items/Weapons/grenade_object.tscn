@@ -1,0 +1,40 @@
+[gd_scene load_steps=5 format=3 uid="uid://c2vyv6ntayjrc"]
+
+[ext_resource type="PackedScene" uid="uid://da8ofrck81etq" path="res://Assets/Visuals/Models/Grenade/FragGrenadeModel.fbx" id="1_yf12n"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_yf12n"]
+radius = 0.0284433
+height = 0.10698
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_o0pwm"]
+radius = 0.0585351
+height = 0.158321
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_yf12n"]
+
+[node name="Grenade Object" type="RigidBody3D"]
+collision_layer = 8
+collision_mask = 15
+
+[node name="FragGrenadeModel" parent="." instance=ExtResource("1_yf12n")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00358991, 0.0487643, -0.00217346)
+shape = SubResource("CapsuleShape3D_yf12n")
+
+[node name="Collection Area" type="Area3D" parent="."]
+transform = Transform3D(1.1, 0, 0, 0, 1.1, 0, 0, 0, 1.1, 0, 0.0285043, 0)
+collision_layer = 8
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Collection Area"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.000167462, 0.00367736, -0.00248752)
+shape = SubResource("CapsuleShape3D_o0pwm")
+
+[node name="Explosion Area" type="Area3D" parent="."]
+collision_layer = 8
+collision_mask = 11
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Explosion Area"]
+shape = SubResource("SphereShape3D_yf12n")
+
+[connection signal="body_entered" from="Collection Area" to="." method="_on_collection_area_body_entered"]

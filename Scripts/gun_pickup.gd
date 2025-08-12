@@ -16,6 +16,9 @@ func _ready():
 	elif weapon_name == "Pistol":
 		new_node = load("res://Assets/Visuals/Models/Luger/Luger.fbx").instantiate()
 		_weapon = Pistol
+	elif weapon_name == "Grenade":
+		new_node = load("res://Assets/Visuals/Models/Grenade/FragGrenadeModel.fbx").instantiate()
+		_weapon = Grenade
 	else:
 		print("Unknown pickup item %s" % weapon_name)
 		new_node.erase()
