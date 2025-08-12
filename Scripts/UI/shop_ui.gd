@@ -4,6 +4,7 @@ signal on_menu_opened()
 signal on_menu_closed()
 
 @onready var player = $"../../Player"
+@onready var hud = get_parent()
 
 func _ready() -> void:
 	visible = false
@@ -12,6 +13,7 @@ func _ready() -> void:
 	$"VBoxContainer/HBoxContainer/Sells/Sell Organs".pressed.connect(_on_sell_organs_pressed)
 	$"VBoxContainer/HBoxContainer/Drugs/Buy Crack".pressed.connect(_on_buy_crack_pressed)
 	$Close.pressed.connect(_on_close_pressed)
+	hud.slot_clicked.connect(_sell_item)
 
 func open_for_player():
 	visible = true
@@ -38,6 +40,11 @@ func _on_sell_rifle_pressed():
 		print("Player sold a rifle!")
 	else:
 		print("Rifle sale unsuccessful")
+
+func _sell_item(item_index: int):
+	var item = player.get_item(item_index)
+	if item:
+		player.sell_item(item)
 
 func _on_sell_organs_pressed():
 	var organs = player.sell_all_organs()

@@ -420,6 +420,7 @@ func remove_item(item: Node3D = null, name: String = "") -> bool:
 func _on_target_destroyed(value: int) -> void:
 	add_money(value)
 
+## Increase the amount of money the player has
 func add_money(amount: int) -> void:
 	money += amount
 	money_change.emit(money)
@@ -612,3 +613,21 @@ func place_spray(image: ImageTexture):
 			spray.rotate(Vector3.UP, PI/2)
 		elif result.normal == Vector3.DOWN:
 			spray.rotate(Vector3.RIGHT, PI)
+
+func get_item(item_index: int) -> Node3D:
+	if item_index < _items.size():
+		return _items[item_index]
+	return null
+
+## Sell an item by reference
+func sell_item(item: Node3D) -> bool:
+	# Remove the item from the player's inventory
+	var removed = remove_item(item)
+	if not removed:
+		return false
+	
+	# Add money 
+	var value = floori(item.value * (float(item.condition) / 100.0))
+	add_money(value)
+	
+	return true
