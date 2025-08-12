@@ -1,5 +1,7 @@
 extends CanvasLayer
 
+signal slot_clicked
+
 @onready var ammo_label = get_node("Control/Ammo")
 @onready var money_label = get_node("Control/Money")
 @onready var player = get_node("../Player")
@@ -20,7 +22,10 @@ func _ready() -> void:
 	
 	# Set up item slots
 	for i in range(player.item_capacity):
-		$"Control/Hotbar".add_child(TextureButton.new())
+		var button = TextureButton.new()
+		button.set_meta("item_index", i)
+		button.pressed.connect(_on_hotbar_slot_pressed.bind(i))
+		$"Control/Hotbar".add_child(button)
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("interact"):
@@ -92,3 +97,7 @@ func _update_hotbar(items: Array, equipped_index: int):
 			slot.modulate = Color(1, 1, 1) # Normal color
 		else:
 			slot.modulate = Color(0.5, 0.5, 0.5) # Dimmed
+
+func _on_hotbar_slot_pressed(item_index: int) -> void:
+	print("Clicked item %s" % str(item_index))
+	slot_clicked.emit(item_index)
