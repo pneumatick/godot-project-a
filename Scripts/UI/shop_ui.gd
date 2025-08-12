@@ -9,7 +9,6 @@ signal on_menu_closed()
 func _ready() -> void:
 	visible = false
 	$"VBoxContainer/HBoxContainer/Buys/Buy Rifle".pressed.connect(_on_buy_rifle_pressed)
-	$"VBoxContainer/HBoxContainer/Sells/Sell Rifle".pressed.connect(_on_sell_rifle_pressed)
 	$"VBoxContainer/HBoxContainer/Sells/Sell Organs".pressed.connect(_on_sell_organs_pressed)
 	$"VBoxContainer/HBoxContainer/Drugs/Buy Crack".pressed.connect(_on_buy_crack_pressed)
 	$Close.pressed.connect(_on_close_pressed)
@@ -32,19 +31,16 @@ func _on_buy_rifle_pressed():
 	else:
 		print("Player does not have enough money")
 
-'''NOTE: This has broken due to the fact that multiple of the same item can be held in _items and _inventory'''
-func _on_sell_rifle_pressed():
-	var removed = player.remove_item(null, "Rifle")
-	if removed:
-		player.add_money(25)
-		print("Player sold a rifle!")
-	else:
-		print("Rifle sale unsuccessful")
-
+## Attempt to sell the selected hotbar item
 func _sell_item(item_index: int):
 	var item = player.get_item(item_index)
+	var sold = false
 	if item:
-		player.sell_item(item)
+		sold = player.sell_item(item)
+	else:
+		print("Get item failed at index %s" % str(item_index))
+	if not sold:
+		print("Sell item failed for ", item, " at index ", str(item_index))
 
 func _on_sell_organs_pressed():
 	var organs = player.sell_all_organs()

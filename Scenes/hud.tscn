@@ -173,10 +173,6 @@ layout_mode = 2
 size_flags_horizontal = 10
 size_flags_vertical = 0
 
-[node name="Sell Rifle" type="Button" parent="ShopUI/VBoxContainer/HBoxContainer/Sells"]
-layout_mode = 2
-text = "Sell Rifle - $25"
-
 [node name="Sell Organs" type="Button" parent="ShopUI/VBoxContainer/HBoxContainer/Sells"]
 layout_mode = 2
 text = "Sell All Organs"
