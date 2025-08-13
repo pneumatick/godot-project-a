@@ -1,20 +1,11 @@
 extends RigidBody3D
 
-var type : String = "Weapon"
-var prev_owner : CharacterBody3D
-# These variables are manually set upon instantiation in the Player script 
-# (at least for now)
-var ammo : int = -1
 var parent : Weapon
 
-@export var item_name : String
-@export var value : int = 15
 @export var resistance : int = 5
 
 func _ready() -> void:
 	parent = get_parent()
-	item_name = parent.item_name
-	value = parent.value
 
 func _on_collection_area_body_entered(body: Node3D) -> void:
 	if body.name == "Player" and body.is_alive():
@@ -33,7 +24,7 @@ func apply_bullet_force(hit_pos: Vector3, direction: Vector3, force: float, dama
 	# HIT PARTICLES HERE
 
 func set_new_owner(new_owner: CharacterBody3D):
-	prev_owner = new_owner
+	parent.prev_owner = new_owner
 
 func _apply_damage(damage: int) -> void:
 	if get_parent().condition - damage <= 0:
