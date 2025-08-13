@@ -5,7 +5,7 @@ var fuse_set : bool = false
 
 @export var throw_force : float = 20.0
 
-func use(fuse_time: int, callback: Callable) -> void:
+func use(fuse_time: float, callback: Callable) -> void:
 	# Remove item from player's inventory
 	player.remove_item(self)
 	
@@ -39,14 +39,15 @@ func use(fuse_time: int, callback: Callable) -> void:
 	# Set the fuse
 	fuse_set = true
 
-func apply_bullet_force(hit_pos: Vector3, direction: Vector3, force: float, damage: int):
+func apply_bullet_force(hit_pos: Vector3, direction: Vector3, force: float, hit_damage: int):
 	get_child(0).apply_impulse(hit_pos - global_transform.origin + direction * force)
-	_apply_damage(damage)
+	_apply_damage(hit_damage)
 	# HIT SOUND HERE
 	# HIT PARTICLES HERE
 
-func _apply_damage(damage: int) -> void:
-	if condition - damage <= 0:
+## Apply incoming damage to the throwable item
+func _apply_damage(hit_damage: int) -> void:
+	if condition - hit_damage <= 0:
 		queue_free()
 	else:
-		condition -= damage
+		condition -= hit_damage

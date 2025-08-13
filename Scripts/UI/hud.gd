@@ -78,11 +78,11 @@ func _on_menu_opened() -> void:
 func _on_menu_closed() -> void:
 	$Control/Crosshair.visible = true
 
-func _on_player_entered_shop(p):
+func _on_player_entered_shop():
 	player.in_shop = true
 	$"Control/Interact Label".text = "[Interact] Open Shop Menu"
 
-func _on_player_exited_shop(p):
+func _on_player_exited_shop():
 	player.in_shop = false
 	$ShopUI.visible = false
 

@@ -19,13 +19,9 @@ func _init() -> void:
 	held_scene = held
 	object_scene = object
 	
-		# Set up icon
-	var image = Image.new()
-	var error = image.load("res://Assets/Visuals/Icons/drug.PNG")
-	if error != OK:
-		print("Error loading image: ", error)
-		return
-	icon = ImageTexture.create_from_image(image)
+	# Set up icon
+	var image: Texture2D = load("res://Assets/Visuals/Icons/drug.PNG")
+	icon = ImageTexture.create_from_image(image.get_image())
 
 func use(player: CharacterBody3D):
 	print("%s used" % item_name)
@@ -46,6 +42,6 @@ func _on_timer_timeout():
 		queue_free()
 	else:
 		print("Player taking crack")
-		_player.apply_damage(HEALTH_BONUS / DURATION)
+		_player.apply_damage(floor(HEALTH_BONUS / DURATION))
 		duration_left -= 1
 		_timer.start()

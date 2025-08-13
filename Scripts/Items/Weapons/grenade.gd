@@ -20,14 +20,10 @@ func _init(i_owner: CharacterBody3D = null) -> void:
 	object_scene = preload("res://Scenes/Items/Weapons/grenade_object.tscn")
 	
 	# Set up icon
-	var image = Image.new()
-	var error = image.load("res://Assets/Visuals/Icons/grenade.PNG")
-	if error != OK:
-		print("Error loading image: ", error)
-		return
-	icon = ImageTexture.create_from_image(image)
+	var image: Texture2D = load("res://Assets/Visuals/Icons/grenade.PNG")
+	icon = ImageTexture.create_from_image(image.get_image())
 
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	if Input.is_action_pressed("fire"):
 		var in_menu = player.get_in_menu()
 		if _equipped and current_ammo > 0 and not in_menu:
@@ -66,8 +62,8 @@ func explode():
 			var hit_pos = result.position
 			var direction = (hit_pos - position).normalized()
 			var proportion = 1 - (explosion_area.global_position.distance_to(result.global_position) / explosion_radius)
-			var damage = floori(explosion_damage * proportion)
-			entity.apply_bullet_force(hit_pos, direction, explosion_force, damage)
+			var hit_damage = floori(explosion_damage * proportion)
+			entity.apply_bullet_force(hit_pos, direction, explosion_force, hit_damage)
 			# Set the damager to be the new owner
 			if entity.has_method("set_new_owner"):
 				entity.set_new_owner(prev_owner)
@@ -76,8 +72,8 @@ func explode():
 			print(explosion_area.global_position.distance_to(result.global_position))
 			var proportion = 1 - (explosion_area.global_position.distance_to(result.global_position) / explosion_radius)
 			print(proportion)
-			var damage = floori(explosion_damage * proportion)
-			body.apply_damage(damage)
+			var hit_damage = floori(explosion_damage * proportion)
+			body.apply_damage(hit_damage)
 	
 	# Play explosion sound effect
 	# NOTE: Probably a better way to do this but this works for now

@@ -71,12 +71,12 @@ func _ready() -> void:
 	_organs["Brain"] = Brain
 	_organs["Liver"] = Liver
 	
-	var spray_image = Image.load_from_file("res://Assets/Sprays/spray.jpg")
-	spray_texture = ImageTexture.create_from_image(spray_image)
+	var spray_image : Texture2D = load("res://Assets/Sprays/spray.jpg")
+	spray_texture = ImageTexture.create_from_image(spray_image.get_image())
 	
 	spawn.emit()						# Probably not supposed to be here...
 
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	# Check for interactable objects in the player's view
 	_check_interact_target()
 
@@ -375,16 +375,14 @@ func _add_organ(organ: Organ) -> bool:
 func _add_drug(drug: Drug) -> bool:
 	return _add_weapon(drug)
 
-func remove_item(item: Node3D = null, name: String = "") -> bool:
+func remove_item(item: Node3D = null) -> bool:
 	var removed = false
 	
 	var item_name : String
-	if name != "":
-		item_name = name
-	elif item:
+	if item:
 		item_name = item.item_name
 	else:
-		print("Error: Item removal without specifying item node or name")
+		print("Error: Item removal without specifying item node")
 		return false
 	
 	print("Removing %s" % item_name)
@@ -479,7 +477,7 @@ func drop_all_items():
 			
 			# Instantiate item object
 			item.free_held_scene()
-			var obj_scene = item.instantiate_object_scene()
+			item.instantiate_object_scene()
 			item.prev_owner = self
 			drop_item(item)		# Drop item into world
 	

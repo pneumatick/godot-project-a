@@ -12,7 +12,7 @@ var icon : Texture2D
 
 var _timer : Timer
 
-func use(player: CharacterBody3D): pass
+func use(_player: CharacterBody3D): pass
 	
 func throw(): pass
 

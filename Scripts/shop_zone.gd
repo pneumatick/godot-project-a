@@ -11,7 +11,8 @@ func _ready() -> void:
 func _on_body_entered(body):
 	if body.name == "Player":
 		print("Player entered shop")
-		emit_signal("player_entered_shop", body)
+		#emit_signal("player_entered_shop", body)
+		emit_signal("player_entered_shop")
 		body.in_shop = true
 	elif body.name == "Organ":
 		pass
@@ -30,6 +31,7 @@ func _on_body_exited(body):
 	if body.name == "Player":
 		body.in_shop = false
 		print("Player exited shop")
-		emit_signal("player_exited_shop", body)
+		#emit_signal("player_exited_shop", body)
+		emit_signal("player_exited_shop")
 		body.set_in_menu(false)
 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)

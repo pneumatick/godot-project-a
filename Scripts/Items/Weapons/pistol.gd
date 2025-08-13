@@ -17,12 +17,8 @@ func _init(i_owner: CharacterBody3D = null) -> void:
 	object_scene = preload("res://Scenes/Items/Weapons/pistol_object.tscn")
 	
 	# Set up icon
-	var image = Image.new()
-	var error = image.load("res://Assets/Visuals/Icons/pistol.PNG")
-	if error != OK:
-		print("Error loading image: ", error)
-		return
-	icon = ImageTexture.create_from_image(image)
+	var image: Texture2D = load("res://Assets/Visuals/Icons/pistol.PNG")
+	icon = ImageTexture.create_from_image(image.get_image())
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta: float) -> void:
