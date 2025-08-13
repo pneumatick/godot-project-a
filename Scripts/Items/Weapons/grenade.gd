@@ -74,6 +74,14 @@ func explode():
 			print(proportion)
 			var damage = floori(explosion_damage * proportion)
 			body.apply_damage(damage)
+	
+	# Play explosion sound effect
+	# NOTE: Probably a better way to do this but this works for now
+	$"Grenade Object/Explosion Sound".play()
+	visible = false
+	set_physics_process(false)
+	await $"Grenade Object/Explosion Sound".finished
+	
 	queue_free()
 
 '''
