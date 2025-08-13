@@ -1,8 +1,9 @@
-[gd_scene load_steps=7 format=3 uid="uid://c2vyv6ntayjrc"]
+[gd_scene load_steps=8 format=3 uid="uid://c2vyv6ntayjrc"]
 
 [ext_resource type="Script" uid="uid://caftax4sau71h" path="res://Scripts/Items/Weapons/thrown_weapon.gd" id="1_o0pwm"]
 [ext_resource type="PackedScene" uid="uid://da8ofrck81etq" path="res://Assets/Visuals/Models/Grenade/FragGrenadeModel.fbx" id="1_yf12n"]
 [ext_resource type="AudioStream" uid="uid://b88ixxqn06sfa" path="res://Assets/Sounds/vine-boom-sound-effect_KT89XIq.mp3" id="3_5rgbw"]
+[ext_resource type="AudioStream" uid="uid://dndkg7anfdvb1" path="res://Assets/Sounds/gas-gas-gaslqshort.mp3" id="4_haj6m"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_yf12n"]
 radius = 0.0284433
@@ -42,5 +43,8 @@ shape = SubResource("SphereShape3D_yf12n")
 
 [node name="Explosion Sound" type="AudioStreamPlayer3D" parent="."]
 stream = ExtResource("3_5rgbw")
+
+[node name="Fuse Sound" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("4_haj6m")
 
 [connection signal="body_entered" from="Collection Area" to="." method="_on_collection_area_body_entered"]

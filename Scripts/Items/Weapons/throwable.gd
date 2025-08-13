@@ -36,8 +36,9 @@ func use(fuse_time: int, callback: Callable) -> void:
 	add_child(timer)
 	timer.start()
 	
-	# Declare that the fuse has been started
+	# Set the fuse
 	fuse_set = true
+	$"Grenade Object/Fuse Sound".play()
 
 func apply_bullet_force(hit_pos: Vector3, direction: Vector3, force: float, damage: int):
 	get_child(0).apply_impulse(hit_pos - global_transform.origin + direction * force)

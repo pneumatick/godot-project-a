@@ -38,6 +38,9 @@ func _on_timer_timeout():
 	print("BOOM!")
 
 func explode():
+	# Stop fuse sound
+	$"Grenade Object/Fuse Sound".stop()
+	
 	# Play explosion effect
 	#spawn_explosion_effect(global_transform.origin)
 

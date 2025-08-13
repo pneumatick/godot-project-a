@@ -480,7 +480,7 @@ func drop_all_items():
 			# Instantiate item object
 			item.free_held_scene()
 			var obj_scene = item.instantiate_object_scene()
-			obj_scene.prev_owner = self
+			item.prev_owner = self
 			drop_item(item)		# Drop item into world
 	
 	# Drop held organs
