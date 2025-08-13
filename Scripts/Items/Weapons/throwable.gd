@@ -1,6 +1,8 @@
 extends Weapon
 class_name Throwable
 
+var fuse_set : bool = false
+
 @export var throw_force : float = 20.0
 
 func use(fuse_time: int, callback: Callable) -> void:
@@ -13,10 +15,14 @@ func use(fuse_time: int, callback: Callable) -> void:
 	global_transform = player.camera_controller.global_transform
 	player.get_parent().add_child(self)
 	
-	# Apply impulse
+	# Determine position
 	var camera = player.camera_controller
-	var impulse = camera.global_transform.basis.y + -camera.global_transform.basis.z * throw_force
+	var hand_pos = camera.global_transform.origin
 	var forward = -camera.global_transform.basis.z 
+	projectile.global_transform.origin = hand_pos + forward * 1.5
+	
+	# Apply impulse
+	var impulse = camera.global_transform.basis.y + -camera.global_transform.basis.z * throw_force
 	# Apply additional force if the throw is not against the direction of velocity
 	var with_movement : bool = forward.dot(player.velocity) >= 0
 	if player.velocity != Vector3.ZERO and with_movement:
@@ -29,6 +35,9 @@ func use(fuse_time: int, callback: Callable) -> void:
 	timer.timeout.connect(callback)
 	add_child(timer)
 	timer.start()
+	
+	# Declare that the fuse has been started
+	fuse_set = true
 
 func apply_bullet_force(hit_pos: Vector3, direction: Vector3, force: float, damage: int):
 	get_child(0).apply_impulse(hit_pos - global_transform.origin + direction * force)

@@ -1,5 +1,6 @@
-[gd_scene load_steps=5 format=3 uid="uid://c2vyv6ntayjrc"]
+[gd_scene load_steps=6 format=3 uid="uid://c2vyv6ntayjrc"]
 
+[ext_resource type="Script" uid="uid://caftax4sau71h" path="res://Scripts/Items/Weapons/thrown_weapon.gd" id="1_o0pwm"]
 [ext_resource type="PackedScene" uid="uid://da8ofrck81etq" path="res://Assets/Visuals/Models/Grenade/FragGrenadeModel.fbx" id="1_yf12n"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_yf12n"]
@@ -15,6 +16,7 @@ height = 0.158321
 [node name="Grenade Object" type="RigidBody3D"]
 collision_layer = 8
 collision_mask = 15
+script = ExtResource("1_o0pwm")
 
 [node name="FragGrenadeModel" parent="." instance=ExtResource("1_yf12n")]
 
