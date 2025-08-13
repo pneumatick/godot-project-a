@@ -20,8 +20,10 @@ func _on_collection_area_body_entered(body: Node3D) -> void:
 
 func apply_bullet_force(hit_pos: Vector3, direction: Vector3, force: float, damage: int):
 	apply_impulse(hit_pos - global_transform.origin + direction * force)
-	_apply_damage(floor(damage / resistance))
-	get_parent().condition -= floor(damage / resistance)
+	@warning_ignore("integer_division")
+	_apply_damage(damage / resistance)
+	@warning_ignore("integer_division")
+	get_parent().condition -= damage / resistance
 	# HIT SOUND HERE
 	# HIT PARTICLES HERE
 

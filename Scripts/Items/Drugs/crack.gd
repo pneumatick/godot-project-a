@@ -42,6 +42,7 @@ func _on_timer_timeout():
 		queue_free()
 	else:
 		print("Player taking crack")
-		_player.apply_damage(floor(HEALTH_BONUS / DURATION))
+		@warning_ignore("integer_division")
+		_player.apply_damage(HEALTH_BONUS / DURATION)
 		duration_left -= 1
 		_timer.start()

@@ -54,26 +54,23 @@ func explode():
 		print("Grenade explosion hit ", body)
 		
 		var entity
-		if body.has_method("apply_bullet_force"):
+		# Former method == items, latter method == players
+		if body.has_method("apply_bullet_force") or body.has_method("apply_damage"):
 			entity = body
 		elif body.get_parent().has_method("apply_bullet_force"):
 			entity = body.get_parent()
 		if entity:
-			var hit_pos = result.position
+			var hit_pos = result.global_position
 			var direction = (hit_pos - position).normalized()
-			var proportion = 1 - (explosion_area.global_position.distance_to(result.global_position) / explosion_radius)
+			var proportion = 1 - (explosion_area.global_position.distance_to(hit_pos) / explosion_radius)
 			var hit_damage = floori(explosion_damage * proportion)
-			entity.apply_bullet_force(hit_pos, direction, explosion_force, hit_damage)
-			# Set the damager to be the new owner
-			if entity.has_method("set_new_owner"):
-				entity.set_new_owner(prev_owner)
-		elif body.has_method("apply_damage"):
-			var hit_pos = result.position
-			print(explosion_area.global_position.distance_to(result.global_position))
-			var proportion = 1 - (explosion_area.global_position.distance_to(result.global_position) / explosion_radius)
-			print(proportion)
-			var hit_damage = floori(explosion_damage * proportion)
-			body.apply_damage(hit_damage)
+			if entity.has_method("apply_bullet_force"):
+				entity.apply_bullet_force(hit_pos, direction, explosion_force, hit_damage)
+				# Set the damager to be the new owner
+				if entity.has_method("set_new_owner"):
+					entity.set_new_owner(prev_owner)
+			elif entity.has_method("apply_damage"):
+				body.apply_damage(hit_damage)
 	
 	# Play explosion sound effect
 	# NOTE: Probably a better way to do this but this works for now
