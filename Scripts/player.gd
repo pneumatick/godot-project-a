@@ -168,8 +168,7 @@ func _apply_friction(delta):
 	if speed < 0.1:
 		velocity = Vector3.ZERO
 		return
-	
-	var control = max(speed, STOP_SPEED)
+		
 	var drop = FRICTION * delta
 	
 	var new_speed = max(speed - drop, 0)
