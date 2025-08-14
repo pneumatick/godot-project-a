@@ -31,7 +31,11 @@ func set_new_owner(new_owner: CharacterBody3D):
 	parent.prev_owner = new_owner
 
 func _apply_damage(damage: int) -> void:
-	if get_parent().condition - damage <= 0:
-		get_parent().queue_free()
+	var root_node = get_parent()
+	if root_node.condition - damage <= 0:
+		if root_node is Throwable:
+			root_node.explode()
+		else:
+			root_node.queue_free()
 	else:
-		get_parent().condition -= damage
+		root_node.condition -= damage

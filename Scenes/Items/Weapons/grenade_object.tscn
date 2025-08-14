@@ -19,6 +19,7 @@ height = 0.158321
 collision_layer = 8
 collision_mask = 15
 script = ExtResource("1_o0pwm")
+resistance = 2
 
 [node name="FragGrenadeModel" parent="." instance=ExtResource("1_yf12n")]
 
