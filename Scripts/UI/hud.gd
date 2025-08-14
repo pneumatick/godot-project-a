@@ -43,9 +43,33 @@ func _on_player_weapon_equipped(weapon: Node) -> void:
 		ammo_label.text = "Ammo: %s" % str(weapon.current_ammo)
 
 func _on_player_death(source) -> void:
-	print("HUD: Player killed by ", source)
 	ammo_label.text = ""
 	$"Control/Death Counter".text = "Deaths: " + str(int($"Control/Death Counter".text) + 1)
+	
+	# Killfeed entry
+	var killer
+	var kill_text
+	if source == player:
+		kill_text = "Suicide → %s" % player
+	elif source is Weapon:
+		killer = source.prev_owner
+		kill_text = "%s → %s → %s" % [killer, source.item_name, player]
+	else:
+		kill_text = "%s → %s" % [source.name, player]
+	
+	var label = Label.new()
+	label.text = kill_text
+	label.add_theme_color_override("font_color", Color.WHITE)
+	label.modulate.a = 0.0  # start transparent
+	
+	$"Control/KillFeed".add_child(label)
+
+	# Fade in, wait, fade out, then remove
+	var tween = get_tree().create_tween()
+	tween.tween_property(label, "modulate:a", 1.0, 0.2) # fade in
+	tween.tween_interval(3.0) # stay on screen for 3 seconds
+	tween.tween_property(label, "modulate:a", 0.0, 0.5) # fade out
+	tween.tween_callback(label.queue_free)
 
 func _on_player_money_change(current_money: int) -> void:
 	money_label.text = "Money: %s" % str(current_money)

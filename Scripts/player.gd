@@ -322,6 +322,7 @@ func add_item(item) -> void:
 	
 	if added:
 		print("Picked up %s" % item_name)
+		item.prev_owner = self
 		items_changed.emit(_items, _equipped_item_idx)
 	else:
 		print("Failed to pick up %s" % item_name)
