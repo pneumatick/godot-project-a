@@ -11,6 +11,7 @@ func _ready() -> void:
 	$"VBoxContainer/HBoxContainer/Buys/Buy Rifle".pressed.connect(_on_buy_rifle_pressed)
 	$"VBoxContainer/HBoxContainer/Sells/Sell Organs".pressed.connect(_on_sell_organs_pressed)
 	$"VBoxContainer/HBoxContainer/Drugs/Buy Crack".pressed.connect(_on_buy_crack_pressed)
+	$"HBoxContainer/End Game".pressed.connect(_end_game)
 	$Close.pressed.connect(_on_close_pressed)
 	hud.slot_clicked.connect(_sell_item)
 
@@ -69,3 +70,10 @@ func _on_close_pressed():
 	player.set_in_menu(false)
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	on_menu_closed.emit()
+
+func _end_game():
+	var price = 100
+	if player.money >= price:
+		get_tree().quit()
+	else:
+		print("Player needs %s more money to end the game" % str(price - player.money))
