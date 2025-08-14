@@ -42,7 +42,8 @@ func _on_player_weapon_equipped(weapon: Node) -> void:
 	if weapon is Weapon:
 		ammo_label.text = "Ammo: %s" % str(weapon.current_ammo)
 
-func _on_player_death() -> void:
+func _on_player_death(source) -> void:
+	print("HUD: Player killed by ", source)
 	ammo_label.text = ""
 	$"Control/Death Counter".text = "Deaths: " + str(int($"Control/Death Counter".text) + 1)
 

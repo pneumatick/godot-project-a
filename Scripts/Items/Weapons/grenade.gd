@@ -70,7 +70,7 @@ func explode():
 				if entity.has_method("set_new_owner"):
 					entity.set_new_owner(prev_owner)
 			elif entity.has_method("apply_damage"):
-				body.apply_damage(hit_damage)
+				body.apply_damage(hit_damage, self)
 	
 	# Play explosion sound effect
 	# NOTE: Probably a better way to do this but this works for now

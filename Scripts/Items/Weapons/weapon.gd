@@ -59,9 +59,9 @@ func fire():
 	
 	if result:
 		print("Hit: ", result.collider)
-		# Determine relevant entity and apply bullet force
+		# Determine relevant entity and apply bullet force/damage
 		var entity
-		if result.collider.has_method("apply_bullet_force"):
+		if result.collider.has_method("apply_bullet_force") or result.collider.has_method("apply_damage"):
 			entity = result.collider
 		elif result.collider.get_parent().has_method("apply_bullet_force"):
 			entity = result.collider.get_parent()
@@ -71,11 +71,8 @@ func fire():
 			var force = 10.0
 			if entity.has_method("apply_bullet_force"):
 				entity.apply_bullet_force(hit_pos, direction, force, damage, self)
-				# Set the damager to be the new owner
-				if entity.has_method("set_new_owner"):
-					entity.set_new_owner(prev_owner)
 			elif entity.has_method("apply_damage"):
-				result.apply_damage(damage)
+				result.collider.apply_damage(damage, self)
 
 # Load ammo into the weapon
 func load_ammo(amount: int):

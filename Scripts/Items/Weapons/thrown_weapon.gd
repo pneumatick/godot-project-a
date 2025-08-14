@@ -23,7 +23,7 @@ func apply_bullet_force(hit_pos: Vector3, direction: Vector3, force: float, dama
 	@warning_ignore("integer_division")
 	_apply_damage(damage / resistance)
 	@warning_ignore("integer_division")
-	get_parent().condition -= damage / resistance
+	set_new_owner(source.prev_owner)
 	# HIT SOUND HERE
 	# HIT PARTICLES HERE
 

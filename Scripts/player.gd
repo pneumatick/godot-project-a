@@ -129,7 +129,7 @@ func _input(event):
 	elif event.is_action_pressed("throw_item"):
 		throw_current_item()
 	elif event.is_action_pressed("kill"):
-		_die()
+		_die(self)
 	elif event.is_action_pressed("interact"):
 		if seen_object and seen_object.is_in_group("interactables"):
 			seen_object.get_parent().interact(self)
@@ -191,7 +191,7 @@ func _update_camera(delta: float) -> void:
 	_tilt_input = 0.0
 
 # Handle player death logic
-func _die() -> void:
+func _die(source) -> void:
 	_alive = false
 	set_process(false)
 	set_physics_process(false)
@@ -227,7 +227,7 @@ func _die() -> void:
 		drug.queue_free()
 	
 	death_sound.play()
-	death.emit()
+	death.emit(source)
 	
 	# Wait a bit before respawning the player
 	await get_tree().create_timer(2.0).timeout
@@ -243,17 +243,17 @@ func _respawn(respawn_position: Vector3) -> void:
 	set_physics_process(true)
 	spawn.emit()
 
-func _take_damage(amount: int) -> void:
+func _take_damage(amount: int, source) -> void:
 	health -= amount
 	health_bar.value = health
 	print("The player was hit, health now %s" % [str(health)])
 	if health <= 0 and _alive:
-		_die()
+		_die(source)
 	else:
 		hit_sound.play()
 
-func apply_damage(amount: int) -> void:
-	_take_damage(amount)
+func apply_damage(amount: int, source) -> void:
+	_take_damage(amount, source)
 
 func _on_mob_detector_body_entered(body: Node3D) -> void:
 	print("%s entered..." % [body.name])
@@ -265,7 +265,7 @@ func _on_mob_detector_body_entered(body: Node3D) -> void:
 		# Do the initial damage, and set the timer to continue doing damage
 		# so long as the player remains in the body.
 		if $DamageTimer.is_stopped() and _alive:
-			_take_damage(damage_amount)
+			_take_damage(damage_amount, body)
 			print("Starting damage timer...")
 			$DamageTimer.start(0.5)
 
@@ -280,7 +280,7 @@ func _on_mob_detector_body_exited(body: Node3D) -> void:
 func _on_damage_timer_timeout():
 	for body in _damaging_bodies.keys():
 		if _alive:
-			_take_damage(_damaging_bodies[body])
+			_take_damage(_damaging_bodies[body], body)
 
 # Equip held item
 func _equip_item(idx: int) -> void:
@@ -567,7 +567,7 @@ func use_item(item) -> void:
 		
 		# Overdose
 		if $"Active Drugs".get_child_count() > drug_limit:
-			_die()
+			_die(item)
 
 func place_spray(image: ImageTexture):
 	print("Spraying...")

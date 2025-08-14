@@ -22,6 +22,7 @@ func apply_bullet_force(hit_pos: Vector3, direction: Vector3, force: float, dama
 	#organ_body.apply_impulse(hit_pos - global_transform.origin + direction * force)
 	get_child(0).apply_impulse(hit_pos - global_transform.origin + direction * force)
 	_apply_damage(damage)
+	set_new_owner(source.prev_owner)
 	# HIT SOUND HERE
 	# HIT PARTICLES HERE
 
