@@ -65,7 +65,7 @@ func explode():
 			var proportion = 1 - (explosion_area.global_position.distance_to(hit_pos) / explosion_radius)
 			var hit_damage = floori(explosion_damage * proportion)
 			if entity.has_method("apply_bullet_force"):
-				entity.apply_bullet_force(hit_pos, direction, explosion_force, hit_damage)
+				entity.apply_bullet_force(hit_pos, direction, explosion_force, hit_damage, self)
 				# Set the damager to be the new owner
 				if entity.has_method("set_new_owner"):
 					entity.set_new_owner(prev_owner)

@@ -18,7 +18,7 @@ func _on_collection_area_body_entered(body: Node3D) -> void:
 		# Add weapon to the player that entered the collection area
 		body.call_deferred("add_item", parent)
 
-func apply_bullet_force(hit_pos: Vector3, direction: Vector3, force: float, damage: int):
+func apply_bullet_force(hit_pos: Vector3, direction: Vector3, force: float, damage: int, source):
 	apply_impulse(hit_pos - global_transform.origin + direction * force)
 	@warning_ignore("integer_division")
 	_apply_damage(damage / resistance)

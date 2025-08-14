@@ -59,10 +59,6 @@ func fire():
 	
 	if result:
 		print("Hit: ", result.collider)
-		# Players and targets use "take_damage" 
-		# NOTE: consider merging with below which applies to everything else
-		if result.collider.has_method("take_damage"):
-			result.collider.take_damage(damage)
 		# Determine relevant entity and apply bullet force
 		var entity
 		if result.collider.has_method("apply_bullet_force"):
@@ -73,10 +69,13 @@ func fire():
 			var hit_pos = result.position
 			var direction = (to - from).normalized()
 			var force = 10.0
-			entity.apply_bullet_force(hit_pos, direction, force, damage)
-			# Set the shooter to be the new owner
-			if entity.has_method("set_new_owner"):
-				entity.set_new_owner(player)
+			if entity.has_method("apply_bullet_force"):
+				entity.apply_bullet_force(hit_pos, direction, force, damage, self)
+				# Set the damager to be the new owner
+				if entity.has_method("set_new_owner"):
+					entity.set_new_owner(prev_owner)
+			elif entity.has_method("apply_damage"):
+				result.apply_damage(damage)
 
 # Load ammo into the weapon
 func load_ammo(amount: int):

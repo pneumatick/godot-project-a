@@ -39,7 +39,7 @@ func use(fuse_time: float, callback: Callable) -> void:
 	# Set the fuse
 	fuse_set = true
 
-func apply_bullet_force(hit_pos: Vector3, direction: Vector3, force: float, hit_damage: int):
+func apply_bullet_force(hit_pos: Vector3, direction: Vector3, force: float, hit_damage: int, source):
 	get_child(0).apply_impulse(hit_pos - global_transform.origin + direction * force)
 	_apply_damage(hit_damage)
 	# HIT SOUND HERE
