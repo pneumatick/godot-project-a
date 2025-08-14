@@ -45,6 +45,8 @@ var in_shop : bool = false
 @export var item_capacity : int = 6
 @export var drug_limit : int = 2
 var spray_texture : ImageTexture
+var gravity_direction : Vector3 = Vector3.DOWN
+var gravity_strength : float = 9.8
 
 # Nodes internal to scene
 @onready var right_hand : Node3D = get_node("Pivot/Camera3D/Right Hand")
@@ -86,7 +88,8 @@ func _physics_process(delta: float) -> void:
 	
 	# Add the gravity.
 	if not is_on_floor():
-		velocity += get_gravity() * delta
+		#velocity += get_gravity() * delta
+		velocity += gravity_direction * gravity_strength * delta
 	
 	# Reset the player's position when they fall below a certain Y value
 	if position.y < -10:
@@ -98,7 +101,8 @@ func _physics_process(delta: float) -> void:
 	var jumping = false
 	if Input.is_action_pressed("jump"):
 		if is_on_floor():
-			velocity.y = JUMP_VELOCITY
+			#velocity.y = JUMP_VELOCITY
+			velocity += JUMP_VELOCITY * -gravity_direction
 		
 		jumping = true
 		if direction:
@@ -117,10 +121,29 @@ func _physics_process(delta: float) -> void:
 	
 	move_and_slide()
 
+func set_gravity_direction(new_dir: Vector3):
+	gravity_direction = new_dir.normalized()
+	align_with_gravity_instant()
+
+func align_with_gravity_instant():
+	var up_dir = -gravity_direction
+	set_up_direction(up_dir)
+	'''
+	var forward = transform.basis.z.normalized()
+	forward = (forward - up_dir * forward.dot(up_dir)).normalized()
+	var right = forward.cross(up_dir).normalized()
+	transform.basis = Basis(right, up_dir, forward).orthonormalized()
+	'''
+	transform.basis *= Basis(
+		Vector3(-1, 0, 0),
+		Vector3(0, -1, 0),
+		Vector3(0, 0, 1)
+	)
+
 func _input(event):
 	_mouse_input = event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED
 	if _mouse_input:
-		_rotation_input = -event.relative.x * mouse_sensitivity
+		_rotation_input = -event.relative.x * mouse_sensitivity * up_direction.y
 		_tilt_input = -event.relative.y * mouse_sensitivity
 	elif event.is_action_pressed("previous_item"):
 			_equip_item(wrapi(_equipped_item_idx - 1, 0, _items.size()))
@@ -138,6 +161,11 @@ func _input(event):
 			use_item(item)
 	elif event.is_action_pressed("spray"):
 		place_spray(spray_texture)
+	elif event.is_action_pressed("invert_gravity"):
+		if gravity_direction == Vector3.DOWN:
+			set_gravity_direction(Vector3.UP)
+		else:
+			set_gravity_direction(Vector3.DOWN)
 
 func _accelerate(direction: Vector3, accel: float, max_speed: float, delta: float):
 	var current_speed = velocity.dot(direction)
@@ -175,11 +203,12 @@ func _apply_friction(delta):
 	velocity = velocity.normalized() * new_speed
 
 func _update_camera(delta: float) -> void:
-	_mouse_rotation.x += _tilt_input * delta
-	_mouse_rotation.x = clamp(_mouse_rotation.x, tilt_lower_limit, tilt_upper_limit)
+	# Update pitch (X) and yaw (Y) from input
+	_mouse_rotation.x = clamp(_mouse_rotation.x + _tilt_input * delta, tilt_lower_limit, tilt_upper_limit)
 	_mouse_rotation.y += _rotation_input * delta
 	
-	_player_rotation = Vector3(0.0,_mouse_rotation.y,0.0)
+	'''		Old Code
+	player_rotation = Vector3(0.0,_mouse_rotation.y,0.0)
 	_camera_rotation = Vector3(_mouse_rotation.x,0.0,0.0)
 	
 	camera_controller.transform.basis = Basis.from_euler(_camera_rotation)
@@ -187,6 +216,21 @@ func _update_camera(delta: float) -> void:
 	
 	global_transform.basis = Basis.from_euler(_player_rotation)
 	
+	_rotation_input = 0.0
+	_tilt_input = 0.0
+	
+		   New code follows...
+	''' 
+	
+	# Apply yaw to player body in its local space
+	# This keeps the camera pivot following the player
+	rotate_y(_rotation_input * delta)
+
+	# Apply pitch to camera locally (camera_controller is a child of player)
+	camera_controller.rotation.x = _mouse_rotation.x
+	camera_controller.rotation.z = 0.0
+
+	# Reset input accumulators
 	_rotation_input = 0.0
 	_tilt_input = 0.0
 

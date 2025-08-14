@@ -11,7 +11,7 @@ var health = DEFAULT_HEALTH
 @onready var collision_shape = $CollisionShape3D
 @onready var hit_sound = $"Hit Sound"
 
-func take_damage(amount: int) -> void:
+func apply_damage(amount: int, _source) -> void:
 	health -= amount
 	print("Target health now %s" % health)
 	if health <= 0:
