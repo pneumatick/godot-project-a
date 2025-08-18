@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://c2dcha7sipp8a"]
+[gd_scene load_steps=8 format=3 uid="uid://c2dcha7sipp8a"]
 
 [ext_resource type="Script" uid="uid://ck610abr6ujd" path="res://Scripts/player.gd" id="1_4flbx"]
 [ext_resource type="AudioStream" uid="uid://m02ydh4m0xlk" path="res://Assets/Sounds/steve-old-hurt-sound_XKZxUk4.mp3" id="2_onrkg"]
@@ -9,8 +9,6 @@
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_c3xsu"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_4flbx"]
-
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_4flbx"]
 
 [node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("camera_controller")]
 collision_mask = 6
@@ -32,17 +30,6 @@ shape = SubResource("CapsuleShape3D_c3xsu")
 mesh = SubResource("CapsuleMesh_4flbx")
 skeleton = NodePath("../Pivot")
 
-[node name="MobDetector" type="Area3D" parent="."]
-transform = Transform3D(1.05, 0, 0, 0, 1.05, 0, 0, 0, 1.05, 0, 0, 0)
-collision_layer = 0
-collision_mask = 2
-monitorable = false
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="MobDetector"]
-shape = SubResource("CapsuleShape3D_4flbx")
-
-[node name="DamageTimer" type="Timer" parent="."]
-
 [node name="Hit Sound" type="AudioStreamPlayer3D" parent="."]
 stream = ExtResource("2_onrkg")
 
@@ -56,7 +43,3 @@ stream = ExtResource("4_vgqql")
 stream = ExtResource("5_fkybt")
 
 [node name="Active Drugs" type="Node3D" parent="."]
-
-[connection signal="body_entered" from="MobDetector" to="." method="_on_mob_detector_body_entered"]
-[connection signal="body_exited" from="MobDetector" to="." method="_on_mob_detector_body_exited"]
-[connection signal="timeout" from="DamageTimer" to="." method="_on_damage_timer_timeout"]

@@ -1,23 +1,14 @@
-[gd_scene load_steps=21 format=3 uid="uid://hmv4dr58x4if"]
+[gd_scene load_steps=18 format=3 uid="uid://hmv4dr58x4if"]
 
 [ext_resource type="Script" uid="uid://cf8moef3pykdp" path="res://Scripts/3d_scene_root.gd" id="1_1rpu5"]
 [ext_resource type="PackedScene" uid="uid://c2dcha7sipp8a" path="res://Scenes/player.tscn" id="1_sxnch"]
-[ext_resource type="Script" uid="uid://bpumr1tul6w4p" path="res://Scripts/death_cube.gd" id="3_g5xil"]
 [ext_resource type="PackedScene" uid="uid://ducw325a8ghny" path="res://Scenes/weapon_pickup.tscn" id="4_5rbum"]
 [ext_resource type="PackedScene" uid="uid://tldca8ygc1hw" path="res://Scenes/hud.tscn" id="4_kb1pf"]
 [ext_resource type="PackedScene" uid="uid://mlxqh5iqxvxs" path="res://Scenes/target.tscn" id="5_23mtt"]
 [ext_resource type="PackedScene" uid="uid://dulrda5jbt33a" path="res://Scenes/shop_zone.tscn" id="7_lyres"]
+[ext_resource type="PackedScene" uid="uid://gv7xvye5xef7" path="res://Scenes/damage_area.tscn" id="7_riqsv"]
 [ext_resource type="Texture2D" uid="uid://buhhtw8gu5tbk" path="res://Assets/Visuals/Textures/Dirt_20-512x512.png" id="8_fqem3"]
 [ext_resource type="Texture2D" uid="uid://cp0yvea54ymu6" path="res://Assets/Sprays/spray.jpg" id="9_riqsv"]
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_1rpu5"]
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1rpu5"]
-albedo_color = Color(1, 0, 0, 1)
-metallic = 0.74
-
-[sub_resource type="BoxMesh" id="BoxMesh_g5xil"]
-material = SubResource("StandardMaterial3D_1rpu5")
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_sxnch"]
 size = Vector3(10, 1, 10)
@@ -53,19 +44,6 @@ script = ExtResource("1_1rpu5")
 [node name="Player" parent="." instance=ExtResource("1_sxnch")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 
-[node name="Death Cube" type="CharacterBody3D" parent="." groups=["mob"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -4)
-collision_layer = 2
-collision_mask = 0
-motion_mode = 1
-script = ExtResource("3_g5xil")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Death Cube"]
-shape = SubResource("BoxShape3D_1rpu5")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Death Cube"]
-mesh = SubResource("BoxMesh_g5xil")
-
 [node name="Rifle Pickup" parent="." instance=ExtResource("4_5rbum")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0, -3)
 
@@ -82,6 +60,9 @@ weapon_name = "Grenade"
 
 [node name="ShopZone" parent="." instance=ExtResource("7_lyres")]
 transform = Transform3D(5, 0, 0, 0, 5, 0, 0, 0, 5, 0, 0, -10)
+
+[node name="DamageArea" parent="." instance=ExtResource("7_riqsv")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.25369, -0.917322, -3.5383)
 
 [node name="Floor" type="StaticBody3D" parent="."]
 transform = Transform3D(5, 0, 0, 0, 5, 0, 0, 0, 5, 0, -3, 0)

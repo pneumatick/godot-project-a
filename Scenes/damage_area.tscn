@@ -1,0 +1,26 @@
+[gd_scene load_steps=4 format=3 uid="uid://gv7xvye5xef7"]
+
+[ext_resource type="Script" uid="uid://bpumr1tul6w4p" path="res://Scripts/damage_area.gd" id="1_tuwn5"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_0npu1"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_tuwn5"]
+
+[node name="DamageArea" type="StaticBody3D"]
+script = ExtResource("1_tuwn5")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_0npu1")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_tuwn5")
+
+[node name="Body Detector" type="Area3D" parent="."]
+transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, 0, 0, 0)
+collision_layer = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Body Detector"]
+shape = SubResource("BoxShape3D_0npu1")
+
+[connection signal="body_entered" from="Body Detector" to="." method="_on_body_entered"]
+[connection signal="body_exited" from="Body Detector" to="." method="_on_body_exited"]

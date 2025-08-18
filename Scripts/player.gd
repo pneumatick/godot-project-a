@@ -21,9 +21,8 @@ var _mouse_input : bool = false
 var _mouse_rotation : Vector3
 var _rotation_input : float
 var _tilt_input : float
-var _player_rotation : Vector3
-var _camera_rotation : Vector3
-var _damaging_bodies : Dictionary = {}
+#var _player_rotation : Vector3
+#var _camera_rotation : Vector3
 var _items : Array = []
 var _inventory : Dictionary = {}	# {String: Array[Items]}
 var _equipped_item_idx : int = 0
@@ -299,33 +298,6 @@ func _take_damage(amount: int, source) -> void:
 
 func apply_damage(amount: int, source) -> void:
 	_take_damage(amount, source)
-
-func _on_mob_detector_body_entered(body: Node3D) -> void:
-	print("%s entered..." % [body.name])
-	
-	if body.has_method("get_damage_amount"):
-		var damage_amount = body.get_damage_amount()
-		_damaging_bodies[body] = damage_amount
-		
-		# Do the initial damage, and set the timer to continue doing damage
-		# so long as the player remains in the body.
-		if $DamageTimer.is_stopped() and _alive:
-			_take_damage(damage_amount, body)
-			print("Starting damage timer...")
-			$DamageTimer.start(0.5)
-
-func _on_mob_detector_body_exited(body: Node3D) -> void:
-	if _damaging_bodies.has(body):
-		_damaging_bodies.erase(body)
-		
-		if _damaging_bodies.size() == 0:
-			$DamageTimer.stop()
-
-# Accumulate damage when the damage timer times out
-func _on_damage_timer_timeout():
-	for body in _damaging_bodies.keys():
-		if _alive:
-			_take_damage(_damaging_bodies[body], body)
 
 # Equip held item
 func _equip_item(idx: int) -> void:
