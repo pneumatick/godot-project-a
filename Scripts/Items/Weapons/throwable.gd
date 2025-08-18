@@ -5,14 +5,18 @@ var fuse_set : bool = false
 
 @export var throw_force : float = 20.0
 
-func use(fuse_time: float, callback: Callable) -> void:
+func use(fuse_time: float, callback: Callable, explosion_radius = null) -> void:
 	# Remove item from player's inventory
 	player.remove_item(self)
 	
 	# Set up
 	free_held_scene()
 	var projectile = instantiate_object_scene()
-	global_transform = player.camera_controller.global_transform
+	if explosion_radius:
+		var explosion_area = $"Grenade Object/Explosion Area"
+		var explosion_collider = explosion_area.get_child(0)
+		explosion_collider.shape.radius = explosion_radius
+		global_transform = player.camera_controller.global_transform
 	player.get_parent().add_child(self)
 	
 	# Determine position
