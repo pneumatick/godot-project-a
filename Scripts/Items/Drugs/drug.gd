@@ -42,6 +42,11 @@ func _apply_damage(damage: int) -> void:
 	else:
 		condition -= damage
 
+func interact(player: CharacterBody3D) -> void:
+	free_object_scene()
+	get_parent().remove_child(self)
+	player.add_item(self)
+
 # Instantiate the scene that represents the held weapon
 func instantiate_held_scene() -> void:
 	var scene = held_scene.instantiate()
@@ -53,6 +58,7 @@ func instantiate_held_scene() -> void:
 
 func instantiate_object_scene() -> Node3D:
 	var scene = object_scene.instantiate()
+	scene.add_to_group("interactables")
 	add_child(scene)
 	return scene
 
@@ -60,3 +66,6 @@ func instantiate_object_scene() -> Node3D:
 func free_held_scene() -> void:
 	get_child(0).free()
 	visible = true		# Too hacky? Made to handle drop_all_items() as expected. Consider...
+
+func free_object_scene() -> void:
+	get_child(0).free()
