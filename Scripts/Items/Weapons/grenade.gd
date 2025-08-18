@@ -2,7 +2,7 @@ extends Throwable
 class_name Grenade
 
 @export var fuse_time: float = 3.0
-@export var explosion_radius: float = 20.0
+@export var explosion_radius: float = 10.0
 @export var explosion_damage: float = 100.0
 @export var explosion_force: float = 20.0
 
@@ -43,9 +43,6 @@ func explode():
 
 	# Damage logic
 	var explosion_area = $"Grenade Object/Explosion Area"
-	var explosion_collider = explosion_area.get_child(0)
-	explosion_collider.shape.radius = explosion_radius
-	
 	var results = explosion_area.get_overlapping_bodies()
 	for result in results:
 		if result == get_child(0):
