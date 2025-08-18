@@ -18,6 +18,8 @@ func _on_body_entered(body):
 		pass
 	elif body.get_parent() is Weapon:
 		var parent = body.get_parent()
+		if parent is Throwable and parent.fuse_set:
+			return
 		if parent.prev_owner:
 			var value
 			if parent.condition > 20:
@@ -25,7 +27,7 @@ func _on_body_entered(body):
 			else:
 				value = 5
 			parent.prev_owner.add_money(value)
-			body.queue_free()
+			parent.queue_free()
 
 func _on_body_exited(body):
 	if body.name == "Player":
