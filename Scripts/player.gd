@@ -143,6 +143,7 @@ func align_with_gravity_instant():
 func _input(event):
 	_mouse_input = event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED
 	if _mouse_input:
+		#_rotation_input = -event.relative.x * mouse_sensitivity
 		_rotation_input = -event.relative.x * mouse_sensitivity * up_direction.y
 		_tilt_input = -event.relative.y * mouse_sensitivity
 	elif event.is_action_pressed("previous_item"):
