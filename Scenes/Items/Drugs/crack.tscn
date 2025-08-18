@@ -1,19 +1,8 @@
-[gd_scene load_steps=4 format=3 uid="uid://cil2py0exsjs1"]
+[gd_scene load_steps=2 format=3 uid="uid://cil2py0exsjs1"]
 
 [ext_resource type="PackedScene" uid="uid://blowynai12qju" path="res://Assets/Visuals/Models/Drugs/methpipe.fbx" id="1_c1h1q"]
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4flbx"]
-
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_onrkg"]
-material = SubResource("StandardMaterial3D_4flbx")
-
 [node name="Crack" type="Node3D"]
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
-transform = Transform3D(0.25, 0, 0, 0, -1.09278e-08, -0.25, 0, 0.25, -1.09278e-08, 0.393306, 0, -0.833452)
-visible = false
-mesh = SubResource("CapsuleMesh_onrkg")
-skeleton = NodePath("../..")
 
 [node name="Timer" type="Timer" parent="."]
 

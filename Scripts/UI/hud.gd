@@ -90,6 +90,8 @@ func _display_interaction_label(scene = null) -> void:
 					interact_label.text = "[Interact] %s\nCondition: %s\nDrugs Present: %s" % [parent.item_name, str(parent.condition), str(parent.num_drugs)]
 			elif parent is Weapon:
 					interact_label.text = "%s\nCondition: %s" % [parent.item_name, str(parent.condition)]
+			elif parent is Drug:
+					interact_label.text = "[Interact] %s\nCondition: %s" % [parent.item_name, str(parent.condition)]
 			else:
 				interact_label.text = ""
 		elif player.in_shop:

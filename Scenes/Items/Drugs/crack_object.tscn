@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3 uid="uid://dfmr5b8u8s1cw"]
+
+[ext_resource type="PackedScene" uid="uid://blowynai12qju" path="res://Assets/Visuals/Models/Drugs/methpipe.fbx" id="1_o4ob6"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_o4ob6"]
+radius = 0.0805368
+height = 0.475951
+
+[node name="CrackObject" type="RigidBody3D"]
+collision_layer = 8
+collision_mask = 12
+
+[node name="methpipe" parent="." instance=ExtResource("1_o4ob6")]
+transform = Transform3D(0.05, 0, 0, 0, 0.05, 0, 0, 0, 0.05, 0, 0, -0.160863)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, -0.00696544)
+shape = SubResource("CapsuleShape3D_o4ob6")

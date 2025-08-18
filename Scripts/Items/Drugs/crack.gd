@@ -9,7 +9,7 @@ var duration_left : int = DURATION
 var _player : CharacterBody3D
 
 @export var held : PackedScene = preload("res://Scenes/Items/Drugs/crack.tscn")
-@export var object : PackedScene = preload("res://Scenes/Items/Drugs/crack.tscn")	# NOTE: Replace later
+@export var object : PackedScene = preload("res://Scenes/Items/Drugs/crack_object.tscn")
 
 func _init() -> void:
 	item_name = "Crack"
