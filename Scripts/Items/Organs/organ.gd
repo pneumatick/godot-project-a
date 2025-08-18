@@ -43,12 +43,9 @@ func _apply_damage(damage: int) -> void:
 		condition -= damage
 
 func interact(player: CharacterBody3D) -> void:
-	var new_organ: Organ = new()
-	new_organ.prev_owner = prev_owner
-	new_organ.condition = condition
-	new_organ.num_drugs = num_drugs
-	player.add_item(new_organ)
-	queue_free()
+	get_child(0).free()
+	get_parent().remove_child(self)
+	player.add_item(self)
 
 func instantiate() -> void:
 	var child_scene = scene.instantiate()
