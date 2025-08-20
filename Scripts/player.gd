@@ -1,4 +1,5 @@
 extends CharacterBody3D
+class_name Player
 
 signal spawn
 signal death
@@ -60,6 +61,11 @@ var gravity_strength : float = 9.8
 @onready var weapon_reload_sound : AudioStreamPlayer3D = $"Weapon Reload Sound"
 
 func _ready() -> void:
+	if is_multiplayer_authority():
+		camera_controller.current = true
+	else:
+		camera_controller.current = false
+	
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	health_bar.value = health
 	
@@ -75,6 +81,10 @@ func _ready() -> void:
 	var spray_image : Texture2D = load("res://Assets/Sprays/spray.jpg")
 	spray_texture = ImageTexture.create_from_image(spray_image.get_image())
 	
+	# Connect to relevant entities
+	if name == str(multiplayer.get_unique_id()):
+		get_node("/root/3D Scene Root/HUD").connect_player(self)
+	
 	spawn.emit()						# Probably not supposed to be here...
 
 func _process(_delta: float) -> void:
@@ -82,43 +92,44 @@ func _process(_delta: float) -> void:
 	_check_interact_target()
 
 func _physics_process(delta: float) -> void:
-	# Update the camera view
-	_update_camera(delta)
-	
-	# Add the gravity.
-	if not is_on_floor():
-		#velocity += get_gravity() * delta
-		velocity += gravity_direction * gravity_strength * delta
-	
-	# Reset the player's position when they fall below a certain Y value
-	if position.y < -10:
-		position = Vector3(0.0, 0.0, 0.0)
+	if is_multiplayer_authority():
+		# Update the camera view
+		_update_camera(delta)
+		
+		# Add the gravity.
+		if not is_on_floor():
+			#velocity += get_gravity() * delta
+			velocity += gravity_direction * gravity_strength * delta
+		
+		# Reset the player's position when they fall below a certain Y value
+		if position.y < -10:
+			position = Vector3(0.0, 0.0, 0.0)
 
-	# Handle movement
-	var input_dir := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
-	var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
-	var jumping = false
-	if Input.is_action_pressed("jump"):
-		if is_on_floor():
-			#velocity.y = JUMP_VELOCITY
-			velocity += JUMP_VELOCITY * -gravity_direction
+		# Handle movement
+		var input_dir := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
+		var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
+		var jumping = false
+		if Input.is_action_pressed("jump"):
+			if is_on_floor():
+				#velocity.y = JUMP_VELOCITY
+				velocity += JUMP_VELOCITY * -gravity_direction
+			
+			jumping = true
+			if direction:
+				_air_control(direction, delta)
+		elif is_on_floor():
+			jumping = false
+			if direction:
+				if not jumping:
+					velocity = direction * SPEED
+					if velocity.length() > SPEED:
+						velocity = velocity.normalized() * SPEED
+			else:
+				_apply_friction(delta)
+			
+		_accelerate(direction, ACCEL, SPEED, delta)
 		
-		jumping = true
-		if direction:
-			_air_control(direction, delta)
-	elif is_on_floor():
-		jumping = false
-		if direction:
-			if not jumping:
-				velocity = direction * SPEED
-				if velocity.length() > SPEED:
-					velocity = velocity.normalized() * SPEED
-		else:
-			_apply_friction(delta)
-		
-	_accelerate(direction, ACCEL, SPEED, delta)
-	
-	move_and_slide()
+		move_and_slide()
 
 func set_gravity_direction(new_dir: Vector3):
 	gravity_direction = new_dir.normalized()

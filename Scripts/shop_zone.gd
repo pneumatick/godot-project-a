@@ -9,7 +9,7 @@ func _ready() -> void:
 	body_exited.connect(_on_body_exited)
 
 func _on_body_entered(body):
-	if body.name == "Player":
+	if body is Player:
 		print("Player entered shop")
 		#emit_signal("player_entered_shop", body)
 		emit_signal("player_entered_shop")
@@ -30,7 +30,7 @@ func _on_body_entered(body):
 			parent.queue_free()
 
 func _on_body_exited(body):
-	if body.name == "Player":
+	if body is Player:
 		body.in_shop = false
 		print("Player exited shop")
 		#emit_signal("player_exited_shop", body)
