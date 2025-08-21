@@ -5,16 +5,15 @@ func _ready() -> void:
 
 func _spawn_organs(data: Variant) -> Node3D:
 	var new_organ
-	var pos
+	# Organ arrives as EncodedObjectAsID for client
 	if data["Organ"] is EncodedObjectAsID:
 		new_organ = instance_from_id(data["Organ"].object_id).new()
-		print(data["Position"])
-		pos = data["Position"]
 	else:
 		new_organ = data["Organ"].new()
-		pos = data["Position"]
-	print(multiplayer.get_unique_id(), pos)
+	
+	# Initialize the organ
 	new_organ.instantiate()
-	new_organ.position = pos
+	new_organ.position = data["Position"]
+	new_organ.num_drugs = data["Num_drugs"]
 	
 	return new_organ

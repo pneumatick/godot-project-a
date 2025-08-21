@@ -20,9 +20,9 @@ func spawn_organs(player: CharacterBody3D):
 	for organ in _organs.keys():
 		var new_organ = organ_spawner.spawn({
 			"Organ": _organs[organ],
-			"Position": player.position
+			"Position": player.position,
+			"Num_drugs": player.get_node("Active Drugs").get_child_count()
 		})
-		new_organ.num_drugs = player.get_node("Active Drugs").get_child_count()
 		
 		# Apply impulse
 		var rand_dir = Vector3(randf_range(-1.0, 1.0), randf_range(-1.0, 1.0), randf_range(-1.0, 1.0))

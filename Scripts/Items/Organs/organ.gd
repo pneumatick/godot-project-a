@@ -15,6 +15,7 @@ var num_drugs : int = 0
 var sync: MultiplayerSynchronizer
 
 func _init() -> void:
+	# Set up MultiplayerSynchronizer on Organ root node (Node3D)
 	sync = MultiplayerSynchronizer.new()
 	var config  = SceneReplicationConfig.new()
 	config.add_property("Organ:position")
