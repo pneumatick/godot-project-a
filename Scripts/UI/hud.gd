@@ -7,6 +7,7 @@ signal slot_clicked
 @onready var ammo_label = get_node("Control/Ammo")
 @onready var money_label = get_node("Control/Money")
 @onready var interact_label = get_node("Control/Interact Label")
+@onready var health_bar = get_node("Control/Health Bar")
 
 var player: CharacterBody3D
 
@@ -33,6 +34,7 @@ func connect_player(client_player: CharacterBody3D) -> void:
 	player.death.connect(_on_player_death)
 	player.viewing.connect(_display_interaction_label)
 	player.items_changed.connect(_update_hotbar)
+	player.health_change.connect(_on_health_change)
 	
 	# Set up item slots
 	for i in range(player.item_capacity):
@@ -139,3 +141,6 @@ func _on_hotbar_slot_pressed(item_index: int) -> void:
 	print("Clicked item %s" % str(item_index))
 	if player.in_shop and player.get_in_menu():
 		slot_clicked.emit(item_index)
+
+func _on_health_change(health: int):
+	health_bar.value = health

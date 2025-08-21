@@ -9,6 +9,7 @@ signal money_change
 signal hand_empty
 signal viewing
 signal items_changed
+signal health_change
 
 const SPEED = 7.5
 const ACCEL = 1.0
@@ -53,7 +54,6 @@ var gravity_strength : float = 9.8
 
 # Nodes external to scene
 @onready var world : Node3D = get_node("/root/3D Scene Root")
-@onready var health_bar : ProgressBar = get_node("/root/3D Scene Root/HUD/Control/Health Bar")
 @onready var money_display : Label = get_node("/root/3D Scene Root/HUD/Control/Money")
 @onready var hit_sound : AudioStreamPlayer3D = $"Hit Sound"
 @onready var death_sound : AudioStreamPlayer3D = $"Death Sound"
@@ -62,12 +62,17 @@ var gravity_strength : float = 9.8
 
 func _ready() -> void:
 	if is_multiplayer_authority():
+		# Camera
 		camera_controller.current = true
+		
+		# HUD
+		get_node("/root/3D Scene Root/HUD").connect_player(self)
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+		health_change.emit(health)
 	else:
 		camera_controller.current = false
+		print("not authority")
 	
-	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-	health_bar.value = health
 	
 	# Prepare items array
 	for i in range(item_capacity):
@@ -80,10 +85,6 @@ func _ready() -> void:
 	
 	var spray_image : Texture2D = load("res://Assets/Sprays/spray.jpg")
 	spray_texture = ImageTexture.create_from_image(spray_image.get_image())
-	
-	# Connect to relevant entities
-	if name == str(multiplayer.get_unique_id()):
-		get_node("/root/3D Scene Root/HUD").connect_player(self)
 	
 	spawn.emit()						# Probably not supposed to be here...
 
@@ -291,7 +292,7 @@ func _die(source) -> void:
 func _respawn(respawn_position: Vector3) -> void:
 	global_transform.origin = respawn_position
 	health = DEFAULT_HEALTH
-	health_bar.value = health
+	health_change.emit(health)
 	visible = true
 	_alive = true
 	set_process(true)
@@ -300,7 +301,7 @@ func _respawn(respawn_position: Vector3) -> void:
 
 func _take_damage(amount: int, source) -> void:
 	health -= amount
-	health_bar.value = health
+	health_change.emit(health)
 	print("The player was hit, health now %s" % [str(health)])
 	if health <= 0 and _alive:
 		_die(source)

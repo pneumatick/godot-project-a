@@ -35,5 +35,4 @@ func spawn_player(id: int) -> CharacterBody3D:
 	player.set_multiplayer_authority(id)
 	player.add_to_group("players")
 	
-	#add_child(player)
 	return player
