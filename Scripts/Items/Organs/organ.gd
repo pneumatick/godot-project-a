@@ -12,18 +12,20 @@ var num_drugs : int = 0
 @export var _timer : Timer
 #@export var organ_body : RigidBody3D
 
+var sync: MultiplayerSynchronizer
+
 func _init() -> void:
-	var sync = MultiplayerSynchronizer.new()
+	sync = MultiplayerSynchronizer.new()
 	var config  = SceneReplicationConfig.new()
 	config.add_property("Organ:position")
-	config.property_set_replication_mode("Organ:position", SceneReplicationConfig.REPLICATION_MODE_ON_CHANGE)
+	config.property_set_replication_mode("Organ:position", SceneReplicationConfig.REPLICATION_MODE_ALWAYS)
 	config.add_property("Organ:rotation")
-	config.property_set_replication_mode("Organ:rotation", SceneReplicationConfig.REPLICATION_MODE_ON_CHANGE)
-	config.add_property("Organ:collision_mask")
-	config.property_set_replication_mode("Organ:collision_mask", SceneReplicationConfig.REPLICATION_MODE_ALWAYS)
+	config.property_set_replication_mode("Organ:rotation", SceneReplicationConfig.REPLICATION_MODE_ALWAYS)
 	sync.replication_config = config
 	add_child(sync)
-	
+
+func _enter_tree() -> void:
+	sync.root_path = self.get_path()
 
 func apply_bullet_force(hit_pos: Vector3, direction: Vector3, force: float, damage: int, source):
 	#organ_body.apply_impulse(hit_pos - global_transform.origin + direction * force)

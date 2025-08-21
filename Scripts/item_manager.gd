@@ -18,8 +18,10 @@ func spawn_organs(player: CharacterBody3D):
 	var camera_controller = player.camera_controller
 	
 	for organ in _organs.keys():
-		var new_organ = organ_spawner.spawn(_organs[organ])
-		new_organ.position = player.position
+		var new_organ = organ_spawner.spawn({
+			"Organ": _organs[organ],
+			"Position": player.position
+		})
 		new_organ.num_drugs = player.get_node("Active Drugs").get_child_count()
 		
 		# Apply impulse
