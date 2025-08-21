@@ -3,8 +3,9 @@ extends Control
 signal on_menu_opened()
 signal on_menu_closed()
 
-@onready var player = $"../../Player"
 @onready var hud = get_parent()
+
+var player: CharacterBody3D
 
 func _ready() -> void:
 	visible = false

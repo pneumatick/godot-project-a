@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://c2dcha7sipp8a"]
+[gd_scene load_steps=9 format=3 uid="uid://c2dcha7sipp8a"]
 
 [ext_resource type="Script" uid="uid://ck610abr6ujd" path="res://Scripts/player.gd" id="1_4flbx"]
 [ext_resource type="AudioStream" uid="uid://m02ydh4m0xlk" path="res://Assets/Sounds/steve-old-hurt-sound_XKZxUk4.mp3" id="2_onrkg"]
@@ -9,6 +9,14 @@
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_c3xsu"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_4flbx"]
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_fkybt"]
+properties/0/path = NodePath(".:position")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+properties/1/path = NodePath(".:rotation")
+properties/1/spawn = true
+properties/1/replication_mode = 1
 
 [node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("camera_controller")]
 collision_mask = 6
@@ -43,3 +51,6 @@ stream = ExtResource("4_vgqql")
 stream = ExtResource("5_fkybt")
 
 [node name="Active Drugs" type="Node3D" parent="."]
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_fkybt")

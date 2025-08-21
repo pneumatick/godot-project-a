@@ -25,7 +25,7 @@ func _init(i_owner: CharacterBody3D = null) -> void:
 
 func _process(_delta: float) -> void:
 	if Input.is_action_pressed("fire"):
-		var in_menu = player.get_in_menu()
+		var in_menu = prev_owner.get_in_menu()
 		if _equipped and current_ammo > 0 and not in_menu:
 			use(fuse_time, _on_timer_timeout, explosion_radius)
 			$"Grenade Object/Fuse Sound".play()

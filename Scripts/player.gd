@@ -1,4 +1,5 @@
 extends CharacterBody3D
+class_name Player
 
 signal spawn
 signal death
@@ -8,6 +9,7 @@ signal money_change
 signal hand_empty
 signal viewing
 signal items_changed
+signal health_change
 
 const SPEED = 7.5
 const ACCEL = 1.0
@@ -52,7 +54,6 @@ var gravity_strength : float = 9.8
 
 # Nodes external to scene
 @onready var world : Node3D = get_node("/root/3D Scene Root")
-@onready var health_bar : ProgressBar = get_node("/root/3D Scene Root/HUD/Control/Health Bar")
 @onready var money_display : Label = get_node("/root/3D Scene Root/HUD/Control/Money")
 @onready var hit_sound : AudioStreamPlayer3D = $"Hit Sound"
 @onready var death_sound : AudioStreamPlayer3D = $"Death Sound"
@@ -60,8 +61,18 @@ var gravity_strength : float = 9.8
 @onready var weapon_reload_sound : AudioStreamPlayer3D = $"Weapon Reload Sound"
 
 func _ready() -> void:
-	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-	health_bar.value = health
+	if is_multiplayer_authority():
+		# Camera
+		camera_controller.current = true
+		
+		# HUD
+		get_node("/root/3D Scene Root/HUD").connect_player(self)
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+		health_change.emit(health)
+	else:
+		camera_controller.current = false
+		print("not authority")
+	
 	
 	# Prepare items array
 	for i in range(item_capacity):
@@ -82,43 +93,44 @@ func _process(_delta: float) -> void:
 	_check_interact_target()
 
 func _physics_process(delta: float) -> void:
-	# Update the camera view
-	_update_camera(delta)
-	
-	# Add the gravity.
-	if not is_on_floor():
-		#velocity += get_gravity() * delta
-		velocity += gravity_direction * gravity_strength * delta
-	
-	# Reset the player's position when they fall below a certain Y value
-	if position.y < -10:
-		position = Vector3(0.0, 0.0, 0.0)
+	if is_multiplayer_authority():
+		# Update the camera view
+		_update_camera(delta)
+		
+		# Add the gravity.
+		if not is_on_floor():
+			#velocity += get_gravity() * delta
+			velocity += gravity_direction * gravity_strength * delta
+		
+		# Reset the player's position when they fall below a certain Y value
+		if position.y < -10:
+			position = Vector3(0.0, 0.0, 0.0)
 
-	# Handle movement
-	var input_dir := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
-	var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
-	var jumping = false
-	if Input.is_action_pressed("jump"):
-		if is_on_floor():
-			#velocity.y = JUMP_VELOCITY
-			velocity += JUMP_VELOCITY * -gravity_direction
+		# Handle movement
+		var input_dir := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
+		var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
+		var jumping = false
+		if Input.is_action_pressed("jump"):
+			if is_on_floor():
+				#velocity.y = JUMP_VELOCITY
+				velocity += JUMP_VELOCITY * -gravity_direction
+			
+			jumping = true
+			if direction:
+				_air_control(direction, delta)
+		elif is_on_floor():
+			jumping = false
+			if direction:
+				if not jumping:
+					velocity = direction * SPEED
+					if velocity.length() > SPEED:
+						velocity = velocity.normalized() * SPEED
+			else:
+				_apply_friction(delta)
+			
+		_accelerate(direction, ACCEL, SPEED, delta)
 		
-		jumping = true
-		if direction:
-			_air_control(direction, delta)
-	elif is_on_floor():
-		jumping = false
-		if direction:
-			if not jumping:
-				velocity = direction * SPEED
-				if velocity.length() > SPEED:
-					velocity = velocity.normalized() * SPEED
-		else:
-			_apply_friction(delta)
-		
-	_accelerate(direction, ACCEL, SPEED, delta)
-	
-	move_and_slide()
+		move_and_slide()
 
 func set_gravity_direction(new_dir: Vector3):
 	gravity_direction = new_dir.normalized()
@@ -236,11 +248,17 @@ func _update_camera(delta: float) -> void:
 
 # Handle player death logic
 func _die(source) -> void:
+	if not is_multiplayer_authority():
+		return
+	
+	rpc("die_rpc", source)
+
+@rpc("authority", "call_local")
+func die_rpc(source):
 	_alive = false
 	set_process(false)
 	set_physics_process(false)
 	visible = false
-	velocity = Vector3.ZERO
 	
 	# Drop items
 	drop_all_items()
@@ -252,7 +270,9 @@ func _die(source) -> void:
 	_inventory = {}
 	
 	# Spawn organs
-	_spawn_organs()
+	world.get_node("ItemManager").spawn_organs(self)
+	
+	velocity = Vector3.ZERO
 	
 	# Deduct money
 	if money - death_deduction >= 0:
@@ -280,7 +300,7 @@ func _die(source) -> void:
 func _respawn(respawn_position: Vector3) -> void:
 	global_transform.origin = respawn_position
 	health = DEFAULT_HEALTH
-	health_bar.value = health
+	health_change.emit(health)
 	visible = true
 	_alive = true
 	set_process(true)
@@ -289,7 +309,7 @@ func _respawn(respawn_position: Vector3) -> void:
 
 func _take_damage(amount: int, source) -> void:
 	health -= amount
-	health_bar.value = health
+	health_change.emit(health)
 	print("The player was hit, health now %s" % [str(health)])
 	if health <= 0 and _alive:
 		_die(source)
@@ -527,22 +547,6 @@ func drop_item(item):
 
 func is_alive() -> bool:
 	return _alive
-
-func _spawn_organs() -> void:
-	for organ in _organs.keys():
-		var new_organ : Organ = _organs[organ].new()
-		new_organ.instantiate()
-		new_organ.position = position
-		new_organ.num_drugs = $"Active Drugs".get_child_count()
-		get_parent().add_child(new_organ)
-		
-		# Apply impulse
-		var rand_dir = Vector3(randf_range(-1.0, 1.0), randf_range(-1.0, 1.0), randf_range(-1.0, 1.0))
-		var impulse = camera_controller.global_transform.basis.y + -camera_controller.global_transform.basis.z * 15
-		if velocity != Vector3.ZERO:
-			impulse += velocity
-		impulse *= rand_dir
-		new_organ.get_child(0).apply_impulse(impulse)
 
 func _check_interact_target():
 	var space_state = get_world_3d().direct_space_state

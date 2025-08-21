@@ -6,28 +6,17 @@ signal slot_clicked
 
 @onready var ammo_label = get_node("Control/Ammo")
 @onready var money_label = get_node("Control/Money")
-@onready var player = get_node("../Player")
 @onready var interact_label = get_node("Control/Interact Label")
+@onready var health_bar = get_node("Control/Health Bar")
+
+var player: CharacterBody3D
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	player.money_change.connect(_on_player_money_change)
-	player.weapon_equipped.connect(_on_player_weapon_equipped)
-	player.hand_empty.connect(_on_player_hand_empty)
-	player.death.connect(_on_player_death)
-	player.viewing.connect(_display_interaction_label)
-	player.items_changed.connect(_update_hotbar)
 	$ShopUI.on_menu_opened.connect(_on_menu_opened)
 	$ShopUI.on_menu_closed.connect(_on_menu_closed)
 	$"../ShopZone".player_entered_shop.connect(_on_player_entered_shop)
 	$"../ShopZone".player_exited_shop.connect(_on_player_exited_shop)
-	
-	# Set up item slots
-	for i in range(player.item_capacity):
-		var button = TextureButton.new()
-		button.set_meta("item_index", i)
-		button.pressed.connect(_on_hotbar_slot_pressed.bind(i))
-		$"Control/Hotbar".add_child(button)
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("interact"):
@@ -36,6 +25,26 @@ func _input(event: InputEvent) -> void:
 				$ShopUI.open_for_player()
 			else:
 				$ShopUI.close_for_player()
+
+func connect_player(client_player: CharacterBody3D) -> void:
+	player = client_player
+	player.money_change.connect(_on_player_money_change)
+	player.weapon_equipped.connect(_on_player_weapon_equipped)
+	player.hand_empty.connect(_on_player_hand_empty)
+	player.death.connect(_on_player_death)
+	player.viewing.connect(_display_interaction_label)
+	player.items_changed.connect(_update_hotbar)
+	player.health_change.connect(_on_health_change)
+	
+	# Set up item slots
+	for i in range(player.item_capacity):
+		var button = TextureButton.new()
+		button.set_meta("item_index", i)
+		button.pressed.connect(_on_hotbar_slot_pressed.bind(i))
+		$"Control/Hotbar".add_child(button)
+	
+	# Assign player to Shop UI
+	$ShopUI.player = player
 
 func _on_player_weapon_equipped(weapon: Node) -> void:
 	print("HUD received weapon equipped signal")
@@ -132,3 +141,6 @@ func _on_hotbar_slot_pressed(item_index: int) -> void:
 	print("Clicked item %s" % str(item_index))
 	if player.in_shop and player.get_in_menu():
 		slot_clicked.emit(item_index)
+
+func _on_health_change(health: int):
+	health_bar.value = health
