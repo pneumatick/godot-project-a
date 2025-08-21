@@ -29,8 +29,8 @@ func _enter_tree() -> void:
 	sync.root_path = self.get_path()
 
 func apply_bullet_force(hit_pos: Vector3, direction: Vector3, force: float, damage: int, source):
-	#organ_body.apply_impulse(hit_pos - global_transform.origin + direction * force)
-	get_child(0).apply_impulse(hit_pos - global_transform.origin + direction * force)
+	var body = get_node("Organ")
+	body.apply_impulse(hit_pos - global_transform.origin + direction * force)
 	_apply_damage(damage)
 	set_new_owner(source.prev_owner)
 	# HIT SOUND HERE
@@ -53,7 +53,7 @@ func _apply_damage(damage: int) -> void:
 		condition -= damage
 
 func interact(player: CharacterBody3D) -> void:
-	get_child(0).free()
+	get_node("Organ").free()
 	get_parent().remove_child(self)
 	player.add_item(self)
 
