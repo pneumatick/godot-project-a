@@ -7,7 +7,7 @@ var fuse_set : bool = false
 
 func use(fuse_time: float, callback: Callable, explosion_radius = null) -> void:
 	# Remove item from player's inventory
-	player.remove_item(self)
+	prev_owner.remove_item(self)
 	
 	# Set up
 	free_held_scene()
@@ -16,11 +16,11 @@ func use(fuse_time: float, callback: Callable, explosion_radius = null) -> void:
 		var explosion_area = $"Grenade Object/Explosion Area"
 		var explosion_collider = explosion_area.get_child(0)
 		explosion_collider.shape.radius = explosion_radius
-		global_transform = player.camera_controller.global_transform
-	player.get_parent().add_child(self)
+		global_transform = prev_owner.camera_controller.global_transform
+	prev_owner.get_parent().add_child(self)
 	
 	# Determine position
-	var camera = player.camera_controller
+	var camera = prev_owner.camera_controller
 	var hand_pos = camera.global_transform.origin
 	var forward = -camera.global_transform.basis.z 
 	projectile.global_transform.origin = hand_pos + forward * 1.5
@@ -28,9 +28,9 @@ func use(fuse_time: float, callback: Callable, explosion_radius = null) -> void:
 	# Apply impulse
 	var impulse = camera.global_transform.basis.y + -camera.global_transform.basis.z * throw_force
 	# Apply additional force if the throw is not against the direction of velocity
-	var with_movement : bool = forward.dot(player.velocity) >= 0
-	if player.velocity != Vector3.ZERO and with_movement:
-		impulse += Vector3(player.velocity.x, 0, player.velocity.z)
+	var with_movement : bool = forward.dot(prev_owner.velocity) >= 0
+	if prev_owner.velocity != Vector3.ZERO and with_movement:
+		impulse += Vector3(prev_owner.velocity.x, 0, prev_owner.velocity.z)
 	projectile.apply_impulse(impulse, forward * throw_force)
 	
 	# Start timer

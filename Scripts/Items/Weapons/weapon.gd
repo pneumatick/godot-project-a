@@ -10,7 +10,6 @@ class_name Weapon
 @export var value : int
 @export var prev_owner : CharacterBody3D
 
-@onready var player = get_node("/root/3D Scene Root/Player")
 @onready var ammo_label = get_node("/root/3D Scene Root/HUD/Control/Ammo")
 @onready var fire_sound : AudioStreamPlayer3D
 
@@ -53,7 +52,7 @@ func fire():
 			from,
 			to,
 			0xFFFFFFFF,			  # Default value
-			[self, player]  	  # exclude gun and player
+			[self, prev_owner]    # exclude gun and player
 		)
 	)
 	

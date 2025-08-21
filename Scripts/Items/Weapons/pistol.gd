@@ -23,7 +23,7 @@ func _init(i_owner: CharacterBody3D = null) -> void:
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta: float) -> void:
 	if Input.is_action_pressed("fire"):
-		var in_menu = player.get_in_menu()
+		var in_menu = prev_owner.get_in_menu()
 		if _can_fire and _equipped and current_ammo > 0 and not in_menu:
 			fire()
 			_can_fire = false
