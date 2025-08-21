@@ -1,6 +1,5 @@
 extends Node3D
 
-@onready var player_scene = preload("res://Scenes/player.tscn")
 @onready var spawner = $MultiplayerSpawner
 
 const PORT = 12345

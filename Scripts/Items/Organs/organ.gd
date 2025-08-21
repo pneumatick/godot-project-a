@@ -12,11 +12,18 @@ var num_drugs : int = 0
 @export var _timer : Timer
 #@export var organ_body : RigidBody3D
 
-func _on_collection_area_body_entered(body: Node3D) -> void:		# Placholder: May not get equivalent (TBD)
-	if body.name == "Player" and body.is_alive():
-		#body.add_item(item_name)
-		print("Player collected %s" % item_name)
-		queue_free()
+func _init() -> void:
+	var sync = MultiplayerSynchronizer.new()
+	var config  = SceneReplicationConfig.new()
+	config.add_property("Organ:position")
+	config.property_set_replication_mode("Organ:position", SceneReplicationConfig.REPLICATION_MODE_ON_CHANGE)
+	config.add_property("Organ:rotation")
+	config.property_set_replication_mode("Organ:rotation", SceneReplicationConfig.REPLICATION_MODE_ON_CHANGE)
+	config.add_property("Organ:collision_mask")
+	config.property_set_replication_mode("Organ:collision_mask", SceneReplicationConfig.REPLICATION_MODE_ALWAYS)
+	sync.replication_config = config
+	add_child(sync)
+	
 
 func apply_bullet_force(hit_pos: Vector3, direction: Vector3, force: float, damage: int, source):
 	#organ_body.apply_impulse(hit_pos - global_transform.origin + direction * force)
@@ -47,7 +54,7 @@ func interact(player: CharacterBody3D) -> void:
 	get_parent().remove_child(self)
 	player.add_item(self)
 
-func instantiate() -> void:
+func instantiate() -> Organ:
 	var child_scene = scene.instantiate()
 	for node in child_scene.get_children():
 		if node is Timer:
@@ -56,3 +63,5 @@ func instantiate() -> void:
 			_timer.call_deferred("start")
 	child_scene.add_to_group("interactables")
 	add_child(child_scene)
+	
+	return self

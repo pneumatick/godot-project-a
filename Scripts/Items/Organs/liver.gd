@@ -2,6 +2,7 @@ extends Organ
 class_name Liver
 
 func _init(p_owner: CharacterBody3D = null) -> void:
+	super()
 	prev_owner = p_owner
 	
 	item_name = "Liver"

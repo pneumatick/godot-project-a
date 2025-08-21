@@ -1,10 +1,12 @@
-[gd_scene load_steps=19 format=3 uid="uid://hmv4dr58x4if"]
+[gd_scene load_steps=21 format=3 uid="uid://hmv4dr58x4if"]
 
 [ext_resource type="Script" uid="uid://cf8moef3pykdp" path="res://Scripts/3d_scene_root.gd" id="1_1rpu5"]
 [ext_resource type="PackedScene" uid="uid://c2dcha7sipp8a" path="res://Scenes/player.tscn" id="1_sxnch"]
+[ext_resource type="Script" uid="uid://dfvohn1o74n2w" path="res://Scripts/item_manager.gd" id="2_1gw12"]
 [ext_resource type="PackedScene" uid="uid://ducw325a8ghny" path="res://Scenes/weapon_pickup.tscn" id="4_5rbum"]
 [ext_resource type="PackedScene" uid="uid://tldca8ygc1hw" path="res://Scenes/hud.tscn" id="4_kb1pf"]
 [ext_resource type="PackedScene" uid="uid://mlxqh5iqxvxs" path="res://Scenes/target.tscn" id="5_23mtt"]
+[ext_resource type="Script" uid="uid://bfdlky23b1cf8" path="res://Scripts/organ_spawner.gd" id="5_gy3gj"]
 [ext_resource type="PackedScene" uid="uid://dulrda5jbt33a" path="res://Scenes/shop_zone.tscn" id="7_lyres"]
 [ext_resource type="PackedScene" uid="uid://gv7xvye5xef7" path="res://Scenes/damage_area.tscn" id="7_riqsv"]
 [ext_resource type="Texture2D" uid="uid://buhhtw8gu5tbk" path="res://Assets/Visuals/Textures/Dirt_20-512x512.png" id="8_fqem3"]
@@ -39,6 +41,19 @@ ambient_light_color = Color(0.617455, 0.617455, 0.617455, 1)
 
 [node name="3D Scene Root" type="Node3D"]
 script = ExtResource("1_1rpu5")
+
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("uid://c2dcha7sipp8a")
+spawn_path = NodePath("..")
+script = ExtResource("9_o6qxm")
+network_player = ExtResource("1_sxnch")
+
+[node name="ItemManager" type="Node3D" parent="."]
+script = ExtResource("2_1gw12")
+
+[node name="OrganSpawner" type="MultiplayerSpawner" parent="ItemManager"]
+spawn_path = NodePath("..")
+script = ExtResource("5_gy3gj")
 
 [node name="HUD" parent="." instance=ExtResource("4_kb1pf")]
 
@@ -117,9 +132,3 @@ mesh = SubResource("BoxMesh_riqsv")
 [node name="Test Decal" type="Decal" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.12077, 2.27356, 5.78955)
 texture_albedo = ExtResource("9_riqsv")
-
-[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
-_spawnable_scenes = PackedStringArray("uid://c2dcha7sipp8a")
-spawn_path = NodePath("..")
-script = ExtResource("9_o6qxm")
-network_player = ExtResource("1_sxnch")

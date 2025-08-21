@@ -270,7 +270,7 @@ func die_rpc(source):
 	_inventory = {}
 	
 	# Spawn organs
-	_spawn_organs()
+	world.get_node("ItemManager").spawn_organs(self)
 	
 	velocity = Vector3.ZERO
 	
@@ -547,22 +547,6 @@ func drop_item(item):
 
 func is_alive() -> bool:
 	return _alive
-
-func _spawn_organs() -> void:
-	for organ in _organs.keys():
-		var new_organ : Organ = _organs[organ].new()
-		new_organ.instantiate()
-		new_organ.position = position
-		new_organ.num_drugs = $"Active Drugs".get_child_count()
-		get_parent().add_child(new_organ)
-		
-		# Apply impulse
-		var rand_dir = Vector3(randf_range(-1.0, 1.0), randf_range(-1.0, 1.0), randf_range(-1.0, 1.0))
-		var impulse = camera_controller.global_transform.basis.y + -camera_controller.global_transform.basis.z * 15
-		if velocity != Vector3.ZERO:
-			impulse += velocity
-		impulse *= rand_dir
-		new_organ.get_child(0).apply_impulse(impulse)
 
 func _check_interact_target():
 	var space_state = get_world_3d().direct_space_state
