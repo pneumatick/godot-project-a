@@ -10,7 +10,8 @@ func _ready() -> void:
 
 func _on_peer_connected(id):
 	print(multiplayer.get_unique_id(), " Peer connected:", id)
-	spawn(id)
+	if multiplayer.is_server():
+		spawn(id)
 
 func _on_peer_disconnected(id):
 	print(multiplayer.get_unique_id(), " Peer disconnected:", id)
