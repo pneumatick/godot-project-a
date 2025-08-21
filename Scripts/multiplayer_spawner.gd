@@ -33,6 +33,7 @@ func spawn_player(id: int) -> CharacterBody3D:
 	var player = network_player.instantiate()
 	player.name = str(id)
 	player.set_multiplayer_authority(id)
+	player.add_to_group("players")
 	
 	#add_child(player)
 	return player
