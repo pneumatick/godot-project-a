@@ -260,8 +260,6 @@ func die_rpc(source):
 	set_physics_process(false)
 	visible = false
 	
-	velocity = Vector3.ZERO
-	
 	# Drop items
 	drop_all_items()
 	
@@ -273,6 +271,8 @@ func die_rpc(source):
 	
 	# Spawn organs
 	_spawn_organs()
+	
+	velocity = Vector3.ZERO
 	
 	# Deduct money
 	if money - death_deduction >= 0:
