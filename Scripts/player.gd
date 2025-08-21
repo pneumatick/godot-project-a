@@ -248,10 +248,18 @@ func _update_camera(delta: float) -> void:
 
 # Handle player death logic
 func _die(source) -> void:
+	if not is_multiplayer_authority():
+		return
+	
+	rpc("die_rpc", source)
+
+@rpc("authority", "call_local")
+func die_rpc(source):
 	_alive = false
 	set_process(false)
 	set_physics_process(false)
 	visible = false
+	
 	velocity = Vector3.ZERO
 	
 	# Drop items

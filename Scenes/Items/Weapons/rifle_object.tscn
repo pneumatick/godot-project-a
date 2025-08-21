@@ -15,7 +15,6 @@ size = Vector3(0.127045, 0.30481, 0.857666)
 collision_layer = 8
 collision_mask = 4
 script = ExtResource("1_bdioh")
-item_name = "Rifle"
 
 [node name="AK47" parent="." instance=ExtResource("2_tnen6")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.15)
