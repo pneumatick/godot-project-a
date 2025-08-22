@@ -272,7 +272,7 @@ func die_rpc(source):
 	
 	# Clear inventory slots
 	_items = []
-	for i in _items.size():
+	for i in range(item_capacity):
 		_items.append(null)
 	_inventory = {}
 	

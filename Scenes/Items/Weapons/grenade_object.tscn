@@ -15,7 +15,7 @@ height = 0.158321
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_yf12n"]
 
-[node name="Grenade Object" type="RigidBody3D"]
+[node name="Throwable" type="RigidBody3D"]
 collision_layer = 8
 collision_mask = 15
 script = ExtResource("1_o0pwm")
