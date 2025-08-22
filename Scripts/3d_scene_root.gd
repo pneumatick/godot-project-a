@@ -1,6 +1,6 @@
 extends Node3D
 
-@onready var spawner = $MultiplayerSpawner
+@onready var spawner = $"PlayerManager/MultiplayerSpawner"
 
 const PORT = 12345
 

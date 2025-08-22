@@ -7,6 +7,7 @@ class_name Grenade
 @export var explosion_force: float = 20.0
 
 func _init(i_owner: CharacterBody3D = null) -> void:
+	super()
 	prev_owner = i_owner
 	
 	max_ammo = 1
@@ -28,7 +29,7 @@ func _process(_delta: float) -> void:
 		var in_menu = prev_owner.get_in_menu()
 		if _equipped and current_ammo > 0 and not in_menu:
 			use(fuse_time, _on_timer_timeout, explosion_radius)
-			$"Grenade Object/Fuse Sound".play()
+			$"Throwable/Fuse Sound".play()
 
 func _on_timer_timeout():
 	explode()
@@ -36,13 +37,13 @@ func _on_timer_timeout():
 
 func explode():
 	# Stop fuse sound
-	$"Grenade Object/Fuse Sound".stop()
+	$"Throwable/Fuse Sound".stop()
 	
 	# Play explosion effect
 	#spawn_explosion_effect(global_transform.origin)
 
 	# Damage logic
-	var explosion_area = $"Grenade Object/Explosion Area"
+	var explosion_area = $"Throwable/Explosion Area"
 	var results = explosion_area.get_overlapping_bodies()
 	for result in results:
 		if result == get_child(0):
@@ -71,10 +72,10 @@ func explode():
 	
 	# Play explosion sound effect
 	# NOTE: Probably a better way to do this but this works for now
-	$"Grenade Object/Explosion Sound".play()
+	$"Throwable/Explosion Sound".play()
 	visible = false
 	set_physics_process(false)
-	await $"Grenade Object/Explosion Sound".finished
+	await $"Throwable/Explosion Sound".finished
 	
 	queue_free()
 

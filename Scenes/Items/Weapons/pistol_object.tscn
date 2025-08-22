@@ -11,7 +11,7 @@ size = Vector3(0.0414734, 0.153198, 0.233246)
 [sub_resource type="BoxShape3D" id="BoxShape3D_0eyra"]
 size = Vector3(0.101212, 0.160797, 0.344238)
 
-[node name="Pistol Object" type="RigidBody3D"]
+[node name="Weapon" type="RigidBody3D"]
 collision_layer = 8
 collision_mask = 4
 script = ExtResource("1_f4sev")

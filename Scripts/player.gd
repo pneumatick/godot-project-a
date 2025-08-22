@@ -54,6 +54,7 @@ var gravity_strength : float = 9.8
 
 # Nodes external to scene
 @onready var world : Node3D = get_node("/root/3D Scene Root")
+@onready var HUD: CanvasLayer = get_node("/root/3D Scene Root/HUD")
 @onready var money_display : Label = get_node("/root/3D Scene Root/HUD/Control/Money")
 @onready var hit_sound : AudioStreamPlayer3D = $"Hit Sound"
 @onready var death_sound : AudioStreamPlayer3D = $"Death Sound"
@@ -66,13 +67,12 @@ func _ready() -> void:
 		camera_controller.current = true
 		
 		# HUD
-		get_node("/root/3D Scene Root/HUD").connect_player(self)
+		HUD.connect_player(self)
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 		health_change.emit(health)
 	else:
+		HUD.connect_peer(self)
 		camera_controller.current = false
-		print("not authority")
-	
 	
 	# Prepare items array
 	for i in range(item_capacity):
@@ -93,44 +93,46 @@ func _process(_delta: float) -> void:
 	_check_interact_target()
 
 func _physics_process(delta: float) -> void:
-	if is_multiplayer_authority():
-		# Update the camera view
-		_update_camera(delta)
-		
-		# Add the gravity.
-		if not is_on_floor():
-			#velocity += get_gravity() * delta
-			velocity += gravity_direction * gravity_strength * delta
-		
-		# Reset the player's position when they fall below a certain Y value
-		if position.y < -10:
-			position = Vector3(0.0, 0.0, 0.0)
+	if not is_multiplayer_authority():
+		return
+	
+	# Update the camera view
+	_update_camera(delta)
+	
+	# Add the gravity.
+	if not is_on_floor():
+		#velocity += get_gravity() * delta
+		velocity += gravity_direction * gravity_strength * delta
+	
+	# Reset the player's position when they fall below a certain Y value
+	if position.y < -10:
+		position = Vector3(0.0, 0.0, 0.0)
 
-		# Handle movement
-		var input_dir := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
-		var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
-		var jumping = false
-		if Input.is_action_pressed("jump"):
-			if is_on_floor():
-				#velocity.y = JUMP_VELOCITY
-				velocity += JUMP_VELOCITY * -gravity_direction
-			
-			jumping = true
-			if direction:
-				_air_control(direction, delta)
-		elif is_on_floor():
-			jumping = false
-			if direction:
-				if not jumping:
-					velocity = direction * SPEED
-					if velocity.length() > SPEED:
-						velocity = velocity.normalized() * SPEED
-			else:
-				_apply_friction(delta)
-			
-		_accelerate(direction, ACCEL, SPEED, delta)
+	# Handle movement
+	var input_dir := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
+	var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
+	var jumping = false
+	if Input.is_action_pressed("jump"):
+		if is_on_floor():
+			#velocity.y = JUMP_VELOCITY
+			velocity += JUMP_VELOCITY * -gravity_direction
 		
-		move_and_slide()
+		jumping = true
+		if direction:
+			_air_control(direction, delta)
+	elif is_on_floor():
+		jumping = false
+		if direction:
+			if not jumping:
+				velocity = direction * SPEED
+				if velocity.length() > SPEED:
+					velocity = velocity.normalized() * SPEED
+		else:
+			_apply_friction(delta)
+		
+	_accelerate(direction, ACCEL, SPEED, delta)
+	
+	move_and_slide()
 
 func set_gravity_direction(new_dir: Vector3):
 	gravity_direction = new_dir.normalized()
@@ -152,6 +154,9 @@ func align_with_gravity_instant():
 	)
 
 func _input(event):
+	if not is_multiplayer_authority():
+		return
+	
 	_mouse_input = event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED
 	if _mouse_input:
 		#_rotation_input = -event.relative.x * mouse_sensitivity
@@ -163,6 +168,8 @@ func _input(event):
 			_equip_item(wrapi(_equipped_item_idx + 1, 0, _items.size()))
 	elif event.is_action_pressed("throw_item"):
 		throw_current_item()
+	elif event.is_action_pressed("fire"):
+		_fire()
 	elif event.is_action_pressed("kill"):
 		_die(self)
 	elif event.is_action_pressed("interact"):
@@ -251,10 +258,13 @@ func _die(source) -> void:
 	if not is_multiplayer_authority():
 		return
 	
-	rpc("die_rpc", source)
+	if source is Weapon:
+		rpc("die_rpc", source.name, self.name, source.prev_owner.name)
+	else:
+		rpc("die_rpc", source.name, self.name)
 
 @rpc("authority", "call_local")
-func die_rpc(source):
+func die_rpc(source: String, victim: String, killer: String = ""):
 	_alive = false
 	set_process(false)
 	set_physics_process(false)
@@ -263,7 +273,7 @@ func die_rpc(source):
 	# Drop items
 	drop_all_items()
 	
-	# Dump inventory
+	# Clear inventory slots
 	_items = []
 	for i in range(item_capacity):
 		_items.append(null)
@@ -280,22 +290,28 @@ func die_rpc(source):
 	else:
 		remove_money(money)
 	
-	# Remove whatever is in the right hand
-	var right_hand_children = right_hand.get_children()
-	for child in right_hand_children:
-		child.queue_free()
-	
 	# Remove active drugs
 	var drugs = $"Active Drugs".get_children()
 	for drug in drugs:
 		drug.queue_free()
 	
 	death_sound.play()
-	death.emit(source)
+	if killer == "":
+		death.emit(source, victim)
+	else:
+		death.emit(source, victim, killer)
 	
 	# Wait a bit before respawning the player
 	await get_tree().create_timer(2.0).timeout
 	_respawn(Vector3(0.0, 1.0, 0.0))
+
+func _fire() -> void:
+	assert_fire.rpc_id(1)
+
+@rpc("any_peer", "call_local", "unreliable")
+func assert_fire() -> void:
+	if multiplayer.is_server():
+		print(multiplayer.get_unique_id(), " received fire assertion from ", multiplayer.get_remote_sender_id())
 
 func _respawn(respawn_position: Vector3) -> void:
 	global_transform.origin = respawn_position
@@ -339,8 +355,10 @@ func _equip_item(idx: int) -> void:
 
 # Add an item to the player's inventory (and hand, at least for now)
 func add_item(item) -> void:
-	var item_name = item.item_name
-	print("Adding %s..." % item_name)
+	if multiplayer.get_remote_sender_id() != 1:
+		return
+	
+	print(multiplayer.get_unique_id(), " Adding %s..." % str(item))
 	
 	# Add weapons
 	var added = false
@@ -349,20 +367,20 @@ func add_item(item) -> void:
 	# Add organs
 	elif item is Organ:
 		added = _add_organ(item)
-		print("%s %s %s" % [item.item_name, item.condition, item.value])
+		print("%s %s %s" % [str(item), item.condition, item.value])
 		print(_inventory["Organs"])
 	elif item is Drug:
 		added = _add_drug(item)
 		print(_inventory)
 	else:
-		print("Unknown item %s" % item_name)
+		print("Unknown item %s" % str(item))
 	
 	if added:
-		print("Picked up %s" % item_name)
+		print(multiplayer.get_unique_id(), " Picked up %s" % str(item))
 		item.prev_owner = self
 		items_changed.emit(_items, _equipped_item_idx)
 	else:
-		print("Failed to pick up %s" % item_name)
+		print("Failed to pick up %s" % str(item))
 	
 	print(_items)
 
@@ -532,9 +550,13 @@ func drop_item(item):
 	get_parent().add_child(item)
 
 	# Determine position
+	var body: CollisionObject3D
+	for node in item.get_children():
+		if node is CollisionObject3D:
+			body = node
 	var muzzle_pos = camera_controller.global_transform.origin
 	var forward = -camera_controller.global_transform.basis.z 
-	item.get_child(0).global_transform.origin = muzzle_pos + forward * 1.5
+	body.global_transform.origin = muzzle_pos + forward * 1.5
 
 	# Apply impulse
 	var rand_dir = Vector3(randf_range(-1.0, 1.0), randf_range(-1.0, 1.0), randf_range(-1.0, 1.0))
@@ -542,7 +564,7 @@ func drop_item(item):
 	if velocity != Vector3.ZERO:
 			impulse += velocity
 	impulse *= rand_dir
-	item.get_child(0).apply_impulse(impulse)
+	body.apply_impulse(impulse)
 	
 
 func is_alive() -> bool:

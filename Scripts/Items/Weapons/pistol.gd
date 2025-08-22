@@ -2,6 +2,7 @@ extends Weapon
 class_name Pistol
 
 func _init(i_owner: CharacterBody3D = null) -> void:
+	super()
 	prev_owner = i_owner
 	
 	max_ammo = 17
