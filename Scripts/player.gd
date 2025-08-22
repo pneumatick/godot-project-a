@@ -544,9 +544,13 @@ func drop_item(item):
 	get_parent().add_child(item)
 
 	# Determine position
+	var body: CollisionObject3D
+	for node in item.get_children():
+		if node is CollisionObject3D:
+			body = node
 	var muzzle_pos = camera_controller.global_transform.origin
 	var forward = -camera_controller.global_transform.basis.z 
-	item.get_child(0).global_transform.origin = muzzle_pos + forward * 1.5
+	body.global_transform.origin = muzzle_pos + forward * 1.5
 
 	# Apply impulse
 	var rand_dir = Vector3(randf_range(-1.0, 1.0), randf_range(-1.0, 1.0), randf_range(-1.0, 1.0))
@@ -554,7 +558,7 @@ func drop_item(item):
 	if velocity != Vector3.ZERO:
 			impulse += velocity
 	impulse *= rand_dir
-	item.get_child(0).apply_impulse(impulse)
+	body.apply_impulse(impulse)
 	
 
 func is_alive() -> bool:
