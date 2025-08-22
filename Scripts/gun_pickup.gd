@@ -50,5 +50,7 @@ func _transfer_to_player(id: String) -> void:
 			for player in %PlayerManager.get_children():
 				print(multiplayer.get_unique_id(), " child of player manager: ", player)
 				if player.name == id:
+					# Actually transfer ownership (and initialize relevant weapon vars)
 					print(multiplayer.get_unique_id(), " found player ", player)
 					player.add_item(weapon)
+					weapon.prev_owner = player
