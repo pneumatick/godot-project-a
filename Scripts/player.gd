@@ -93,44 +93,46 @@ func _process(_delta: float) -> void:
 	_check_interact_target()
 
 func _physics_process(delta: float) -> void:
-	if is_multiplayer_authority():
-		# Update the camera view
-		_update_camera(delta)
-		
-		# Add the gravity.
-		if not is_on_floor():
-			#velocity += get_gravity() * delta
-			velocity += gravity_direction * gravity_strength * delta
-		
-		# Reset the player's position when they fall below a certain Y value
-		if position.y < -10:
-			position = Vector3(0.0, 0.0, 0.0)
+	if not is_multiplayer_authority():
+		return
+	
+	# Update the camera view
+	_update_camera(delta)
+	
+	# Add the gravity.
+	if not is_on_floor():
+		#velocity += get_gravity() * delta
+		velocity += gravity_direction * gravity_strength * delta
+	
+	# Reset the player's position when they fall below a certain Y value
+	if position.y < -10:
+		position = Vector3(0.0, 0.0, 0.0)
 
-		# Handle movement
-		var input_dir := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
-		var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
-		var jumping = false
-		if Input.is_action_pressed("jump"):
-			if is_on_floor():
-				#velocity.y = JUMP_VELOCITY
-				velocity += JUMP_VELOCITY * -gravity_direction
-			
-			jumping = true
-			if direction:
-				_air_control(direction, delta)
-		elif is_on_floor():
-			jumping = false
-			if direction:
-				if not jumping:
-					velocity = direction * SPEED
-					if velocity.length() > SPEED:
-						velocity = velocity.normalized() * SPEED
-			else:
-				_apply_friction(delta)
-			
-		_accelerate(direction, ACCEL, SPEED, delta)
+	# Handle movement
+	var input_dir := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
+	var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
+	var jumping = false
+	if Input.is_action_pressed("jump"):
+		if is_on_floor():
+			#velocity.y = JUMP_VELOCITY
+			velocity += JUMP_VELOCITY * -gravity_direction
 		
-		move_and_slide()
+		jumping = true
+		if direction:
+			_air_control(direction, delta)
+	elif is_on_floor():
+		jumping = false
+		if direction:
+			if not jumping:
+				velocity = direction * SPEED
+				if velocity.length() > SPEED:
+					velocity = velocity.normalized() * SPEED
+		else:
+			_apply_friction(delta)
+		
+	_accelerate(direction, ACCEL, SPEED, delta)
+	
+	move_and_slide()
 
 func set_gravity_direction(new_dir: Vector3):
 	gravity_direction = new_dir.normalized()
@@ -152,6 +154,9 @@ func align_with_gravity_instant():
 	)
 
 func _input(event):
+	if not is_multiplayer_authority():
+		return
+	
 	_mouse_input = event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED
 	if _mouse_input:
 		#_rotation_input = -event.relative.x * mouse_sensitivity
@@ -163,6 +168,8 @@ func _input(event):
 			_equip_item(wrapi(_equipped_item_idx + 1, 0, _items.size()))
 	elif event.is_action_pressed("throw_item"):
 		throw_current_item()
+	elif event.is_action_pressed("fire"):
+		_fire()
 	elif event.is_action_pressed("kill"):
 		_die(self)
 	elif event.is_action_pressed("interact"):
@@ -296,6 +303,15 @@ func die_rpc(source):
 	# Wait a bit before respawning the player
 	await get_tree().create_timer(2.0).timeout
 	_respawn(Vector3(0.0, 1.0, 0.0))
+
+func _fire() -> void:
+	assert_fire.rpc_id(1)
+
+@rpc("any_peer", "call_local", "unreliable")
+func assert_fire() -> void:
+	if multiplayer.is_server():
+		print(multiplayer.get_unique_id(), " received fire assertion from ", multiplayer.get_remote_sender_id())
+	
 
 func _respawn(respawn_position: Vector3) -> void:
 	global_transform.origin = respawn_position
