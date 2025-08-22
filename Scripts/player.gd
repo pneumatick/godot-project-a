@@ -54,6 +54,7 @@ var gravity_strength : float = 9.8
 
 # Nodes external to scene
 @onready var world : Node3D = get_node("/root/3D Scene Root")
+@onready var HUD: CanvasLayer = get_node("/root/3D Scene Root/HUD")
 @onready var money_display : Label = get_node("/root/3D Scene Root/HUD/Control/Money")
 @onready var hit_sound : AudioStreamPlayer3D = $"Hit Sound"
 @onready var death_sound : AudioStreamPlayer3D = $"Death Sound"
@@ -66,13 +67,12 @@ func _ready() -> void:
 		camera_controller.current = true
 		
 		# HUD
-		get_node("/root/3D Scene Root/HUD").connect_player(self)
+		HUD.connect_player(self)
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 		health_change.emit(health)
 	else:
+		HUD.connect_peer(self)
 		camera_controller.current = false
-		print("not authority")
-	
 	
 	# Prepare items array
 	for i in range(item_capacity):
@@ -258,10 +258,13 @@ func _die(source) -> void:
 	if not is_multiplayer_authority():
 		return
 	
-	rpc("die_rpc", source)
+	if source is Weapon:
+		rpc("die_rpc", source.name, self.name, source.prev_owner.name)
+	else:
+		rpc("die_rpc", source.name, self.name)
 
 @rpc("authority", "call_local")
-func die_rpc(source):
+func die_rpc(source: String, victim: String, killer: String = ""):
 	_alive = false
 	set_process(false)
 	set_physics_process(false)
@@ -293,7 +296,10 @@ func die_rpc(source):
 		drug.queue_free()
 	
 	death_sound.play()
-	death.emit(source)
+	if killer == "":
+		death.emit(source, victim)
+	else:
+		death.emit(source, victim, killer)
 	
 	# Wait a bit before respawning the player
 	await get_tree().create_timer(2.0).timeout

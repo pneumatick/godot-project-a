@@ -46,25 +46,26 @@ func connect_player(client_player: CharacterBody3D) -> void:
 	# Assign player to Shop UI
 	$ShopUI.player = player
 
+func connect_peer(peer: CharacterBody3D) -> void:
+	peer.death.connect(_on_player_death)
+
 func _on_player_weapon_equipped(weapon: Node) -> void:
 	print("HUD received weapon equipped signal")
 	if weapon is Weapon:
 		ammo_label.text = "Ammo: %s" % str(weapon.current_ammo)
 
-func _on_player_death(source) -> void:
+func _on_player_death(source: String, victim: String, killer: String = "") -> void:
 	ammo_label.text = ""
 	$"Control/Death Counter".text = "Deaths: " + str(int($"Control/Death Counter".text) + 1)
 	
 	# Killfeed entry
-	var killer
 	var kill_text
-	if source == player:
-		kill_text = "Suicide → %s" % player
-	elif source is Weapon:
-		killer = source.prev_owner
-		kill_text = "%s → %s → %s" % [killer, source.item_name, player]
+	if source == victim:
+		kill_text = "Suicide → %s" % victim
+	elif killer != "":
+		kill_text = "%s → %s → %s" % [killer, source, victim]
 	else:
-		kill_text = "%s → %s" % [source.name, player]
+		kill_text = "%s → %s" % [source, victim]
 	
 	var label = Label.new()
 	label.text = kill_text
