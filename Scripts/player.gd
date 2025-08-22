@@ -270,9 +270,9 @@ func die_rpc(source):
 	# Drop items
 	drop_all_items()
 	
-	# Dump inventory
+	# Clear inventory slots
 	_items = []
-	for i in range(item_capacity):
+	for i in _items.size():
 		_items.append(null)
 	_inventory = {}
 	
@@ -286,11 +286,6 @@ func die_rpc(source):
 		remove_money(death_deduction)
 	else:
 		remove_money(money)
-	
-	# Remove whatever is in the right hand
-	var right_hand_children = right_hand.get_children()
-	for child in right_hand_children:
-		child.queue_free()
 	
 	# Remove active drugs
 	var drugs = $"Active Drugs".get_children()
@@ -311,7 +306,6 @@ func _fire() -> void:
 func assert_fire() -> void:
 	if multiplayer.is_server():
 		print(multiplayer.get_unique_id(), " received fire assertion from ", multiplayer.get_remote_sender_id())
-	
 
 func _respawn(respawn_position: Vector3) -> void:
 	global_transform.origin = respawn_position
@@ -355,8 +349,10 @@ func _equip_item(idx: int) -> void:
 
 # Add an item to the player's inventory (and hand, at least for now)
 func add_item(item) -> void:
-	var item_name = item.item_name
-	print("Adding %s..." % item_name)
+	if multiplayer.get_remote_sender_id() != 1:
+		return
+	
+	print(multiplayer.get_unique_id(), " Adding %s..." % str(item))
 	
 	# Add weapons
 	var added = false
@@ -365,20 +361,20 @@ func add_item(item) -> void:
 	# Add organs
 	elif item is Organ:
 		added = _add_organ(item)
-		print("%s %s %s" % [item.item_name, item.condition, item.value])
+		print("%s %s %s" % [str(item), item.condition, item.value])
 		print(_inventory["Organs"])
 	elif item is Drug:
 		added = _add_drug(item)
 		print(_inventory)
 	else:
-		print("Unknown item %s" % item_name)
+		print("Unknown item %s" % str(item))
 	
 	if added:
-		print("Picked up %s" % item_name)
+		print(multiplayer.get_unique_id(), " Picked up %s" % str(item))
 		item.prev_owner = self
 		items_changed.emit(_items, _equipped_item_idx)
 	else:
-		print("Failed to pick up %s" % item_name)
+		print("Failed to pick up %s" % str(item))
 	
 	print(_items)
 
