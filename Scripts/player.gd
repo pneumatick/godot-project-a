@@ -163,9 +163,9 @@ func _input(event):
 		_rotation_input = -event.relative.x * mouse_sensitivity * up_direction.y
 		_tilt_input = -event.relative.y * mouse_sensitivity
 	elif event.is_action_pressed("previous_item"):
-			_signal_equip(wrapi(_equipped_item_idx - 1, 0, _items.size()))
+			rpc("_signal_equip", wrapi(_equipped_item_idx - 1, 0, _items.size()))
 	elif event.is_action_pressed("next_item"):
-			_signal_equip(wrapi(_equipped_item_idx + 1, 0, _items.size()))
+			rpc("_signal_equip", wrapi(_equipped_item_idx + 1, 0, _items.size()))
 	elif event.is_action_pressed("throw_item"):
 		rpc("_signal_throw_current_item")
 	elif event.is_action_pressed("fire"):
@@ -335,7 +335,7 @@ func _take_damage(amount: int, source) -> void:
 func apply_damage(amount: int, source) -> void:
 	_take_damage(amount, source)
 
-@rpc("any_peer", "call_remote")
+@rpc("any_peer", "call_local")
 func _signal_equip(idx: int) -> void:
 	if multiplayer.is_server():
 		rpc("_equip_item", idx)
