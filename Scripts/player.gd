@@ -354,9 +354,9 @@ func _equip_item(idx: int) -> void:
 	print(_equipped_item_idx)
 
 # Add an item to the player's inventory (and hand, at least for now)
-func add_item(item) -> void:
+func add_item(item) -> bool:
 	if multiplayer.get_remote_sender_id() != 1:
-		return
+		return false
 	
 	print(multiplayer.get_unique_id(), " Adding %s..." % str(item))
 	
@@ -383,6 +383,7 @@ func add_item(item) -> void:
 		print("Failed to pick up %s" % str(item))
 	
 	print(_items)
+	return added
 
 func _add_weapon(weapon: Node3D) -> bool:
 	# Initialize weapon

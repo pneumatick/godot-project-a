@@ -52,8 +52,11 @@ func _transfer_to_player(player_id: String, item_id: int) -> void:
 					# Actually transfer ownership (and initialize relevant weapon vars)
 					weapon.prev_owner = player
 					weapon.item_id = item_id
-					player.add_item(weapon)
-					print(
-						multiplayer.get_unique_id(), " Added weapon ", weapon.item_id, 
-						" to ", player_id
-					)
+					var added = player.add_item(weapon)
+					if added:
+						print(
+							multiplayer.get_unique_id(), " Added weapon ", weapon.item_id, 
+							" to ", player_id
+						)
+					else:
+						weapon.queue_free()
