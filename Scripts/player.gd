@@ -163,11 +163,11 @@ func _input(event):
 		_rotation_input = -event.relative.x * mouse_sensitivity * up_direction.y
 		_tilt_input = -event.relative.y * mouse_sensitivity
 	elif event.is_action_pressed("previous_item"):
-			rpc("_signal_equip", wrapi(_equipped_item_idx - 1, 0, _items.size()))
+			_signal_equip.rpc_id(1, wrapi(_equipped_item_idx - 1, 0, _items.size()))
 	elif event.is_action_pressed("next_item"):
-			rpc("_signal_equip", wrapi(_equipped_item_idx + 1, 0, _items.size()))
+			_signal_equip.rpc_id(1, wrapi(_equipped_item_idx + 1, 0, _items.size()))
 	elif event.is_action_pressed("throw_item"):
-		rpc("_signal_throw_current_item")
+		_signal_throw_current_item.rpc_id(1)
 	elif event.is_action_pressed("fire"):
 		_fire()
 	elif event.is_action_pressed("kill"):
