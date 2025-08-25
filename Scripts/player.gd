@@ -312,6 +312,9 @@ func _fire() -> void:
 func assert_fire() -> void:
 	if multiplayer.is_server():
 		print(multiplayer.get_unique_id(), " received fire assertion from ", multiplayer.get_remote_sender_id())
+		var equipped = _items[_equipped_item_idx]
+		if equipped and equipped.has_method("pull_trigger"):
+			equipped.pull_trigger.rpc()
 
 func _respawn(respawn_position: Vector3) -> void:
 	global_transform.origin = respawn_position

@@ -24,12 +24,15 @@ func _init(i_owner: CharacterBody3D = null) -> void:
 	var image: Texture2D = load("res://Assets/Visuals/Icons/grenade.PNG")
 	icon = ImageTexture.create_from_image(image.get_image())
 
-func _process(_delta: float) -> void:
-	if Input.is_action_pressed("fire"):
-		var in_menu = prev_owner.get_in_menu()
-		if _equipped and current_ammo > 0 and not in_menu:
-			use(fuse_time, _on_timer_timeout, explosion_radius)
-			$"Throwable/Fuse Sound".play()
+@rpc("any_peer", "call_local")
+func pull_trigger() -> void:
+	if multiplayer.get_remote_sender_id() != 1:
+		return
+	
+	var in_menu = prev_owner.get_in_menu()
+	if _equipped and current_ammo > 0 and not in_menu:
+		use(fuse_time, _on_timer_timeout, explosion_radius)
+		$"Throwable/Fuse Sound".play()
 
 func _on_timer_timeout():
 	explode()
