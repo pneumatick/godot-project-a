@@ -13,7 +13,7 @@ func use(fuse_time: float, callback: Callable, explosion_radius = null) -> void:
 	free_held_scene()
 	var projectile = instantiate_object_scene()
 	if explosion_radius:
-		var explosion_area = $"Grenade Object/Explosion Area"
+		var explosion_area = $"Throwable/Explosion Area"
 		var explosion_collider = explosion_area.get_child(0)
 		explosion_collider.shape.radius = explosion_radius
 		global_transform = prev_owner.camera_controller.global_transform
