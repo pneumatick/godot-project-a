@@ -56,35 +56,39 @@ func fire():
 		print("No camera found!")
 		return
 	
-	var from = camera.global_transform.origin
-	var to = from + camera.global_transform.basis.z * -max_distance
-	
-	var space_state = get_world_3d().direct_space_state
-	var result = space_state.intersect_ray(
-		PhysicsRayQueryParameters3D.create(
-			from,
-			to,
-			0xFFFFFFFF,			  # Default value
-			[self, prev_owner]    # exclude gun and player
+	# Hit detection
+	if multiplayer.is_server():
+		print("Calculating hit...")
+		var from = camera.global_transform.origin
+		var to = from + camera.global_transform.basis.z * -max_distance
+		
+		var space_state = get_world_3d().direct_space_state
+		var result = space_state.intersect_ray(
+			PhysicsRayQueryParameters3D.create(
+				from,
+				to,
+				0xFFFFFFFF,			  # Default value
+				[self, prev_owner]    # exclude gun and player
+			)
 		)
-	)
-	
-	if result:
-		print("Hit: ", result.collider)
-		# Determine relevant entity and apply bullet force/damage
-		var entity
-		if result.collider.has_method("apply_bullet_force") or result.collider.has_method("apply_damage"):
-			entity = result.collider
-		elif result.collider.get_parent().has_method("apply_bullet_force"):
-			entity = result.collider.get_parent()
-		if entity:
-			var hit_pos = result.position
-			var direction = (to - from).normalized()
-			var force = 10.0
-			if entity.has_method("apply_bullet_force"):
-				entity.apply_bullet_force(hit_pos, direction, force, damage, self)
-			elif entity.has_method("apply_damage"):
-				result.collider.apply_damage(damage, self)
+		
+		if result:
+			print("Hit: ", result.collider)
+			# Determine relevant entity and apply bullet force/damage
+			var entity
+			if result.collider.has_method("apply_bullet_force") or result.collider.has_method("apply_damage"):
+				entity = result.collider
+			elif result.collider.get_parent().has_method("apply_bullet_force"):
+				entity = result.collider.get_parent()
+			if entity:
+				var hit_pos = result.position
+				var direction = (to - from).normalized()
+				var force = 10.0
+				if entity.has_method("apply_bullet_force"):
+					entity.apply_bullet_force(hit_pos, direction, force, damage, self)
+				elif entity.has_method("apply_damage"):
+					print("Hit detected: Applying damamge")
+					result.collider.apply_damage(damage, self)
 
 # Load ammo into the weapon
 func load_ammo(amount: int):

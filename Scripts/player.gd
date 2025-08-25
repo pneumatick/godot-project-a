@@ -255,7 +255,7 @@ func _update_camera(delta: float) -> void:
 
 # Handle player death logic
 func _die(source) -> void:
-	if not is_multiplayer_authority():
+	if not multiplayer.is_server():
 		return
 	
 	if source is Weapon:
@@ -263,8 +263,11 @@ func _die(source) -> void:
 	else:
 		rpc("die_rpc", source.name, self.name)
 
-@rpc("authority", "call_local")
+@rpc("any_peer", "call_local")
 func die_rpc(source: String, victim: String, killer: String = ""):
+	if multiplayer.get_remote_sender_id() != 1:
+		return
+	
 	_alive = false
 	set_process(false)
 	set_physics_process(false)
@@ -326,17 +329,19 @@ func _respawn(respawn_position: Vector3) -> void:
 	set_physics_process(true)
 	spawn.emit()
 
-func _take_damage(amount: int, source) -> void:
+@rpc("any_peer", "call_local")
+func _take_damage(amount: int) -> void:
 	health -= amount
 	health_change.emit(health)
 	print("The player was hit, health now %s" % [str(health)])
-	if health <= 0 and _alive:
-		_die(source)
-	else:
-		hit_sound.play()
+	hit_sound.play()
 
 func apply_damage(amount: int, source) -> void:
-	_take_damage(amount, source)
+	if multiplayer.is_server():
+		_take_damage.rpc(amount)
+		
+		if health <= 0 and _alive:
+			_die(source)
 
 @rpc("any_peer", "call_local")
 func _signal_equip(idx: int) -> void:
