@@ -51,7 +51,8 @@ func fire():
 	# Update ammo label
 	ammo_label.text = "Ammo: %s" % str(current_ammo)
 	
-	var camera = get_viewport().get_camera_3d()
+	#var camera = get_viewport().get_camera_3d()
+	var camera = prev_owner.get_node("Pivot/Camera3D")
 	if not camera:
 		print("No camera found!")
 		return
