@@ -163,11 +163,11 @@ func _input(event):
 		_rotation_input = -event.relative.x * mouse_sensitivity * up_direction.y
 		_tilt_input = -event.relative.y * mouse_sensitivity
 	elif event.is_action_pressed("previous_item"):
-			_equip_item(wrapi(_equipped_item_idx - 1, 0, _items.size()))
+			_signal_equip(wrapi(_equipped_item_idx - 1, 0, _items.size()))
 	elif event.is_action_pressed("next_item"):
-			_equip_item(wrapi(_equipped_item_idx + 1, 0, _items.size()))
+			_signal_equip(wrapi(_equipped_item_idx + 1, 0, _items.size()))
 	elif event.is_action_pressed("throw_item"):
-		throw_current_item()
+		rpc("_signal_throw_current_item")
 	elif event.is_action_pressed("fire"):
 		_fire()
 	elif event.is_action_pressed("kill"):
@@ -335,8 +335,17 @@ func _take_damage(amount: int, source) -> void:
 func apply_damage(amount: int, source) -> void:
 	_take_damage(amount, source)
 
+@rpc("any_peer", "call_remote")
+func _signal_equip(idx: int) -> void:
+	if multiplayer.is_server():
+		rpc("_equip_item", idx)
+
 # Equip held item
+@rpc("any_peer", "call_local")
 func _equip_item(idx: int) -> void:
+	if multiplayer.get_remote_sender_id() != 1:
+		return
+	
 	# Unequip (previously) equipped item
 	if _items[_equipped_item_idx]:
 		_items[_equipped_item_idx].unequip()
@@ -496,8 +505,15 @@ func set_in_menu(state: bool) -> void:
 func get_in_menu() -> bool:
 	return _in_menu
 
+@rpc("authority", "call_local")
+func _signal_throw_current_item() -> void:
+	print("Throw signal received by ", multiplayer.get_unique_id())
+	if multiplayer.is_server():
+		rpc("throw_current_item")
+
+@rpc("any_peer", "call_local")
 func throw_current_item():
-	if _items[_equipped_item_idx] == null:
+	if _items[_equipped_item_idx] == null or multiplayer.get_remote_sender_id() != 1:
 		return
 
 	# Remove the item

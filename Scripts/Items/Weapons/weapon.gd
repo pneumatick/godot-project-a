@@ -124,6 +124,9 @@ func instantiate_object_scene() -> Node3D:
 
 # Free the scene that represents the held weapon
 func free_held_scene() -> void:
-	get_child(0).free()
+	for node in get_children():
+		if node.name == "Held":
+			print("Held node found")
+			node.free()
 	_equipped = false
 	visible = true		# Too hacky? Made to handle drop_all_items() as expected. Consider...

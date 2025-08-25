@@ -2,7 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://da8ofrck81etq" path="res://Assets/Visuals/Models/Grenade/FragGrenadeModel.fbx" id="1_nbv06"]
 
-[node name="Grenade" type="Node3D"]
+[node name="Held" type="Node3D"]
 
 [node name="FragGrenadeModel" parent="." instance=ExtResource("1_nbv06")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.109144)
