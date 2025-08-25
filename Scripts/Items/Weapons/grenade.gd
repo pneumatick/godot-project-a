@@ -6,6 +6,8 @@ class_name Grenade
 @export var explosion_damage: float = 100.0
 @export var explosion_force: float = 20.0
 
+var timer: Timer
+
 func _init(i_owner: CharacterBody3D = null) -> void:
 	super()
 	prev_owner = i_owner
@@ -31,12 +33,13 @@ func pull_trigger() -> void:
 	
 	var in_menu = prev_owner.get_in_menu()
 	if _equipped and current_ammo > 0 and not in_menu:
-		use(fuse_time, _on_timer_timeout, explosion_radius)
+		timer = use(fuse_time, _on_timer_timeout, explosion_radius)
 		$"Throwable/Fuse Sound".play()
 
 func _on_timer_timeout():
 	explode()
 	print("BOOM!")
+	timer.queue_free()
 
 func explode():
 	# Stop fuse sound
@@ -49,7 +52,7 @@ func explode():
 	var explosion_area = $"Throwable/Explosion Area"
 	var results = explosion_area.get_overlapping_bodies()
 	for result in results:
-		if result == get_child(0):
+		if result == $Throwable:
 			continue
 		var body = result
 		print("Grenade explosion hit ", body)
@@ -80,7 +83,9 @@ func explode():
 	set_physics_process(false)
 	await $"Throwable/Explosion Sound".finished
 	
-	queue_free()
+	if multiplayer.is_server():
+		print("SERVER REMOVING THROWABLE")
+		queue_free()
 
 '''
 func spawn_explosion_effect(pos: Vector3):

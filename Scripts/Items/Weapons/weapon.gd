@@ -23,6 +23,10 @@ var _can_fire : bool
 var _equipped : bool
 
 func _init() -> void:
+	pass
+
+# Called when the node enters the scene tree for the first time.
+func _ready() -> void:
 	# Set up MultiplayerSynchronizer on Weapon root node (Node3D)
 	sync = MultiplayerSynchronizer.new()
 	var config  = SceneReplicationConfig.new()
@@ -32,9 +36,7 @@ func _init() -> void:
 	config.property_set_replication_mode(".:rotation", SceneReplicationConfig.REPLICATION_MODE_ALWAYS)
 	sync.replication_config = config
 	add_child(sync)
-
-# Called when the node enters the scene tree for the first time.
-func _ready() -> void:
+	
 	# Set default position relative to camera (center of view being origin)
 	position = Vector3(0.5, -0.25, -0.25)
 	_can_fire = true

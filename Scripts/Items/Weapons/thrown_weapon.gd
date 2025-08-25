@@ -46,6 +46,7 @@ func _apply_damage(damage: int) -> void:
 	var root_node = get_parent()
 	if root_node.condition - damage <= 0:
 		if root_node is Throwable:
+			print("Exploding!!!!!!!!!!!!!!")
 			root_node.explode()
 		else:
 			root_node.queue_free()

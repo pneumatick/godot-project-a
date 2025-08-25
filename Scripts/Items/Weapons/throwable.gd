@@ -5,7 +5,7 @@ var fuse_set : bool = false
 
 @export var throw_force : float = 20.0
 
-func use(fuse_time: float, callback: Callable, explosion_radius = null) -> void:
+func use(fuse_time: float, callback: Callable, explosion_radius = null) -> Timer:
 	# Remove item from player's inventory
 	prev_owner.remove_item(self)
 	
@@ -42,6 +42,8 @@ func use(fuse_time: float, callback: Callable, explosion_radius = null) -> void:
 	
 	# Set the fuse
 	fuse_set = true
+	
+	return timer
 
 ## Apply incoming damage to the throwable item
 func _apply_damage(hit_damage: int) -> void:
