@@ -22,11 +22,11 @@ func _init(i_owner: CharacterBody3D = null) -> void:
 	icon = ImageTexture.create_from_image(image.get_image())
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(_delta: float) -> void:
-	if Input.is_action_pressed("fire"):
-		var in_menu = prev_owner.get_in_menu()
-		if _can_fire and _equipped and current_ammo > 0 and not in_menu:
-			fire()
-			_can_fire = false
-	elif !_can_fire:
-		_can_fire = true
+@rpc("any_peer", "call_local")
+func pull_trigger() -> void:
+	if multiplayer.get_remote_sender_id() != 1:
+		return
+	
+	var in_menu = prev_owner.get_in_menu()
+	if _equipped and current_ammo > 0 and not in_menu:
+		fire()

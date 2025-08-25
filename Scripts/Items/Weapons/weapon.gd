@@ -17,13 +17,19 @@ var held_scene : PackedScene
 var object_scene : PackedScene
 var icon : ImageTexture
 var sync: MultiplayerSynchronizer
+var item_id: int
 
 var _can_fire : bool
 var _equipped : bool
 
 func _init() -> void:
+	pass
+
+# Called when the node enters the scene tree for the first time.
+func _ready() -> void:
 	# Set up MultiplayerSynchronizer on Weapon root node (Node3D)
 	sync = MultiplayerSynchronizer.new()
+	sync.root_path = get_parent().get_path()
 	var config  = SceneReplicationConfig.new()
 	config.add_property(".:position")
 	config.property_set_replication_mode(".:position", SceneReplicationConfig.REPLICATION_MODE_ALWAYS)
@@ -31,9 +37,7 @@ func _init() -> void:
 	config.property_set_replication_mode(".:rotation", SceneReplicationConfig.REPLICATION_MODE_ALWAYS)
 	sync.replication_config = config
 	add_child(sync)
-
-# Called when the node enters the scene tree for the first time.
-func _ready() -> void:
+	
 	# Set default position relative to camera (center of view being origin)
 	position = Vector3(0.5, -0.25, -0.25)
 	_can_fire = true
@@ -50,40 +54,45 @@ func fire():
 	# Update ammo label
 	ammo_label.text = "Ammo: %s" % str(current_ammo)
 	
-	var camera = get_viewport().get_camera_3d()
+	#var camera = get_viewport().get_camera_3d()
+	var camera = prev_owner.get_node("Pivot/Camera3D")
 	if not camera:
 		print("No camera found!")
 		return
 	
-	var from = camera.global_transform.origin
-	var to = from + camera.global_transform.basis.z * -max_distance
-	
-	var space_state = get_world_3d().direct_space_state
-	var result = space_state.intersect_ray(
-		PhysicsRayQueryParameters3D.create(
-			from,
-			to,
-			0xFFFFFFFF,			  # Default value
-			[self, prev_owner]    # exclude gun and player
+	# Hit detection
+	if multiplayer.is_server():
+		print("Calculating hit...")
+		var from = camera.global_transform.origin
+		var to = from + camera.global_transform.basis.z * -max_distance
+		
+		var space_state = get_world_3d().direct_space_state
+		var result = space_state.intersect_ray(
+			PhysicsRayQueryParameters3D.create(
+				from,
+				to,
+				0xFFFFFFFF,			  # Default value
+				[self, prev_owner]    # exclude gun and player
+			)
 		)
-	)
-	
-	if result:
-		print("Hit: ", result.collider)
-		# Determine relevant entity and apply bullet force/damage
-		var entity
-		if result.collider.has_method("apply_bullet_force") or result.collider.has_method("apply_damage"):
-			entity = result.collider
-		elif result.collider.get_parent().has_method("apply_bullet_force"):
-			entity = result.collider.get_parent()
-		if entity:
-			var hit_pos = result.position
-			var direction = (to - from).normalized()
-			var force = 10.0
-			if entity.has_method("apply_bullet_force"):
-				entity.apply_bullet_force(hit_pos, direction, force, damage, self)
-			elif entity.has_method("apply_damage"):
-				result.collider.apply_damage(damage, self)
+		
+		if result:
+			print("Hit: ", result.collider)
+			# Determine relevant entity and apply bullet force/damage
+			var entity
+			if result.collider.has_method("apply_bullet_force") or result.collider.has_method("apply_damage"):
+				entity = result.collider
+			elif result.collider.get_parent().has_method("apply_bullet_force"):
+				entity = result.collider.get_parent()
+			if entity:
+				var hit_pos = result.position
+				var direction = (to - from).normalized()
+				var force = 10.0
+				if entity.has_method("apply_bullet_force"):
+					entity.apply_bullet_force(hit_pos, direction, force, damage, self)
+				elif entity.has_method("apply_damage"):
+					print("Hit detected: Applying damamge")
+					result.collider.apply_damage(damage, self)
 
 # Load ammo into the weapon
 func load_ammo(amount: int):
@@ -119,10 +128,14 @@ func instantiate_held_scene() -> void:
 func instantiate_object_scene() -> Node3D:
 	var scene = object_scene.instantiate()
 	add_child(scene)
+	Globals.ItemManager.add_child(self)
 	return scene
 
 # Free the scene that represents the held weapon
 func free_held_scene() -> void:
-	get_child(0).free()
+	for node in get_children():
+		if node.name == "Held":
+			print("Held node found")
+			node.free()
 	_equipped = false
 	visible = true		# Too hacky? Made to handle drop_all_items() as expected. Consider...

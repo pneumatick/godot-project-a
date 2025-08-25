@@ -15,6 +15,10 @@ run/main_scene="uid://hmv4dr58x4if"
 config/features=PackedStringArray("4.4", "Forward Plus")
 config/icon="res://Assets/Visuals/icon.svg"
 
+[autoload]
+
+Globals="*res://Scripts/globals.gd"
+
 [input]
 
 move_left={

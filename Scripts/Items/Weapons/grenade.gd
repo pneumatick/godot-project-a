@@ -6,6 +6,8 @@ class_name Grenade
 @export var explosion_damage: float = 100.0
 @export var explosion_force: float = 20.0
 
+var timer: Timer
+
 func _init(i_owner: CharacterBody3D = null) -> void:
 	super()
 	prev_owner = i_owner
@@ -24,16 +26,20 @@ func _init(i_owner: CharacterBody3D = null) -> void:
 	var image: Texture2D = load("res://Assets/Visuals/Icons/grenade.PNG")
 	icon = ImageTexture.create_from_image(image.get_image())
 
-func _process(_delta: float) -> void:
-	if Input.is_action_pressed("fire"):
-		var in_menu = prev_owner.get_in_menu()
-		if _equipped and current_ammo > 0 and not in_menu:
-			use(fuse_time, _on_timer_timeout, explosion_radius)
-			$"Throwable/Fuse Sound".play()
+@rpc("any_peer", "call_local")
+func pull_trigger() -> void:
+	if multiplayer.get_remote_sender_id() != 1:
+		return
+	
+	var in_menu = prev_owner.get_in_menu()
+	if _equipped and current_ammo > 0 and not in_menu:
+		timer = use(fuse_time, _on_timer_timeout, explosion_radius)
+		$"Throwable/Fuse Sound".play()
 
 func _on_timer_timeout():
 	explode()
 	print("BOOM!")
+	timer.queue_free()
 
 func explode():
 	# Stop fuse sound
@@ -46,7 +52,7 @@ func explode():
 	var explosion_area = $"Throwable/Explosion Area"
 	var results = explosion_area.get_overlapping_bodies()
 	for result in results:
-		if result == get_child(0):
+		if result == $Throwable:
 			continue
 		var body = result
 		print("Grenade explosion hit ", body)
@@ -77,6 +83,10 @@ func explode():
 	set_physics_process(false)
 	await $"Throwable/Explosion Sound".finished
 	
+	# NOTE: Client should not queue_free(), but the synchronizer and spawners
+	# don't want to play nice and I'm tired of dealing with this shit atm so
+	# this will free the item client-side and create annoying error messages for
+	# now.
 	queue_free()
 
 '''

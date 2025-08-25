@@ -163,11 +163,11 @@ func _input(event):
 		_rotation_input = -event.relative.x * mouse_sensitivity * up_direction.y
 		_tilt_input = -event.relative.y * mouse_sensitivity
 	elif event.is_action_pressed("previous_item"):
-			_equip_item(wrapi(_equipped_item_idx - 1, 0, _items.size()))
+			_signal_equip.rpc_id(1, wrapi(_equipped_item_idx - 1, 0, _items.size()))
 	elif event.is_action_pressed("next_item"):
-			_equip_item(wrapi(_equipped_item_idx + 1, 0, _items.size()))
+			_signal_equip.rpc_id(1, wrapi(_equipped_item_idx + 1, 0, _items.size()))
 	elif event.is_action_pressed("throw_item"):
-		throw_current_item()
+		_signal_throw_current_item.rpc_id(1)
 	elif event.is_action_pressed("fire"):
 		_fire()
 	elif event.is_action_pressed("kill"):
@@ -255,7 +255,7 @@ func _update_camera(delta: float) -> void:
 
 # Handle player death logic
 func _die(source) -> void:
-	if not is_multiplayer_authority():
+	if not multiplayer.is_server():
 		return
 	
 	if source is Weapon:
@@ -263,8 +263,11 @@ func _die(source) -> void:
 	else:
 		rpc("die_rpc", source.name, self.name)
 
-@rpc("authority", "call_local")
+@rpc("any_peer", "call_local")
 func die_rpc(source: String, victim: String, killer: String = ""):
+	if multiplayer.get_remote_sender_id() != 1:
+		return
+	
 	_alive = false
 	set_process(false)
 	set_physics_process(false)
@@ -312,6 +315,9 @@ func _fire() -> void:
 func assert_fire() -> void:
 	if multiplayer.is_server():
 		print(multiplayer.get_unique_id(), " received fire assertion from ", multiplayer.get_remote_sender_id())
+		var equipped = _items[_equipped_item_idx]
+		if equipped and equipped.has_method("pull_trigger"):
+			equipped.pull_trigger.rpc()
 
 func _respawn(respawn_position: Vector3) -> void:
 	global_transform.origin = respawn_position
@@ -323,20 +329,31 @@ func _respawn(respawn_position: Vector3) -> void:
 	set_physics_process(true)
 	spawn.emit()
 
-func _take_damage(amount: int, source) -> void:
+@rpc("any_peer", "call_local")
+func _take_damage(amount: int) -> void:
 	health -= amount
 	health_change.emit(health)
 	print("The player was hit, health now %s" % [str(health)])
-	if health <= 0 and _alive:
-		_die(source)
-	else:
-		hit_sound.play()
+	hit_sound.play()
 
 func apply_damage(amount: int, source) -> void:
-	_take_damage(amount, source)
+	if multiplayer.is_server():
+		_take_damage.rpc(amount)
+		
+		if health <= 0 and _alive:
+			_die(source)
+
+@rpc("any_peer", "call_local")
+func _signal_equip(idx: int) -> void:
+	if multiplayer.is_server():
+		rpc("_equip_item", idx)
 
 # Equip held item
+@rpc("any_peer", "call_local")
 func _equip_item(idx: int) -> void:
+	if multiplayer.get_remote_sender_id() != 1:
+		return
+	
 	# Unequip (previously) equipped item
 	if _items[_equipped_item_idx]:
 		_items[_equipped_item_idx].unequip()
@@ -354,9 +371,9 @@ func _equip_item(idx: int) -> void:
 	print(_equipped_item_idx)
 
 # Add an item to the player's inventory (and hand, at least for now)
-func add_item(item) -> void:
+func add_item(item) -> bool:
 	if multiplayer.get_remote_sender_id() != 1:
-		return
+		return false
 	
 	print(multiplayer.get_unique_id(), " Adding %s..." % str(item))
 	
@@ -383,6 +400,7 @@ func add_item(item) -> void:
 		print("Failed to pick up %s" % str(item))
 	
 	print(_items)
+	return added
 
 func _add_weapon(weapon: Node3D) -> bool:
 	# Initialize weapon
@@ -495,8 +513,15 @@ func set_in_menu(state: bool) -> void:
 func get_in_menu() -> bool:
 	return _in_menu
 
+@rpc("authority", "call_local")
+func _signal_throw_current_item() -> void:
+	print("Throw signal received by ", multiplayer.get_unique_id())
+	if multiplayer.is_server():
+		rpc("throw_current_item")
+
+@rpc("any_peer", "call_local")
 func throw_current_item():
-	if _items[_equipped_item_idx] == null:
+	if _items[_equipped_item_idx] == null or multiplayer.get_remote_sender_id() != 1:
 		return
 
 	# Remove the item
@@ -547,7 +572,7 @@ func drop_all_items():
 
 func drop_item(item):
 	# Add item to world
-	get_parent().add_child(item)
+	#get_parent().add_child(item)
 
 	# Determine position
 	var body: CollisionObject3D

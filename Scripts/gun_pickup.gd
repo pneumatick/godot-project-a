@@ -33,24 +33,30 @@ func _on_body_entered(body):
 			weapon_spawner.spawn({
 				"Weapon": weapon_name
 			})
-			rpc("_transfer_to_player", body.name)
+			rpc("_transfer_to_player", body.name, Globals.new_item_id())
+			
 		
 		await get_tree().create_timer(respawn_time).timeout
 		_available = true
 		visible = true
 
 @rpc("any_peer", "call_local")
-func _transfer_to_player(id: String) -> void:
-	print(multiplayer.get_unique_id(), " transfering ownership of weapon to ", id)
+func _transfer_to_player(player_id: String, item_id: int) -> void:
 	for node in get_children():
 		if node is Weapon:
-			print(multiplayer.get_unique_id(), " found weapon to transfer ", node)
 			var weapon = node
+			# Item will become child of player's right hand, so remove child here
 			remove_child(weapon)
 			for player in %PlayerManager.get_children():
-				print(multiplayer.get_unique_id(), " child of player manager: ", player)
-				if player.name == id:
+				if player.name == player_id:
 					# Actually transfer ownership (and initialize relevant weapon vars)
-					print(multiplayer.get_unique_id(), " found player ", player)
-					player.add_item(weapon)
 					weapon.prev_owner = player
+					weapon.item_id = item_id
+					var added = player.add_item(weapon)
+					if added:
+						print(
+							multiplayer.get_unique_id(), " Added weapon ", weapon.item_id, 
+							" to ", player_id
+						)
+					else:
+						weapon.queue_free()

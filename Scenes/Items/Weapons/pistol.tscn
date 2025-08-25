@@ -5,7 +5,7 @@
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_v21tj"]
 
-[node name="Pistol" type="Node3D"]
+[node name="Held" type="Node3D"]
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 transform = Transform3D(0.25, 0, 0, 0, -1.09278e-08, -0.25, 0, 0.25, -1.09278e-08, 0, 0, 0)
