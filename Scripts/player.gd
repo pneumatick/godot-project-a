@@ -572,7 +572,7 @@ func drop_all_items():
 
 func drop_item(item):
 	# Add item to world
-	get_parent().add_child(item)
+	#get_parent().add_child(item)
 
 	# Determine position
 	var body: CollisionObject3D

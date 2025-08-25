@@ -7,6 +7,11 @@ const PORT = 12345
 func _ready():
 	# For testing: press F1 to host, F2 to join
 	Input.set_custom_mouse_cursor(null) # Just to avoid UI cursor conflicts
+	
+	# Set relevant globals
+	for node in get_children():
+		if node.name == "ItemManager":
+			Globals.ItemManager = node
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("exit"):

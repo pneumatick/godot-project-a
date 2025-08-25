@@ -83,9 +83,11 @@ func explode():
 	set_physics_process(false)
 	await $"Throwable/Explosion Sound".finished
 	
-	if multiplayer.is_server():
-		print("SERVER REMOVING THROWABLE")
-		queue_free()
+	# NOTE: Client should not queue_free(), but the synchronizer and spawners
+	# don't want to play nice and I'm tired of dealing with this shit atm so
+	# this will free the item client-side and create annoying error messages for
+	# now.
+	queue_free()
 
 '''
 func spawn_explosion_effect(pos: Vector3):

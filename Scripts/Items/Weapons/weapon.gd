@@ -29,6 +29,7 @@ func _init() -> void:
 func _ready() -> void:
 	# Set up MultiplayerSynchronizer on Weapon root node (Node3D)
 	sync = MultiplayerSynchronizer.new()
+	sync.root_path = get_parent().get_path()
 	var config  = SceneReplicationConfig.new()
 	config.add_property(".:position")
 	config.property_set_replication_mode(".:position", SceneReplicationConfig.REPLICATION_MODE_ALWAYS)
@@ -127,6 +128,7 @@ func instantiate_held_scene() -> void:
 func instantiate_object_scene() -> Node3D:
 	var scene = object_scene.instantiate()
 	add_child(scene)
+	Globals.ItemManager.add_child(self)
 	return scene
 
 # Free the scene that represents the held weapon

@@ -5,17 +5,6 @@ var sync: MultiplayerSynchronizer
 
 @export var resistance : int = 5
 
-func _init() -> void:
-	# Set up MultiplayerSynchronizer on Weapon root node (Node3D)
-	sync = MultiplayerSynchronizer.new()
-	var config  = SceneReplicationConfig.new()
-	config.add_property(".:position")
-	config.property_set_replication_mode(".:position", SceneReplicationConfig.REPLICATION_MODE_ALWAYS)
-	config.add_property(".:rotation")
-	config.property_set_replication_mode(".:rotation", SceneReplicationConfig.REPLICATION_MODE_ALWAYS)
-	sync.replication_config = config
-	add_child(sync)
-
 func _ready() -> void:
 	parent = get_parent()
 
@@ -46,7 +35,6 @@ func _apply_damage(damage: int) -> void:
 	var root_node = get_parent()
 	if root_node.condition - damage <= 0:
 		if root_node is Throwable:
-			print("Exploding!!!!!!!!!!!!!!")
 			root_node.explode()
 		else:
 			root_node.queue_free()
