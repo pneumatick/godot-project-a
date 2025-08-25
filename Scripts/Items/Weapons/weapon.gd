@@ -17,6 +17,7 @@ var held_scene : PackedScene
 var object_scene : PackedScene
 var icon : ImageTexture
 var sync: MultiplayerSynchronizer
+var item_id: int
 
 var _can_fire : bool
 var _equipped : bool

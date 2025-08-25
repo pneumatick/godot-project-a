@@ -15,6 +15,4 @@ func _spawn_weapon(data: Variant) -> Weapon:
 	var weapon_str = data["Weapon"]
 	var new_weapon = _weapons[weapon_str].new()
 	
-	print(multiplayer.get_unique_id(), " ", new_weapon)
-	
 	return new_weapon
