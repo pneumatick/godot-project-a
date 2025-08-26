@@ -9,6 +9,7 @@ class_name Weapon
 @export var condition : int
 @export var value : int
 @export var prev_owner : CharacterBody3D
+@export var held: bool = false
 
 @onready var ammo_label = get_node("/root/3D Scene Root/HUD/Control/Ammo")
 @onready var fire_sound : AudioStreamPlayer3D
@@ -28,10 +29,16 @@ var _equipped : bool
 func _ready() -> void:
 	# Set default position relative to camera (center of view being origin)
 	_can_fire = true
-	object_node.visible = false
-	object_node.set_process(false)
-	object_node.set_physics_process(false)
-	object_node.get_node("Collection Area/CollisionShape3D").disabled = true
+
+func _process(_delta: float) -> void:
+	if held:
+		object_node.visible = false
+		object_node.set_physics_process(false)
+		object_node.get_node("Collection Area/CollisionShape3D").disabled = true
+	else:
+		object_node.visible = true
+		object_node.set_physics_process(true)
+		object_node.get_node("Collection Area/CollisionShape3D").disabled = false
 
 # Fire the weapon
 func fire():
@@ -115,20 +122,15 @@ func instantiate_held_scene() -> void:
 	for node in scene.get_children():
 		if node.name == "Fire Sound":
 			fire_sound = node
+	
 	_equipped = true
-	object_node.visible = true
-	object_node.set_process(true)
-	object_node.set_physics_process(true)
-	#add_child(scene)
+	held = true
+	
 	held_node = scene
 
 func instantiate_object_scene() -> Node3D:
 	free_held_scene()
-	#var scene = object_scene.instantiate()
-	#add_child(scene)
-	object_node.visible = true
-	object_node.set_process(true)
-	object_node.set_physics_process(true)
+	
 	return object_node
 
 # Free the scene that represents the held weapon
@@ -136,3 +138,4 @@ func free_held_scene() -> void:
 	held_node.free()
 	held_node = null
 	_equipped = false
+	held = false

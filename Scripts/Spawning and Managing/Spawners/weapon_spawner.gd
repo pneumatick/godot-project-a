@@ -10,6 +10,10 @@ func _ready() -> void:
 		"Pistol": Pistol,
 		"Grenade": Grenade
 	}
+	
+	for scene in _weapons.values():
+		add_spawnable_scene(scene.resource_path)
+		print(scene.resource_path)
 
 func _spawn_weapon(data: Variant) -> Weapon:
 	var weapon_str = data["Weapon"]
