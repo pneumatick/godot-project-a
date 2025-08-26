@@ -101,7 +101,7 @@ func load_ammo(amount: int):
 
 func equip() -> void:
 	print("Equip acknowledged from weapon")
-	if held_scene:
+	if held_node:
 		_equipped = true
 		held_node.visible = true
 		_can_fire = true
@@ -109,7 +109,7 @@ func equip() -> void:
 		set_process_input(true)		# Probably not necessary
 
 func unequip() -> void:
-	if held_scene:
+	if held_node:
 		_equipped = false
 		held_node.visible = false
 		_can_fire = false
