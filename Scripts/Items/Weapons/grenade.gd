@@ -9,7 +9,6 @@ class_name Grenade
 var timer: Timer
 
 func _init(i_owner: CharacterBody3D = null) -> void:
-	super()
 	prev_owner = i_owner
 	
 	max_ammo = 1

@@ -13,7 +13,7 @@ func _on_collection_area_body_entered(body: Node3D) -> void:
 		if parent is Throwable and parent.fuse_set:
 			return
 		# Remove weapon root node from ItemManager's ownership
-		parent.get_parent().call_deferred("remove_child", parent)
+		#parent.get_parent().call_deferred("remove_child", parent)
 		# Free weapon object scene
 		queue_free()
 		# Add weapon to the player that entered the collection area
