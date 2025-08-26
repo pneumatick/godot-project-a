@@ -532,7 +532,7 @@ func throw_current_item():
 	current_item.free_held_scene()
 	var thrown = current_item.instantiate_object_scene()
 	thrown.get_parent().prev_owner = self
-	get_parent().add_child(current_item)
+	#get_parent().add_child(current_item)
 
 	# Determine position
 	var muzzle_pos = camera_controller.global_transform.origin
