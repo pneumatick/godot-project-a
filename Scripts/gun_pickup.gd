@@ -30,10 +30,11 @@ func _on_body_entered(body):
 		visible = false
 		
 		if multiplayer.is_server():
-			weapon_spawner.spawn({
-				"Weapon": weapon_name
+			var weapon = weapon_spawner.spawn({
+				"Weapon": weapon_name,
+				"ID": Globals.new_item_id()
 			})
-			rpc("_transfer_to_player", body.name, Globals.new_item_id())
+			rpc("_transfer_to_player", body.name, weapon.item_id)
 		
 		await get_tree().create_timer(respawn_time).timeout
 		_available = true
@@ -42,10 +43,10 @@ func _on_body_entered(body):
 @rpc("any_peer", "call_local")
 func _transfer_to_player(player_id: String, item_id: int) -> void:
 	print("Looking for ", player_id)
-	for node in %WeaponManager.get_children():
-		if node is Weapon:
-			print("Adding weapon ", node)
-			var weapon = node
+	for id in Globals.Weapons.keys():
+		if id == item_id:
+			print("Adding weapon ", Globals.Weapons[id])
+			var weapon = Globals.Weapons[id]
 			print("Player list: ", get_tree().get_nodes_in_group("players"))
 			for player in get_tree().get_nodes_in_group("players"):
 				print("Found player ", player, " ", player.name)

@@ -17,7 +17,11 @@ func _ready() -> void:
 
 func _spawn_weapon(data: Variant) -> Weapon:
 	var weapon_str = data["Weapon"]
+	var id = data["ID"]
 	var new_weapon = _weapons[weapon_str].instantiate()
+	
+	new_weapon.item_id = id
+	Globals.Weapons[id] = new_weapon
 	new_weapon.set_multiplayer_authority(1)
 	
 	return new_weapon

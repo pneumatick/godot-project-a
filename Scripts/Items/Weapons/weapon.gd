@@ -28,6 +28,9 @@ var _equipped : bool
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	# Set default position relative to camera (center of view being origin)
+	object_node.visible = false
+	object_node.set_physics_process(false)
+	object_node.get_node("Collection Area/CollisionShape3D").disabled = true
 	_can_fire = true
 
 func _process(_delta: float) -> void:
