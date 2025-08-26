@@ -12,7 +12,7 @@ func _on_collection_area_body_entered(body: Node3D) -> void:
 	if body is Player and body.is_alive():
 		if parent is Throwable and parent.fuse_set:
 			return
-		# Remove weapon root node from world's ownership
+		# Remove weapon root node from ItemManager's ownership
 		parent.get_parent().call_deferred("remove_child", parent)
 		# Free weapon object scene
 		queue_free()
