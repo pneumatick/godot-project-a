@@ -7,7 +7,7 @@ func _ready() -> void:
 	
 	_weapons = {
 		"Rifle": preload("uid://dsyg6wgpkw52w"),
-		"Pistol": Pistol,
+		"Pistol": preload("uid://qxuv4v071qip"),
 		"Grenade": Grenade
 	}
 	
