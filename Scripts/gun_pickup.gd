@@ -43,11 +43,9 @@ func _on_body_entered(body):
 @rpc("any_peer", "call_local")
 func _transfer_to_player(player_id: String, item_id: int) -> void:
 	print("Looking for ", player_id)
-	for id in Globals.Weapons.keys():
-		if id == item_id:
-			print("Adding weapon ", Globals.Weapons[id])
-			var weapon = Globals.Weapons[id]
-			print("Player list: ", get_tree().get_nodes_in_group("players"))
+	for weapon in get_tree().get_nodes_in_group("weapons"):
+		if weapon.item_id == item_id:
+			print("Adding weapon ", weapon.item_id)
 			for player in get_tree().get_nodes_in_group("players"):
 				print("Found player ", player, " ", player.name)
 				if player.name == player_id:
@@ -61,6 +59,10 @@ func _transfer_to_player(player_id: String, item_id: int) -> void:
 							" to ", player_id
 						)
 					else:
+						printerr("Add item for weapon failed (inventory full?). Freeing weapon...")
 						weapon.queue_free()
 					return
+			# Free the weapon if the player was not found
+			printerr("Player not found for weapon transfer. Freeing weapon...")
 			weapon.queue_free()
+			return
