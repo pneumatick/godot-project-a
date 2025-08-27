@@ -130,6 +130,7 @@ func unequip() -> void:
 # Instantiate the scene that represents the held weapon
 func instantiate_held_scene() -> void:
 	var scene = held_scene.instantiate()
+	scene.position = held_pos
 	for node in scene.get_children():
 		if node.name == "Fire Sound":
 			fire_sound = node
