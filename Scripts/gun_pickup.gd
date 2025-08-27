@@ -30,12 +30,7 @@ func _on_body_entered(body):
 		visible = false
 		
 		# Create weapon and transfer to the player
-		if multiplayer.is_server():
-			var weapon = weapon_spawner.spawn({
-				"Weapon": weapon_name,
-				"ID": Globals.new_item_id()
-			})
-			%WeaponManager.transfer_weapon(body.name, weapon.item_id)
+		%WeaponManager.create_and_transfer(weapon_name, body.name)
 		
 		await get_tree().create_timer(respawn_time).timeout
 		_available = true

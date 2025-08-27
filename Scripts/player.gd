@@ -498,16 +498,24 @@ func add_money(amount: int) -> void:
 	money += amount
 	money_change.emit(money)
 
+## Attempt to remove an amount of money from the player
 func remove_money(amount: int) -> bool:
 	var successful = true
 	
-	if money - amount >= 0:
-		money -= amount
-		money_change.emit(money)
+	if multiplayer.is_server() and money - amount >= 0:
+		rpc("broadcast_money_removal", amount)
 	else:
 		successful = false
 	
 	return successful
+
+@rpc("any_peer", "call_local")
+func broadcast_money_removal(amount: int) -> void:
+	if multiplayer.get_remote_sender_id() != 1:
+		return 
+	
+	money -= amount
+	money_change.emit(money)
 
 func set_in_menu(state: bool) -> void:
 	_in_menu = state

@@ -1,7 +1,15 @@
 extends Node3D
 
-func transfer_weapon(player_id: String, item_id: int) -> void:
-	rpc("_transfer_to_player", player_id, item_id)
+@onready var weapon_spawner: MultiplayerSpawner = $WeaponSpawner
+
+## Create weapon and transfer to the player
+func create_and_transfer(weapon_name: String, player_id: String) -> void:
+	if multiplayer.is_server():
+		var weapon = weapon_spawner.spawn({
+			"Weapon": weapon_name,
+			"ID": Globals.new_item_id()
+		})
+		rpc("_transfer_to_player", player_id, weapon.item_id)
 
 @rpc("any_peer", "call_local")
 func _transfer_to_player(player_id: String, item_id: int) -> void:

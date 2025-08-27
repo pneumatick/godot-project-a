@@ -26,12 +26,22 @@ func close_for_player():
 	_on_close_pressed()
 
 func _on_buy_rifle_pressed():
-	var has_enough = player.remove_money(50)
-	if has_enough:
-		player.add_item(Rifle.new(player))
-		print("Player bought a rifle!")
-	else:
-		print("Player does not have enough money")
+	request_buy.rpc_id(1, "Rifle")
+
+@rpc("any_peer", "call_local")
+func request_buy(weapon_name: String) -> void:
+	if not multiplayer.is_server():
+		return
+	
+	var player_id: int = multiplayer.get_remote_sender_id()
+	for player in get_tree().get_nodes_in_group("players"):
+		if player.name == str(player_id):
+			var removed = player.remove_money(50)
+			if removed:
+				Globals.WeaponManager.create_and_transfer(weapon_name, str(player_id))
+				print("Player %s bought a rifle!" % str(player_id))
+			else:
+				print("Player %s does not have enough money" % str(player_id))
 
 ## Attempt to sell the selected hotbar item
 func _sell_item(item_index: int):
