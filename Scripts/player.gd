@@ -372,9 +372,6 @@ func _equip_item(idx: int) -> void:
 
 # Add an item to the player's inventory (and hand, at least for now)
 func add_item(item) -> bool:
-	if multiplayer.get_remote_sender_id() != 1:
-		return false
-	
 	print(multiplayer.get_unique_id(), " Adding %s..." % str(item))
 	
 	# Add weapons
@@ -429,7 +426,7 @@ func _add_weapon(weapon: Node3D) -> bool:
 		return false
 	
 	# Add held item scene to hand and inventory
-	right_hand.add_child(weapon)
+	right_hand.add_child(weapon.held_node)
 	if not _inventory.has(item_name):
 		_inventory[item_name] = [weapon]
 	else:
@@ -449,6 +446,7 @@ func _add_drug(drug: Drug) -> bool:
 	return _add_weapon(drug)
 
 func remove_item(item: Node3D = null) -> bool:
+	print(item.get_parent())
 	var removed = false
 	
 	var item_name : String
@@ -464,12 +462,12 @@ func remove_item(item: Node3D = null) -> bool:
 		if _items[i] == item:
 			# Remove item from _inventory
 			if _inventory[item_name].size() == 1:
-				right_hand.remove_child(_inventory[item_name][0])
+				#right_hand.remove_child(_inventory[item_name][0].held_node)
 				_inventory.erase(item_name)
 			else:
 				for j in range(_inventory[item_name].size()):
 					if _inventory[item_name][j] == item:
-						right_hand.remove_child(_inventory[item_name][j])
+						#right_hand.remove_child(_inventory[item_name][j].held_node)
 						_inventory[item_name].remove_at(j)
 						break
 			_items[i] = null
@@ -529,10 +527,9 @@ func throw_current_item():
 	remove_item(current_item)
 	
 	# Create the thrown object
-	current_item.free_held_scene()
 	var thrown = current_item.instantiate_object_scene()
 	thrown.get_parent().prev_owner = self
-	get_parent().add_child(current_item)
+	#get_parent().add_child(current_item)
 
 	# Determine position
 	var muzzle_pos = camera_controller.global_transform.origin
@@ -556,7 +553,6 @@ func drop_all_items():
 			remove_item(item)	# Remove item from items/inventory
 			
 			# Instantiate item object
-			item.free_held_scene()
 			item.instantiate_object_scene()
 			item.prev_owner = self
 			drop_item(item)		# Drop item into world

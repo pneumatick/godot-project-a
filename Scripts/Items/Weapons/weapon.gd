@@ -9,38 +9,47 @@ class_name Weapon
 @export var condition : int
 @export var value : int
 @export var prev_owner : CharacterBody3D
+@export var held: bool = false
 
 @onready var ammo_label = get_node("/root/3D Scene Root/HUD/Control/Ammo")
 @onready var fire_sound : AudioStreamPlayer3D
+@onready var object_node: RigidBody3D
 
 var held_scene : PackedScene
+var held_node: Node3D
+var held_pos: Vector3 = Vector3(0.5, -0.25, -0.25)
 var object_scene : PackedScene
 var icon : ImageTexture
-var sync: MultiplayerSynchronizer
 var item_id: int
 
 var _can_fire : bool
 var _equipped : bool
 
-func _init() -> void:
-	pass
-
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	# Set up MultiplayerSynchronizer on Weapon root node (Node3D)
-	sync = MultiplayerSynchronizer.new()
-	sync.root_path = get_parent().get_path()
-	var config  = SceneReplicationConfig.new()
-	config.add_property(".:position")
-	config.property_set_replication_mode(".:position", SceneReplicationConfig.REPLICATION_MODE_ALWAYS)
-	config.add_property(".:rotation")
-	config.property_set_replication_mode(".:rotation", SceneReplicationConfig.REPLICATION_MODE_ALWAYS)
-	sync.replication_config = config
-	add_child(sync)
+	# Get object node (ie in-world physics body root node)
+	if get_node_or_null("Weapon"):
+		object_node = $Weapon
+	elif get_node_or_null("Throwable"):
+		object_node = $Throwable
+	else:
+		printerr("Object node not found for ", self)
 	
 	# Set default position relative to camera (center of view being origin)
-	position = Vector3(0.5, -0.25, -0.25)
+	object_node.visible = false
+	object_node.set_physics_process(false)
+	object_node.get_node("Collection Area/CollisionShape3D").disabled = true
 	_can_fire = true
+
+func _process(_delta: float) -> void:
+	if held:
+		object_node.visible = false
+		object_node.set_physics_process(false)
+		object_node.get_node("Collection Area/CollisionShape3D").disabled = true
+	else:
+		object_node.visible = true
+		object_node.set_physics_process(true)
+		object_node.get_node("Collection Area/CollisionShape3D").disabled = false
 
 # Fire the weapon
 func fire():
@@ -103,39 +112,43 @@ func load_ammo(amount: int):
 
 func equip() -> void:
 	print("Equip acknowledged from weapon")
-	_equipped = true
-	visible = true
-	_can_fire = true
-	set_process(true)
-	set_process_input(true)		# Probably not necessary
+	if held_node:
+		_equipped = true
+		held_node.visible = true
+		_can_fire = true
+		set_process(true)
+		set_process_input(true)		# Probably not necessary
 
 func unequip() -> void:
-	_equipped = false
-	visible = false
-	_can_fire = false
-	set_process(false)
-	set_process_input(false)	# Probably not necessary
+	if held_node:
+		_equipped = false
+		held_node.visible = false
+		_can_fire = false
+		set_process(false)
+		set_process_input(false)	# Probably not necessary
 
 # Instantiate the scene that represents the held weapon
 func instantiate_held_scene() -> void:
 	var scene = held_scene.instantiate()
+	scene.position = held_pos
 	for node in scene.get_children():
 		if node.name == "Fire Sound":
 			fire_sound = node
+	
 	_equipped = true
-	add_child(scene)
+	held = true
+	
+	held_node = scene
 
 func instantiate_object_scene() -> Node3D:
-	var scene = object_scene.instantiate()
-	add_child(scene)
-	Globals.ItemManager.add_child(self)
-	return scene
+	free_held_scene()
+	
+	return object_node
 
 # Free the scene that represents the held weapon
 func free_held_scene() -> void:
-	for node in get_children():
-		if node.name == "Held":
-			print("Held node found")
-			node.free()
+	if held_node:
+		held_node.free()
+		held_node = null
 	_equipped = false
-	visible = true		# Too hacky? Made to handle drop_all_items() as expected. Consider...
+	held = false

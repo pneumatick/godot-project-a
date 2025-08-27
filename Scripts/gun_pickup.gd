@@ -1,6 +1,6 @@
 extends Area3D
 
-@onready var weapon_spawner: MultiplayerSpawner = $WeaponSpawner
+@onready var weapon_spawner: MultiplayerSpawner = %WeaponManager.get_node("WeaponSpawner")
 
 var _available : bool = true
 
@@ -30,11 +30,11 @@ func _on_body_entered(body):
 		visible = false
 		
 		if multiplayer.is_server():
-			weapon_spawner.spawn({
-				"Weapon": weapon_name
+			var weapon = weapon_spawner.spawn({
+				"Weapon": weapon_name,
+				"ID": Globals.new_item_id()
 			})
-			rpc("_transfer_to_player", body.name, Globals.new_item_id())
-			
+			rpc("_transfer_to_player", body.name, weapon.item_id)
 		
 		await get_tree().create_timer(respawn_time).timeout
 		_available = true
@@ -42,12 +42,12 @@ func _on_body_entered(body):
 
 @rpc("any_peer", "call_local")
 func _transfer_to_player(player_id: String, item_id: int) -> void:
-	for node in get_children():
-		if node is Weapon:
-			var weapon = node
-			# Item will become child of player's right hand, so remove child here
-			remove_child(weapon)
-			for player in %PlayerManager.get_children():
+	print("Looking for ", player_id)
+	for weapon in get_tree().get_nodes_in_group("weapons"):
+		if weapon.item_id == item_id:
+			print("Adding weapon ", weapon.item_id)
+			for player in get_tree().get_nodes_in_group("players"):
+				print("Found player ", player, " ", player.name)
 				if player.name == player_id:
 					# Actually transfer ownership (and initialize relevant weapon vars)
 					weapon.prev_owner = player
@@ -59,4 +59,10 @@ func _transfer_to_player(player_id: String, item_id: int) -> void:
 							" to ", player_id
 						)
 					else:
+						printerr("Add item for weapon failed (inventory full?). Freeing weapon...")
 						weapon.queue_free()
+					return
+			# Free the weapon if the player was not found
+			printerr("Player not found for weapon transfer. Freeing weapon...")
+			weapon.queue_free()
+			return
