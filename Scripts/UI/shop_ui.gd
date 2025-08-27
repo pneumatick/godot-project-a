@@ -34,9 +34,9 @@ func request_buy(weapon_name: String) -> void:
 		return
 	
 	var player_id: int = multiplayer.get_remote_sender_id()
-	for player in get_tree().get_nodes_in_group("players"):
-		if player.name == str(player_id):
-			var removed = player.remove_money(50)
+	for player_node in get_tree().get_nodes_in_group("players"):
+		if player_node.name == str(player_id):
+			var removed = player_node.remove_money(50)
 			if removed:
 				Globals.WeaponManager.create_and_transfer(weapon_name, str(player_id))
 				print("Player %s bought a rifle!" % str(player_id))
