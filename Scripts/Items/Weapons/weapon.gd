@@ -13,7 +13,7 @@ class_name Weapon
 
 @onready var ammo_label = get_node("/root/3D Scene Root/HUD/Control/Ammo")
 @onready var fire_sound : AudioStreamPlayer3D
-@onready var object_node: RigidBody3D = $Weapon
+@onready var object_node: RigidBody3D
 
 var held_scene : PackedScene
 var held_node: Node3D
@@ -27,6 +27,14 @@ var _equipped : bool
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
+	# Get object node (ie in-world physics body root node)
+	if get_node_or_null("Weapon"):
+		object_node = $Weapon
+	elif get_node_or_null("Throwable"):
+		object_node = $Throwable
+	else:
+		printerr("Object node not found for ", self)
+	
 	# Set default position relative to camera (center of view being origin)
 	object_node.visible = false
 	object_node.set_physics_process(false)
@@ -138,7 +146,8 @@ func instantiate_object_scene() -> Node3D:
 
 # Free the scene that represents the held weapon
 func free_held_scene() -> void:
-	held_node.free()
-	held_node = null
+	if held_node:
+		held_node.free()
+		held_node = null
 	_equipped = false
 	held = false

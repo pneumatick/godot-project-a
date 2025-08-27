@@ -8,7 +8,7 @@ func _ready() -> void:
 	_weapons = {
 		"Rifle": preload("uid://dsyg6wgpkw52w"),
 		"Pistol": preload("uid://qxuv4v071qip"),
-		"Grenade": Grenade
+		"Grenade": preload("uid://djaboct8i44l")
 	}
 	
 	for scene in _weapons.values():
