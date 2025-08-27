@@ -10,7 +10,7 @@ var num_drugs : int = 0
 @export var condition : int = 100
 @export var scene : PackedScene
 @export var _timer : Timer
-#@export var organ_body : RigidBody3D
+@export var organ_body : RigidBody3D
 
 var sync: MultiplayerSynchronizer
 
@@ -53,18 +53,29 @@ func _apply_damage(damage: int) -> void:
 		condition -= damage
 
 func interact(player: CharacterBody3D) -> void:
-	get_node("Organ").free()
-	get_parent().remove_child(self)
+	if not organ_body:
+		printerr("Attempt to interact with organ that has no body...")
+		return
+	
+	organ_body.visible = false
+	organ_body.set_physics_process(false)
+	_timer.paused = true
 	player.add_item(self)
 
 func instantiate() -> Organ:
-	var child_scene = scene.instantiate()
-	for node in child_scene.get_children():
-		if node is Timer:
-			_timer = node
-			node.timeout.connect(_on_timer_timeout)
-			_timer.call_deferred("start")
-	child_scene.add_to_group("interactables")
-	add_child(child_scene)
+	if not has_node("Organ"):
+		var child_scene = scene.instantiate()
+		for node in child_scene.get_children():
+			if node is Timer:
+				_timer = node
+				node.timeout.connect(_on_timer_timeout)
+				_timer.call_deferred("start")
+		child_scene.add_to_group("interactables")
+		add_child(child_scene)
+		organ_body = child_scene
+	else:
+		organ_body.visible = true
+		organ_body.set_physics_process(true)
+		_timer.paused = false
 	
 	return self

@@ -171,7 +171,7 @@ func _input(event):
 	elif event.is_action_pressed("fire"):
 		_fire()
 	elif event.is_action_pressed("kill"):
-		_die(self)
+		_suicide.rpc_id(1)
 	elif event.is_action_pressed("interact"):
 		if seen_object and seen_object.is_in_group("interactables"):
 			seen_object.get_parent().interact(self)
@@ -253,11 +253,17 @@ func _update_camera(delta: float) -> void:
 	_rotation_input = 0.0
 	_tilt_input = 0.0
 
+@rpc("any_peer", "call_local")
+func _suicide() -> void:
+	if not multiplayer.is_server():
+		return
+	
+	_die(self)
+
 # Handle player death logic
 func _die(source) -> void:
 	if not multiplayer.is_server():
-		if not is_multiplayer_authority():
-			return
+		return
 	
 	if source is Weapon:
 		rpc("die_rpc", source.name, self.name, source.prev_owner.name)
@@ -267,8 +273,7 @@ func _die(source) -> void:
 @rpc("any_peer", "call_local")
 func die_rpc(source: String, victim: String, killer: String = ""):
 	if multiplayer.get_remote_sender_id() != 1:
-		if not is_multiplayer_authority():
-			return
+		return
 	
 	_alive = false
 	set_process(false)
@@ -338,6 +343,7 @@ func _take_damage(amount: int) -> void:
 	print("The player was hit, health now %s" % [str(health)])
 	hit_sound.play()
 
+## Apply damage to the player (server-authoritative)
 func apply_damage(amount: int, source) -> void:
 	if multiplayer.is_server():
 		_take_damage.rpc(amount)
