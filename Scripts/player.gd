@@ -490,7 +490,11 @@ func _on_target_destroyed(value: int) -> void:
 	add_money(value)
 
 ## Increase the amount of money the player has
+@rpc("any_peer", "call_local")
 func add_money(amount: int) -> void:
+	if multiplayer.get_remote_sender_id() != 1:
+		return
+	
 	money += amount
 	money_change.emit(money)
 
