@@ -256,7 +256,8 @@ func _update_camera(delta: float) -> void:
 # Handle player death logic
 func _die(source) -> void:
 	if not multiplayer.is_server():
-		return
+		if not is_multiplayer_authority():
+			return
 	
 	if source is Weapon:
 		rpc("die_rpc", source.name, self.name, source.prev_owner.name)
@@ -266,7 +267,8 @@ func _die(source) -> void:
 @rpc("any_peer", "call_local")
 func die_rpc(source: String, victim: String, killer: String = ""):
 	if multiplayer.get_remote_sender_id() != 1:
-		return
+		if not is_multiplayer_authority():
+			return
 	
 	_alive = false
 	set_process(false)
