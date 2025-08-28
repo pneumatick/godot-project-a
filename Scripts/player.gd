@@ -28,7 +28,6 @@ var _tilt_input : float
 var _items : Array = []
 var _inventory : Dictionary = {}	# {String: Array[Items]}
 var _equipped_item_idx : int = 0
-var _organs : Dictionary = {}		# {String: Organ}
 var _alive : bool = true
 var _in_menu : bool = false
 
@@ -77,11 +76,6 @@ func _ready() -> void:
 	# Prepare items array
 	for i in range(item_capacity):
 		_items.append(null)
-	
-	# Prepare organ dictionary
-	_organs["Heart"] = Heart
-	_organs["Brain"] = Brain
-	_organs["Liver"] = Liver
 	
 	var spray_image : Texture2D = load("res://Assets/Sprays/spray.jpg")
 	spray_texture = ImageTexture.create_from_image(spray_image.get_image())

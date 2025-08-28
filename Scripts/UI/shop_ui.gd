@@ -98,6 +98,7 @@ func organ_sale_request() -> void:
 																str(organ.num_drugs), 
 																str(value)]
 					)
+					organ.queue_free()
 				# Give money to player
 				player.rpc("remove_all_organs")
 				player.rpc("add_money", total)
