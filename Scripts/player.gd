@@ -639,27 +639,24 @@ func _signal_interact() -> void:
 	
 	if seen_object and seen_object.is_in_group("interactables"):
 		var parent = seen_object.get_parent()
-		var id: int = parent.item_id
+		var organ_id: int = parent.item_id
 		var type: String = parent.type
-		rpc("receive_interactable", id, type)
+		var player_id: int = multiplayer.get_remote_sender_id()
+		rpc("receive_interactable", organ_id, type, player_id)
 	else:
 		var item = _items[_equipped_item_idx]
 		use_item(item)
 
 @rpc("any_peer", "call_local")
-func receive_interactable(id: int, type: String = "") -> void:
-	if multiplayer.get_remote_sender_id() != 1:
+func receive_interactable(organ_id: int, type: String, player_id: int) -> void:
+	if multiplayer.get_remote_sender_id() != 1 or name != str(player_id):
 		return
 	
-	if not type.is_empty():
-		if type == "Organ":
-			for organ in get_tree().get_nodes_in_group("organs"):
-				if organ.item_id == id:
-					organ.interact(self)
-					return
-					
-	else:
-		printerr("No type specified for interaction")
+	if type == "Organ":
+		for organ in get_tree().get_nodes_in_group("organs"):
+			if organ.item_id == organ_id:
+				organ.interact(self)
+				return
 
 func sell_all_organs() -> Array:
 	if _inventory.has("Organs"):
