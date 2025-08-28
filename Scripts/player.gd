@@ -641,15 +641,19 @@ func _signal_interact() -> void:
 		var parent = seen_object.get_parent()
 		var organ_id: int = parent.item_id
 		var type: String = parent.type
-		var player_id: int = multiplayer.get_remote_sender_id()
-		rpc("receive_interactable", organ_id, type, player_id)
+		var player_id: String = str(multiplayer.get_remote_sender_id())
+		for player in get_tree().get_nodes_in_group("players"):
+			if player.name == player_id:
+				player.rpc("receive_interactable", organ_id, type)
+				return
+		printerr("Player not found: ", player_id)
 	else:
 		var item = _items[_equipped_item_idx]
 		use_item(item)
 
 @rpc("any_peer", "call_local")
-func receive_interactable(organ_id: int, type: String, player_id: int) -> void:
-	if multiplayer.get_remote_sender_id() != 1 or name != str(player_id):
+func receive_interactable(organ_id: int, type: String) -> void:
+	if multiplayer.get_remote_sender_id() != 1:
 		return
 	
 	if type == "Organ":
