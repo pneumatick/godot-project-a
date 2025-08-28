@@ -2,14 +2,14 @@ extends Node3D
 
 @onready var organ_spawner: MultiplayerSpawner = $OrganSpawner
 
-var _organs : Dictionary = {}		# {String: Organ}
+var _organs: Array = []
 
 func _ready() -> void:
 	if multiplayer.is_server():
 		# Prepare organ dictionary
-		_organs["Heart"] = Heart
-		_organs["Brain"] = Brain
-		_organs["Liver"] = Liver
+		_organs.append("Heart")
+		_organs.append("Brain")
+		_organs.append("Liver")
 
 func spawn_organs(player: CharacterBody3D):
 	if not multiplayer.is_server():
@@ -17,11 +17,12 @@ func spawn_organs(player: CharacterBody3D):
 	
 	var camera_controller = player.camera_controller
 	
-	for organ in _organs.keys():
+	for organ in _organs:
 		var new_organ = organ_spawner.spawn({
-			"Organ": _organs[organ],
+			"Organ": organ,
 			"Position": player.position,
-			"Num_drugs": player.get_node("Active Drugs").get_child_count()
+			"Num_drugs": player.get_node("Active Drugs").get_child_count(),
+			"ID": Globals.new_item_id()
 		})
 		
 		# Apply impulse

@@ -638,9 +638,10 @@ func _signal_interact() -> void:
 		return
 	
 	if seen_object and seen_object.is_in_group("interactables"):
-		#seen_object.get_parent().interact(self)
-		var id: int = seen_object.get_parent().item_id
-		rpc("receive_interactable", id)
+		var parent = seen_object.get_parent()
+		var id: int = parent.item_id
+		var type: String = parent.type
+		rpc("receive_interactable", id, type)
 	else:
 		var item = _items[_equipped_item_idx]
 		use_item(item)

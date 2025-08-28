@@ -4,6 +4,7 @@ class_name Organ
 var type : String = "Organ"
 var prev_owner : CharacterBody3D
 var num_drugs : int = 0
+var item_id: int
 
 @export var item_name : String
 @export var value : int = 40
@@ -66,6 +67,7 @@ func interact(player: CharacterBody3D) -> void:
 	organ_body.set_physics_process(false)
 	_timer.paused = true
 	player.add_item(self)
+	print(multiplayer.get_unique_id(), ": Player ", player.name, " picked up organ ", str(item_id))
 
 func instantiate() -> Organ:
 	if not has_node("Organ"):
