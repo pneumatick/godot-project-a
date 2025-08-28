@@ -12,6 +12,8 @@ func _ready():
 	for node in get_children():
 		if node.name == "ItemManager":
 			Globals.ItemManager = node
+		elif node.name == "WeaponManager":
+			Globals.WeaponManager = node
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("exit"):

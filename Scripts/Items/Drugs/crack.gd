@@ -5,6 +5,7 @@ var HEALTH_BONUS : int = 100
 var DURATION : int = 20
 
 var duration_left : int = DURATION
+var item_id: int
 
 var _player : CharacterBody3D
 

@@ -28,7 +28,6 @@ var _tilt_input : float
 var _items : Array = []
 var _inventory : Dictionary = {}	# {String: Array[Items]}
 var _equipped_item_idx : int = 0
-var _organs : Dictionary = {}		# {String: Organ}
 var _alive : bool = true
 var _in_menu : bool = false
 
@@ -77,11 +76,6 @@ func _ready() -> void:
 	# Prepare items array
 	for i in range(item_capacity):
 		_items.append(null)
-	
-	# Prepare organ dictionary
-	_organs["Heart"] = Heart
-	_organs["Brain"] = Brain
-	_organs["Liver"] = Liver
 	
 	var spray_image : Texture2D = load("res://Assets/Sprays/spray.jpg")
 	spray_texture = ImageTexture.create_from_image(spray_image.get_image())
@@ -171,13 +165,9 @@ func _input(event):
 	elif event.is_action_pressed("fire"):
 		_fire()
 	elif event.is_action_pressed("kill"):
-		_die(self)
+		_suicide.rpc_id(1)
 	elif event.is_action_pressed("interact"):
-		if seen_object and seen_object.is_in_group("interactables"):
-			seen_object.get_parent().interact(self)
-		else:
-			var item = _items[_equipped_item_idx]
-			use_item(item)
+		_signal_interact.rpc_id(1)
 	elif event.is_action_pressed("spray"):
 		place_spray(spray_texture)
 	elif event.is_action_pressed("invert_gravity"):
@@ -252,6 +242,13 @@ func _update_camera(delta: float) -> void:
 	# Reset input accumulators
 	_rotation_input = 0.0
 	_tilt_input = 0.0
+
+@rpc("any_peer", "call_local")
+func _suicide() -> void:
+	if not multiplayer.is_server():
+		return
+	
+	_die(self)
 
 # Handle player death logic
 func _die(source) -> void:
@@ -336,6 +333,7 @@ func _take_damage(amount: int) -> void:
 	print("The player was hit, health now %s" % [str(health)])
 	hit_sound.play()
 
+## Apply damage to the player (server-authoritative)
 func apply_damage(amount: int, source) -> void:
 	if multiplayer.is_server():
 		_take_damage.rpc(amount)
@@ -490,20 +488,32 @@ func _on_target_destroyed(value: int) -> void:
 	add_money(value)
 
 ## Increase the amount of money the player has
+@rpc("any_peer", "call_local")
 func add_money(amount: int) -> void:
+	if multiplayer.get_remote_sender_id() != 1:
+		return
+	
 	money += amount
 	money_change.emit(money)
 
+## Attempt to remove an amount of money from the player
 func remove_money(amount: int) -> bool:
 	var successful = true
 	
-	if money - amount >= 0:
-		money -= amount
-		money_change.emit(money)
+	if multiplayer.is_server() and money - amount >= 0:
+		rpc("broadcast_money_removal", amount)
 	else:
 		successful = false
 	
 	return successful
+
+@rpc("any_peer", "call_local")
+func broadcast_money_removal(amount: int) -> void:
+	if multiplayer.get_remote_sender_id() != 1:
+		return 
+	
+	money -= amount
+	money_change.emit(money)
 
 func set_in_menu(state: bool) -> void:
 	_in_menu = state
@@ -616,13 +626,46 @@ func _check_interact_target():
 		seen_object = null
 		viewing.emit()
 
-func sell_all_organs() -> Array:
+@rpc("any_peer", "call_local")
+func _signal_interact() -> void:
+	if not multiplayer.is_server():
+		return
+	
+	if seen_object and seen_object.is_in_group("interactables"):
+		var parent = seen_object.get_parent()
+		var organ_id: int = parent.item_id
+		var type: String = parent.type
+		var player_id: String = str(multiplayer.get_remote_sender_id())
+		for player in get_tree().get_nodes_in_group("players"):
+			if player.name == player_id:
+				player.rpc("receive_interactable", organ_id, type)
+				return
+		printerr("Player not found: ", player_id)
+	else:
+		var item = _items[_equipped_item_idx]
+		use_item(item)
+
+@rpc("any_peer", "call_local")
+func receive_interactable(organ_id: int, type: String) -> void:
+	if multiplayer.get_remote_sender_id() != 1:
+		return
+	
+	if type == "Organ":
+		for organ in get_tree().get_nodes_in_group("organs"):
+			if organ.item_id == organ_id:
+				organ.interact(self)
+				return
+
+func get_all_organs() -> Array:
 	if _inventory.has("Organs"):
-		var organs = _inventory["Organs"]
-		_inventory.erase("Organs")
-		return organs
+		return _inventory["Organs"]
 	
 	return []
+
+@rpc("any_peer", "call_local")
+func remove_all_organs() -> void:
+	if _inventory.has("Organs"):
+		_inventory.erase("Organs")
 
 func use_item(item) -> void:
 	if item is Drug:
