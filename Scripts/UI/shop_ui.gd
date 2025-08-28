@@ -55,6 +55,7 @@ func _sell_item(item_index: int):
 		print("Sell item failed for ", item, " at index ", str(item_index))
 
 func _on_sell_organs_pressed():
+	'''
 	var organs = player.sell_all_organs()
 	
 	if organs != []:
@@ -70,6 +71,36 @@ func _on_sell_organs_pressed():
 														str(organ.num_drugs), 
 														str(value)]
 			)
+	'''
+	organ_sale_request.rpc_id(1)
+
+@rpc("any_peer", "call_local")
+func organ_sale_request() -> void:
+	if not multiplayer.is_server():
+		return
+	
+	var player_id: int = multiplayer.get_remote_sender_id()
+	
+	for player in get_tree().get_nodes_in_group("players"):
+		if player.name == str(player_id):
+			var organs = player.get_all_organs()
+	
+			if organs != []:
+				var total: int = 0
+				for organ in organs:
+					print(organ)
+					var drug_deduct = floori(organ.value * 0.20 * organ.num_drugs)
+					var value = floori((organ.value - drug_deduct) * (float(organ.condition) / 100.0))
+					total += value
+					print(
+						"%s with condition %s and %s drugs present sold for %s" % [organ.item_name, 
+																str(organ.condition),
+																str(organ.num_drugs), 
+																str(value)]
+					)
+				# Give money to player
+				player.rpc("remove_all_organs")
+				player.rpc("add_money", total)
 
 func _on_buy_crack_pressed():
 	var has_enough = player.remove_money(0)

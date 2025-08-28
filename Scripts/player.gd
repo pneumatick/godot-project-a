@@ -658,13 +658,16 @@ func receive_interactable(organ_id: int, type: String, player_id: int) -> void:
 				organ.interact(self)
 				return
 
-func sell_all_organs() -> Array:
+func get_all_organs() -> Array:
 	if _inventory.has("Organs"):
-		var organs = _inventory["Organs"]
-		_inventory.erase("Organs")
-		return organs
+		return _inventory["Organs"]
 	
 	return []
+
+@rpc("any_peer", "call_local")
+func remove_all_organs() -> void:
+	if _inventory.has("Organs"):
+		_inventory.erase("Organs")
 
 func use_item(item) -> void:
 	if item is Drug:
