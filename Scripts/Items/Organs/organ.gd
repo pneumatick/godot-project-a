@@ -22,6 +22,8 @@ func _init() -> void:
 	config.property_set_replication_mode("Organ:position", SceneReplicationConfig.REPLICATION_MODE_ALWAYS)
 	config.add_property("Organ:rotation")
 	config.property_set_replication_mode("Organ:rotation", SceneReplicationConfig.REPLICATION_MODE_ALWAYS)
+	config.add_property(".:condition")
+	config.property_set_replication_mode(".:condition", SceneReplicationConfig.REPLICATION_MODE_ON_CHANGE)
 	sync.replication_config = config
 	add_child(sync)
 
@@ -40,13 +42,14 @@ func set_new_owner(new_owner: CharacterBody3D):
 	prev_owner = new_owner
 
 func _on_timer_timeout() -> void:
-	condition -= 1
-	if condition <= 0:
-		queue_free()
-	else:
+	_apply_damage(1)
+	if condition > 0:
 		_timer.start()
 
 func _apply_damage(damage: int) -> void:
+	if not multiplayer.is_server():
+		return
+	
 	if condition - damage <= 0:
 		queue_free()
 	else:
