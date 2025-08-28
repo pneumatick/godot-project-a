@@ -173,11 +173,7 @@ func _input(event):
 	elif event.is_action_pressed("kill"):
 		_suicide.rpc_id(1)
 	elif event.is_action_pressed("interact"):
-		if seen_object and seen_object.is_in_group("interactables"):
-			seen_object.get_parent().interact(self)
-		else:
-			var item = _items[_equipped_item_idx]
-			use_item(item)
+		_signal_interact.rpc_id(1)
 	elif event.is_action_pressed("spray"):
 		place_spray(spray_texture)
 	elif event.is_action_pressed("invert_gravity"):
@@ -635,6 +631,34 @@ func _check_interact_target():
 	else:
 		seen_object = null
 		viewing.emit()
+
+@rpc("any_peer", "call_local")
+func _signal_interact() -> void:
+	if not multiplayer.is_server():
+		return
+	
+	if seen_object and seen_object.is_in_group("interactables"):
+		#seen_object.get_parent().interact(self)
+		var id: int = seen_object.get_parent().item_id
+		rpc("receive_interactable", id)
+	else:
+		var item = _items[_equipped_item_idx]
+		use_item(item)
+
+@rpc("any_peer", "call_local")
+func receive_interactable(id: int, type: String = "") -> void:
+	if multiplayer.get_remote_sender_id() != 1:
+		return
+	
+	if not type.is_empty():
+		if type == "Organ":
+			for organ in get_tree().get_nodes_in_group("organs"):
+				if organ.item_id == id:
+					organ.interact(self)
+					return
+					
+	else:
+		printerr("No type specified for interaction")
 
 func sell_all_organs() -> Array:
 	if _inventory.has("Organs"):

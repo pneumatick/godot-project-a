@@ -26,6 +26,8 @@ func _init() -> void:
 	config.property_set_replication_mode(".:condition", SceneReplicationConfig.REPLICATION_MODE_ON_CHANGE)
 	sync.replication_config = config
 	add_child(sync)
+	
+	add_to_group("organs")
 
 func _enter_tree() -> void:
 	sync.root_path = self.get_path()
