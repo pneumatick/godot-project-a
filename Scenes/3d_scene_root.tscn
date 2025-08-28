@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=3 uid="uid://hmv4dr58x4if"]
+[gd_scene load_steps=24 format=3 uid="uid://hmv4dr58x4if"]
 
 [ext_resource type="Script" uid="uid://cf8moef3pykdp" path="res://Scripts/3d_scene_root.gd" id="1_1rpu5"]
 [ext_resource type="PackedScene" uid="uid://c2dcha7sipp8a" path="res://Scenes/player.tscn" id="1_sxnch"]
@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://tldca8ygc1hw" path="res://Scenes/hud.tscn" id="4_kb1pf"]
 [ext_resource type="PackedScene" uid="uid://mlxqh5iqxvxs" path="res://Scenes/target.tscn" id="5_23mtt"]
 [ext_resource type="Script" uid="uid://bfdlky23b1cf8" path="res://Scripts/Spawning and Managing/Spawners/organ_spawner.gd" id="5_gy3gj"]
+[ext_resource type="Script" uid="uid://cjionp47y44nd" path="res://Scripts/Spawning and Managing/Spawners/drug_spawner.gd" id="6_3k4we"]
 [ext_resource type="Script" uid="uid://4at6ahg4d7jt" path="res://Scripts/Spawning and Managing/Managers/weapon_manager.gd" id="6_fn417"]
 [ext_resource type="PackedScene" uid="uid://dulrda5jbt33a" path="res://Scenes/shop_zone.tscn" id="7_lyres"]
 [ext_resource type="PackedScene" uid="uid://gv7xvye5xef7" path="res://Scenes/damage_area.tscn" id="7_riqsv"]
@@ -59,6 +60,10 @@ script = ExtResource("2_1gw12")
 [node name="OrganSpawner" type="MultiplayerSpawner" parent="ItemManager"]
 spawn_path = NodePath("..")
 script = ExtResource("5_gy3gj")
+
+[node name="DrugSpawner" type="MultiplayerSpawner" parent="ItemManager"]
+spawn_path = NodePath("..")
+script = ExtResource("6_3k4we")
 
 [node name="WeaponManager" type="Node3D" parent="."]
 unique_name_in_owner = true
