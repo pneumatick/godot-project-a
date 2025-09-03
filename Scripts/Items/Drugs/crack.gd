@@ -25,12 +25,15 @@ func _init() -> void:
 	icon = ImageTexture.create_from_image(image.get_image())
 
 func use(player: CharacterBody3D):
+	if not multiplayer.is_server():
+		return
+	
 	print("%s used" % item_name)
 	_player = player
 	visible = false
 	
 	# Set initial drug effect
-	player.health += HEALTH_BONUS
+	player.add_health(HEALTH_BONUS, self)
 	
 	# Start drug effect timer
 	_timer.start()

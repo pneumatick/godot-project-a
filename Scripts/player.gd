@@ -333,6 +333,10 @@ func _take_damage(amount: int) -> void:
 	print("The player was hit, health now %s" % [str(health)])
 	hit_sound.play()
 
+## Add health to the player (server-authoritative)
+func add_health(amount: int, source) -> void:
+	apply_damage(-amount, source)
+
 ## Apply damage to the player (server-authoritative)
 func apply_damage(amount: int, source) -> void:
 	if multiplayer.is_server():
