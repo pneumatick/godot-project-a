@@ -30,26 +30,30 @@ func use(player: CharacterBody3D):
 	
 	print("%s used" % item_name)
 	_player = player
-	visible = false
+	free_held_scene()
 	
 	# Set initial drug effect
 	player.add_health(HEALTH_BONUS, self)
 	
 	# Start drug effect timer
-	_timer.start()
+	var timer = Timer.new()
+	timer.timeout.connect(_on_timer_timeout.bind(timer))
+	player.get_node("Active Drugs").add_child(timer)
+	timer.start()
 	
 func throw():
 	print("%s thrown" % item_name)
 
-func _on_timer_timeout():
+func _on_timer_timeout(timer: Timer):
 	if not multiplayer.is_server():
 		return
-		
+	
 	if duration_left <= 0:
 			queue_free()
+			timer.queue_free()
 	else:
 		print("Player taking crack")
 		@warning_ignore("integer_division")
 		_player.apply_damage(HEALTH_BONUS / DURATION, self)
 		duration_left -= 1
-		_timer.start()
+		timer.start()

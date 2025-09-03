@@ -14,7 +14,6 @@ var type: String = "Drug"
 var prev_owner : CharacterBody3D
 var icon : Texture2D
 
-var _timer : Timer
 var _equipped: bool = false
 
 func _ready() -> void:
@@ -30,7 +29,7 @@ func use(_player: CharacterBody3D): pass
 	
 func throw(): pass
 
-func _on_timer_timeout(): pass
+func _on_timer_timeout(timer: Timer): pass
 
 func apply_bullet_force(hit_pos: Vector3, direction: Vector3, force: float, damage: int, source):
 	object_node.apply_impulse(hit_pos - global_transform.origin + direction * force)
@@ -52,52 +51,21 @@ func interact(player: CharacterBody3D) -> void:
 	player.add_item(self)
 	equip()
 
-'''
-# Instantiate the scene that represents the held weapon
-func instantiate_held_scene() -> void:
-	var scene = held_scene.instantiate()
-	for node in scene.get_children():
-		if node is Timer:
-			_timer = node
-			_timer.timeout.connect(_on_timer_timeout)
-	add_child(scene)
-
-func instantiate_object_scene() -> Node3D:
-	var scene = object_scene.instantiate()
-	scene.add_to_group("interactables")
-	add_child(scene)
-	return scene
-
-# Free the scene that represents the held weapon
-func free_held_scene() -> void:
-	get_child(0).free()
-	visible = true		# Too hacky? Made to handle drop_all_items() as expected. Consider...
-
-func free_object_scene() -> void:
-	get_child(0).free()
-'''
-
 func equip() -> void:
 	print("Equip acknowledged from weapon")
 	if held_node:
 		_equipped = true
 		held_node.visible = true
-		set_process(true)
 
 func unequip() -> void:
 	if held_node:
 		_equipped = false
 		held_node.visible = false
-		set_process(false)
 
 # Instantiate the scene that represents the held drug
 func instantiate_held_scene() -> void:
 	var scene = held_scene.instantiate()
 	#scene.position = held_pos
-	for node in scene.get_children():
-		if node is Timer:
-			_timer = node
-			_timer.timeout.connect(_on_timer_timeout)
 	
 	_equipped = true
 	
@@ -105,10 +73,6 @@ func instantiate_held_scene() -> void:
 
 func instantiate_object_scene() -> Node3D:
 	free_held_scene()
-	
-	object_node.visible = true
-	object_node.set_physics_process(true)
-	object_node.get_node("CollisionShape3D").disabled = false
 	
 	return object_node
 

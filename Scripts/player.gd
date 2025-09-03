@@ -679,7 +679,6 @@ func remove_all_organs() -> void:
 func use_item(item) -> void:
 	if item is Drug:
 		remove_item(item)				# Remove from inventory and items
-		$"Active Drugs".add_child(item)
 		item.use(self)
 		
 		# Overdose
