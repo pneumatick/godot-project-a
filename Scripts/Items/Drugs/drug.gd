@@ -21,6 +21,11 @@ func _ready() -> void:
 	object_node = get_node("DrugObject")
 	object_node.add_to_group("interactables")
 
+func _process(_delta: float) -> void:
+	object_node.visible = not _equipped
+	object_node.set_physics_process(not _equipped)
+	object_node.get_node("CollisionShape3D").disabled = _equipped
+
 func use(_player: CharacterBody3D): pass
 	
 func throw(): pass
@@ -28,7 +33,7 @@ func throw(): pass
 func _on_timer_timeout(): pass
 
 func apply_bullet_force(hit_pos: Vector3, direction: Vector3, force: float, damage: int, source):
-	get_child(0).apply_impulse(hit_pos - global_transform.origin + direction * force)
+	object_node.apply_impulse(hit_pos - global_transform.origin + direction * force)
 	_apply_damage(damage)
 	set_new_owner(source.prev_owner)
 	# HIT SOUND HERE
@@ -44,9 +49,6 @@ func _apply_damage(damage: int) -> void:
 		condition -= damage
 
 func interact(player: CharacterBody3D) -> void:
-	object_node.visible = false
-	object_node.set_physics_process(false)
-	object_node.get_node("CollisionShape3D").disabled = true
 	player.add_item(self)
 	equip()
 
