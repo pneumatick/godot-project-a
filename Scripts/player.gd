@@ -646,14 +646,19 @@ func _signal_interact() -> void:
 		use_item(item)
 
 @rpc("any_peer", "call_local")
-func receive_interactable(organ_id: int, type: String) -> void:
+func receive_interactable(item_id: int, type: String) -> void:
 	if multiplayer.get_remote_sender_id() != 1:
 		return
 	
 	if type == "Organ":
 		for organ in get_tree().get_nodes_in_group("organs"):
-			if organ.item_id == organ_id:
+			if organ.item_id == item_id:
 				organ.interact(self)
+				return
+	elif type == "Drug":
+		for drug in get_tree().get_nodes_in_group("drugs"):
+			if drug.item_id == item_id:
+				drug.interact(self)
 				return
 
 func get_all_organs() -> Array:

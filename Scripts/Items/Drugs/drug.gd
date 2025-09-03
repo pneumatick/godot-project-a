@@ -9,6 +9,7 @@ class_name Drug
 @export var object_scene : PackedScene
 var object_node: RigidBody3D
 var held_node: Node3D
+var type: String = "Drug"
 
 var prev_owner : CharacterBody3D
 var icon : Texture2D
@@ -43,6 +44,9 @@ func _apply_damage(damage: int) -> void:
 		condition -= damage
 
 func interact(player: CharacterBody3D) -> void:
+	object_node.visible = false
+	object_node.set_physics_process(false)
+	object_node.get_node("CollisionShape3D").disabled = true
 	player.add_item(self)
 	equip()
 
@@ -99,6 +103,10 @@ func instantiate_held_scene() -> void:
 
 func instantiate_object_scene() -> Node3D:
 	free_held_scene()
+	
+	object_node.visible = true
+	object_node.set_physics_process(true)
+	object_node.get_node("CollisionShape3D").disabled = false
 	
 	return object_node
 

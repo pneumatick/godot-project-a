@@ -39,8 +39,11 @@ func throw():
 	print("%s thrown" % item_name)
 
 func _on_timer_timeout():
+	if not multiplayer.is_server():
+		return
+		
 	if duration_left <= 0:
-		queue_free()
+			queue_free()
 	else:
 		print("Player taking crack")
 		@warning_ignore("integer_division")
