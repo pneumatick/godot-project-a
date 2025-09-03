@@ -54,7 +54,7 @@ func request_drug_buy(drug_name: String) -> void:
 	var player_id: int = multiplayer.get_remote_sender_id()
 	for player_node in get_tree().get_nodes_in_group("players"):
 		if player_node.name == str(player_id):
-			var has_enough = player.remove_money(15)
+			var has_enough = player.remove_money(0)
 			if has_enough:
 				Globals.ItemManager.create_drug_and_transfer(drug_name, str(player_id))
 				print("Player %s bought %s!" % [str(player_id), drug_name])

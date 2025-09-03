@@ -1,4 +1,4 @@
-extends "drug.gd"
+extends Drug
 class_name Crack
 
 var HEALTH_BONUS : int = 100

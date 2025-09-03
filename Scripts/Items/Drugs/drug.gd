@@ -7,24 +7,24 @@ class_name Drug
 @export var value : int
 @export var held_scene : PackedScene
 @export var object_scene : PackedScene
+var object_node: RigidBody3D
+var held_node: Node3D
 
 var prev_owner : CharacterBody3D
 var icon : Texture2D
 
 var _timer : Timer
+var _equipped: bool = false
+
+func _ready() -> void:
+	object_node = get_node("DrugObject")
+	object_node.add_to_group("interactables")
 
 func use(_player: CharacterBody3D): pass
 	
 func throw(): pass
 
 func _on_timer_timeout(): pass
-
-func equip() -> void:
-	print("Equip acknowledged from weapon")
-	visible = true
-
-func unequip() -> void:
-	visible = false
 
 func apply_bullet_force(hit_pos: Vector3, direction: Vector3, force: float, damage: int, source):
 	get_child(0).apply_impulse(hit_pos - global_transform.origin + direction * force)
@@ -43,10 +43,10 @@ func _apply_damage(damage: int) -> void:
 		condition -= damage
 
 func interact(player: CharacterBody3D) -> void:
-	free_object_scene()
-	get_parent().remove_child(self)
 	player.add_item(self)
+	equip()
 
+'''
 # Instantiate the scene that represents the held weapon
 func instantiate_held_scene() -> void:
 	var scene = held_scene.instantiate()
@@ -69,3 +69,42 @@ func free_held_scene() -> void:
 
 func free_object_scene() -> void:
 	get_child(0).free()
+'''
+
+func equip() -> void:
+	print("Equip acknowledged from weapon")
+	if held_node:
+		_equipped = true
+		held_node.visible = true
+		set_process(true)
+
+func unequip() -> void:
+	if held_node:
+		_equipped = false
+		held_node.visible = false
+		set_process(false)
+
+# Instantiate the scene that represents the held drug
+func instantiate_held_scene() -> void:
+	var scene = held_scene.instantiate()
+	#scene.position = held_pos
+	for node in scene.get_children():
+		if node is Timer:
+			_timer = node
+			_timer.timeout.connect(_on_timer_timeout)
+	
+	_equipped = true
+	
+	held_node = scene
+
+func instantiate_object_scene() -> Node3D:
+	free_held_scene()
+	
+	return object_node
+
+# Free the scene that represents the held drug
+func free_held_scene() -> void:
+	if held_node:
+		held_node.free()
+		held_node = null
+	_equipped = false

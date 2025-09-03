@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://bfygo84ukrbh7"]
+
+[ext_resource type="Script" uid="uid://cw8kwxstc7whv" path="res://Scripts/Items/Drugs/crack.gd" id="1_cxr30"]
+[ext_resource type="PackedScene" uid="uid://dfmr5b8u8s1cw" path="res://Scenes/Items/Drugs/crack_object.tscn" id="2_t6aom"]
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_cxr30"]
+properties/0/path = NodePath("DrugObject:position")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+properties/1/path = NodePath("DrugObject:rotation")
+properties/1/spawn = true
+properties/1/replication_mode = 1
+
+[node name="CrackParent" type="Node3D"]
+script = ExtResource("1_cxr30")
+
+[node name="DrugObject" parent="." instance=ExtResource("2_t6aom")]
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_cxr30")
