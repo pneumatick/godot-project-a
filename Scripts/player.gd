@@ -291,9 +291,16 @@ func die_rpc(source: String, victim: String, killer: String = ""):
 		remove_money(money)
 	
 	# Remove active drugs
-	var drugs = $"Active Drugs".get_children()
-	for drug in drugs:
-		drug.queue_free()
+	var timers = $"Active Drugs".get_children()
+	for timer in timers:
+		# Free the drug with the same item_id as the timer
+		if multiplayer.is_server():
+			for drug in get_tree().get_nodes_in_group("drugs"):
+				if str(drug.item_id) == timer.name:
+					print("Found active drug from timer: ", drug.name, " ", drug.item_id)
+					drug.queue_free()
+					break
+		timer.queue_free()
 	
 	death_sound.play()
 	if killer == "":

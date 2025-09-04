@@ -37,6 +37,7 @@ func use(player: CharacterBody3D):
 	
 	# Start drug effect timer
 	var timer = Timer.new()
+	timer.name = str(item_id)
 	timer.timeout.connect(_on_timer_timeout.bind(timer))
 	player.get_node("Active Drugs").add_child(timer)
 	timer.start()
