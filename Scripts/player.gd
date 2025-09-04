@@ -815,11 +815,17 @@ func sync_items() -> void:
 		idx += 1
 	
 	
-	receive_item_sync.rpc_id(multiplayer.get_remote_sender_id(), item_ids)
+	receive_item_sync.rpc_id(multiplayer.get_remote_sender_id(), item_ids, _equipped_item_idx)
 
 @rpc("any_peer", "call_remote")
-func receive_item_sync(item_ids: Array) -> void:
+func receive_item_sync(item_ids: Array, equipped_idx: int) -> void:
+	if multiplayer.get_remote_sender_id() != 1:
+		return
+	
 	print(multiplayer.get_unique_id(), ": Syncing items: ", item_ids)
+	
+	_equipped_item_idx = equipped_idx
+	
 	for item_dict in item_ids:
 		# Add items the typical way
 		if not item_dict:
@@ -831,5 +837,5 @@ func receive_item_sync(item_ids: Array) -> void:
 			if id == item.item_id:
 				print("Item found!: ", item)
 				add_item(item, idx)
-
+	
 	received_item_sync.emit()
