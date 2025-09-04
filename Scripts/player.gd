@@ -10,6 +10,7 @@ signal hand_empty
 signal viewing
 signal items_changed
 signal health_change
+signal received_item_sync
 
 const SPEED = 7.5
 const ACCEL = 1.0
@@ -62,6 +63,10 @@ var gravity_strength : float = 9.8
 @onready var weapon_reload_sound : AudioStreamPlayer3D = $"Weapon Reload Sound"
 
 func _ready() -> void:
+	# Prepare items array
+	for i in range(item_capacity):
+		_items.append(null)
+	
 	if is_multiplayer_authority():
 		# Camera
 		camera_controller.current = true
@@ -73,10 +78,12 @@ func _ready() -> void:
 	else:
 		HUD.connect_peer(self)
 		camera_controller.current = false
-	
-	# Prepare items array
-	for i in range(item_capacity):
-		_items.append(null)
+		if not multiplayer.is_server():
+			sync_items.rpc_id(1)
+			await received_item_sync
+			print("Remote items synchronized! ", _items)
+			if _items[_equipped_item_idx]:
+				_items[_equipped_item_idx].equip()
 	
 	var spray_image : Texture2D = load("res://Assets/Sprays/spray.jpg")
 	spray_texture = ImageTexture.create_from_image(spray_image.get_image())
@@ -769,3 +776,39 @@ func sell_item(item: Node3D) -> bool:
 	add_money(value)
 	
 	return true
+
+@rpc("any_peer", "call_remote")
+func sync_items() -> void:
+	if not multiplayer.is_server():
+		return
+	
+	var item_ids = []
+	
+	for item in _items:
+		if not item:
+			continue
+		
+		var group
+		if item is Weapon:
+			group = "weapons"
+		elif item is Drug:
+			group = "drugs"
+		item_ids.append({
+			"ID": item.item_id,
+			"Group": group
+			})
+	
+	receive_item_sync.rpc_id(multiplayer.get_remote_sender_id(), item_ids)
+
+@rpc("any_peer", "call_remote")
+func receive_item_sync(item_ids: Array) -> void:
+	print(multiplayer.get_unique_id(), ": Syncing items: ", item_ids)
+	for item_dict in item_ids:
+		var id = item_dict["ID"]
+		var group = item_dict["Group"]
+		for item in get_tree().get_nodes_in_group(group):
+			if id == item.item_id:
+				print("Item found!: ", item)
+				add_item(item)
+	
+	received_item_sync.emit()

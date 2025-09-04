@@ -49,6 +49,9 @@ func _process(_delta: float) -> void:
 		object_node.visible = false
 		object_node.set_physics_process(false)
 		object_node.get_node("Collection Area/CollisionShape3D").disabled = true
+		if not held_node:
+			print(multiplayer.get_unique_id(), ": Instantiating held scene...")
+			instantiate_held_scene()
 	else:
 		object_node.visible = true
 		object_node.set_physics_process(true)
