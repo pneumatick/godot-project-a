@@ -389,7 +389,7 @@ func _equip_item(idx: int) -> void:
 	if not _items[idx]:
 		hand_empty.emit()
 	else:
-		print("Weapon equipped...")
+		print(multiplayer.get_unique_id(), ": Item equipped...")
 		_items[idx].equip()
 		weapon_equipped.emit(_items[idx])
 	

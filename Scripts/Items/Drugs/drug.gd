@@ -34,7 +34,6 @@ func _process(_delta: float) -> void:
 		object_node.visible = false
 		object_node.set_physics_process(false)
 		object_node.get_node("CollisionShape3D").disabled = true
-		
 
 func use(_player: CharacterBody3D): pass
 	
@@ -63,7 +62,7 @@ func interact(player: CharacterBody3D) -> void:
 	equip()
 
 func equip() -> void:
-	print("Equip acknowledged from weapon")
+	print("Equip acknowledged from drug")
 	if held_node:
 		_equipped = true
 		held_node.visible = true

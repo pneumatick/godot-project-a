@@ -26,13 +26,27 @@ func _init(i_owner: CharacterBody3D = null) -> void:
 	var image: Texture2D = load("res://Assets/Visuals/Icons/grenade.PNG")
 	icon = ImageTexture.create_from_image(image.get_image())
 
+## Overrides Weapon's function because the explosion radius must be set 
+## before the physics "frame" that the explosion occurs in 
+func instantiate_object_scene() -> Node3D:
+	super()
+	
+	# Set up explosion radius
+	if explosion_radius:
+		var explosion_area = $"Throwable/Explosion Area"
+		var explosion_collider = explosion_area.get_child(0)
+		explosion_collider.shape.radius = explosion_radius
+		global_transform = prev_owner.camera_controller.global_transform
+	
+	return object_node
+
 @rpc("any_peer", "call_local")
 func pull_trigger() -> void:
 	if multiplayer.get_remote_sender_id() != 1:
 		return
 	
 	if _equipped and current_ammo > 0:
-		timer = use(fuse_time, _on_timer_timeout, explosion_radius)
+		timer = use(fuse_time, _on_timer_timeout)
 		$"Throwable/Fuse Sound".play()
 
 func _on_timer_timeout():
@@ -75,12 +89,13 @@ func explode():
 						entity.set_new_owner(prev_owner)
 				elif entity.has_method("apply_damage"):
 					body.apply_damage(hit_damage, self)
+			
+			set_physics_process(false)
 	
 	# Play explosion sound effect
 	# NOTE: Probably a better way to do this but this works for now
 	$"Throwable/Explosion Sound".play()
 	visible = false
-	set_physics_process(false)
 	await $"Throwable/Explosion Sound".finished
 	
 	# Free grenade server-side
