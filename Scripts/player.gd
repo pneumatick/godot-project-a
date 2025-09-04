@@ -163,7 +163,7 @@ func _input(event):
 			_signal_equip.rpc_id(1, wrapi(_equipped_item_idx + 1, 0, _items.size()))
 	elif event.is_action_pressed("throw_item"):
 		_signal_throw_current_item.rpc_id(1)
-	elif event.is_action_pressed("fire"):
+	elif event.is_action_pressed("fire") and not _in_menu:
 		_fire()
 	elif event.is_action_released("fire"):
 		_stop_fire()
