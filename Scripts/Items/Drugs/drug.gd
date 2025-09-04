@@ -34,7 +34,7 @@ func use(_player: CharacterBody3D): pass
 	
 func throw(): pass
 
-func _on_timer_timeout(timer: Timer): pass
+func _on_timer_timeout(_timer: Timer): pass
 
 func apply_bullet_force(hit_pos: Vector3, direction: Vector3, force: float, damage: int, source):
 	object_node.apply_impulse(hit_pos - global_transform.origin + direction * force)
