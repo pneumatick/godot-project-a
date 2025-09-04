@@ -405,13 +405,13 @@ func _equip_item(idx: int) -> void:
 	print(_equipped_item_idx)
 
 # Add an item to the player's inventory (and hand, at least for now)
-func add_item(item) -> bool:
+func add_item(item, idx: int = -1) -> bool:
 	print(multiplayer.get_unique_id(), " Adding %s..." % str(item))
 	
 	# Add weapons
 	var added = false
 	if item is Weapon:
-		added = _add_weapon(item)
+		added = _add_weapon(item, idx)
 	# Add organs
 	elif item is Organ:
 		added = _add_organ(item)
@@ -433,25 +433,37 @@ func add_item(item) -> bool:
 	print(_items)
 	return added
 
-func _add_weapon(weapon: Node3D) -> bool:
+func _add_weapon(weapon: Node3D, idx: int = -1) -> bool:
 	# Initialize weapon
 	var item_name = weapon.item_name
 	
 	# Check if items is at max capacity before adding to it
 	var items_full = true
-	for i in range(_items.size()):
-		if _items[i] == null:
-			weapon.instantiate_held_scene()
-			items_full = false
-			_items[i] = weapon
-			if _items[_equipped_item_idx] == weapon:
-				_equip_item(i)
-			else:
-				print("Unequipping %s at " % item_name, i)
-				weapon.unequip()
-			weapon_picked_up.emit(weapon)
-			weapon_pick_up_sound.play()
-			break
+	if idx >= 0:
+		weapon.instantiate_held_scene()
+		items_full = false
+		_items[idx] = weapon
+		if _items[_equipped_item_idx] == weapon:
+			_equip_item(idx)
+		else:
+			print("Unequipping %s at " % item_name, idx)
+			weapon.unequip()
+		weapon_picked_up.emit(weapon)
+		weapon_pick_up_sound.play()
+	else:
+		for i in range(_items.size()):
+			if _items[i] == null:
+				weapon.instantiate_held_scene()
+				items_full = false
+				_items[i] = weapon
+				if _items[_equipped_item_idx] == weapon:
+					_equip_item(i)
+				else:
+					print("Unequipping %s at " % item_name, i)
+					weapon.unequip()
+				weapon_picked_up.emit(weapon)
+				weapon_pick_up_sound.play()
+				break
 	
 	# Get rid of instantiated weapon if item cannot be added
 	if items_full:
@@ -783,9 +795,11 @@ func sync_items() -> void:
 		return
 	
 	var item_ids = []
-	
+	var idx = 0
 	for item in _items:
 		if not item:
+			item_ids.append(null)
+			idx += 1
 			continue
 		
 		var group
@@ -795,8 +809,11 @@ func sync_items() -> void:
 			group = "drugs"
 		item_ids.append({
 			"ID": item.item_id,
-			"Group": group
+			"Group": group,
+			"Idx": idx
 			})
+		idx += 1
+	
 	
 	receive_item_sync.rpc_id(multiplayer.get_remote_sender_id(), item_ids)
 
@@ -804,11 +821,15 @@ func sync_items() -> void:
 func receive_item_sync(item_ids: Array) -> void:
 	print(multiplayer.get_unique_id(), ": Syncing items: ", item_ids)
 	for item_dict in item_ids:
+		# Add items the typical way
+		if not item_dict:
+			continue
 		var id = item_dict["ID"]
 		var group = item_dict["Group"]
+		var idx = item_dict["Idx"]
 		for item in get_tree().get_nodes_in_group(group):
 			if id == item.item_id:
 				print("Item found!: ", item)
-				add_item(item)
-	
+				add_item(item, idx)
+
 	received_item_sync.emit()
