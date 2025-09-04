@@ -119,7 +119,6 @@ func equip() -> void:
 		_equipped = true
 		held_node.visible = true
 		_can_fire = true
-		set_process(true)
 		set_process_input(true)		# Probably not necessary
 
 func unequip() -> void:
@@ -127,7 +126,6 @@ func unequip() -> void:
 		_equipped = false
 		held_node.visible = false
 		_can_fire = false
-		set_process(false)
 		set_process_input(false)	# Probably not necessary
 
 # Instantiate the scene that represents the held weapon
