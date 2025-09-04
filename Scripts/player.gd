@@ -291,9 +291,16 @@ func die_rpc(source: String, victim: String, killer: String = ""):
 		remove_money(money)
 	
 	# Remove active drugs
-	var drugs = $"Active Drugs".get_children()
-	for drug in drugs:
-		drug.queue_free()
+	var timers = $"Active Drugs".get_children()
+	for timer in timers:
+		# Free the drug with the same item_id as the timer
+		if multiplayer.is_server():
+			for drug in get_tree().get_nodes_in_group("drugs"):
+				if str(drug.item_id) == timer.name:
+					print("Found active drug from timer: ", drug.name, " ", drug.item_id)
+					drug.queue_free()
+					break
+		timer.queue_free()
 	
 	death_sound.play()
 	if killer == "":
@@ -332,6 +339,10 @@ func _take_damage(amount: int) -> void:
 	health_change.emit(health)
 	print("The player was hit, health now %s" % [str(health)])
 	hit_sound.play()
+
+## Add health to the player (server-authoritative)
+func add_health(amount: int, source) -> void:
+	apply_damage(-amount, source)
 
 ## Apply damage to the player (server-authoritative)
 func apply_damage(amount: int, source) -> void:
@@ -646,14 +657,19 @@ func _signal_interact() -> void:
 		use_item(item)
 
 @rpc("any_peer", "call_local")
-func receive_interactable(organ_id: int, type: String) -> void:
+func receive_interactable(item_id: int, type: String) -> void:
 	if multiplayer.get_remote_sender_id() != 1:
 		return
 	
 	if type == "Organ":
 		for organ in get_tree().get_nodes_in_group("organs"):
-			if organ.item_id == organ_id:
+			if organ.item_id == item_id:
 				organ.interact(self)
+				return
+	elif type == "Drug":
+		for drug in get_tree().get_nodes_in_group("drugs"):
+			if drug.item_id == item_id:
+				drug.interact(self)
 				return
 
 func get_all_organs() -> Array:
@@ -670,7 +686,6 @@ func remove_all_organs() -> void:
 func use_item(item) -> void:
 	if item is Drug:
 		remove_item(item)				# Remove from inventory and items
-		$"Active Drugs".add_child(item)
 		item.use(self)
 		
 		# Overdose

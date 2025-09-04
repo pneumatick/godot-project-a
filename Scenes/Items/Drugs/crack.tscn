@@ -4,7 +4,5 @@
 
 [node name="Crack" type="Node3D"]
 
-[node name="Timer" type="Timer" parent="."]
-
 [node name="methpipe" parent="." instance=ExtResource("1_c1h1q")]
 transform = Transform3D(0.05, 0, 0, 0, 0.05, 0, 0, 0, 0.05, 0.267628, -0.21696, -0.328231)

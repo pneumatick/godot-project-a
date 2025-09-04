@@ -7,27 +7,37 @@ class_name Drug
 @export var value : int
 @export var held_scene : PackedScene
 @export var object_scene : PackedScene
+var object_node: RigidBody3D
+var held_node: Node3D
+var type: String = "Drug"
 
 var prev_owner : CharacterBody3D
 var icon : Texture2D
 
-var _timer : Timer
+var _equipped: bool = false
+
+func _ready() -> void:
+	object_node = get_node("DrugObject")
+	object_node.add_to_group("interactables")
+
+func _process(_delta: float) -> void:
+	object_node.visible = not _equipped
+	object_node.set_physics_process(not _equipped)
+	object_node.get_node("CollisionShape3D").disabled = _equipped
+	
+	if uses <= 0 and _equipped:
+		free_held_scene()
+		prev_owner.remove_item(self)
+		_equipped = false
 
 func use(_player: CharacterBody3D): pass
 	
 func throw(): pass
 
-func _on_timer_timeout(): pass
-
-func equip() -> void:
-	print("Equip acknowledged from weapon")
-	visible = true
-
-func unequip() -> void:
-	visible = false
+func _on_timer_timeout(timer: Timer): pass
 
 func apply_bullet_force(hit_pos: Vector3, direction: Vector3, force: float, damage: int, source):
-	get_child(0).apply_impulse(hit_pos - global_transform.origin + direction * force)
+	object_node.apply_impulse(hit_pos - global_transform.origin + direction * force)
 	_apply_damage(damage)
 	set_new_owner(source.prev_owner)
 	# HIT SOUND HERE
@@ -43,29 +53,37 @@ func _apply_damage(damage: int) -> void:
 		condition -= damage
 
 func interact(player: CharacterBody3D) -> void:
-	free_object_scene()
-	get_parent().remove_child(self)
 	player.add_item(self)
+	equip()
 
-# Instantiate the scene that represents the held weapon
+func equip() -> void:
+	print("Equip acknowledged from weapon")
+	if held_node:
+		_equipped = true
+		held_node.visible = true
+
+func unequip() -> void:
+	if held_node:
+		_equipped = false
+		held_node.visible = false
+
+# Instantiate the scene that represents the held drug
 func instantiate_held_scene() -> void:
 	var scene = held_scene.instantiate()
-	for node in scene.get_children():
-		if node is Timer:
-			_timer = node
-			_timer.timeout.connect(_on_timer_timeout)
-	add_child(scene)
+	#scene.position = held_pos
+	
+	_equipped = true
+	
+	held_node = scene
 
 func instantiate_object_scene() -> Node3D:
-	var scene = object_scene.instantiate()
-	scene.add_to_group("interactables")
-	add_child(scene)
-	return scene
+	free_held_scene()
+	
+	return object_node
 
-# Free the scene that represents the held weapon
+# Free the scene that represents the held drug
 func free_held_scene() -> void:
-	get_child(0).free()
-	visible = true		# Too hacky? Made to handle drop_all_items() as expected. Consider...
-
-func free_object_scene() -> void:
-	get_child(0).free()
+	if held_node:
+		held_node.free()
+		held_node = null
+	_equipped = false
