@@ -21,14 +21,20 @@ func _ready() -> void:
 	object_node.add_to_group("interactables")
 
 func _process(_delta: float) -> void:
-	object_node.visible = not _equipped
-	object_node.set_physics_process(not _equipped)
-	object_node.get_node("CollisionShape3D").disabled = _equipped
-	
-	if uses <= 0 and _equipped:
-		free_held_scene()
+	if uses > 0:
+		object_node.visible = not held_node
+		object_node.set_physics_process(not held_node)
+		object_node.get_node("CollisionShape3D").disabled = held_node != null
+	elif uses <= 0 and _equipped:
+		# Start the process of removing the drug from the world (allow timer
+		# to run out)
 		prev_owner.remove_item(self)
 		_equipped = false
+		free_held_scene()
+		object_node.visible = false
+		object_node.set_physics_process(false)
+		object_node.get_node("CollisionShape3D").disabled = true
+		
 
 func use(_player: CharacterBody3D): pass
 	
