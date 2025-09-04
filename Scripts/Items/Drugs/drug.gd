@@ -24,6 +24,11 @@ func _process(_delta: float) -> void:
 	object_node.visible = not _equipped
 	object_node.set_physics_process(not _equipped)
 	object_node.get_node("CollisionShape3D").disabled = _equipped
+	
+	if uses <= 0 and _equipped:
+		free_held_scene()
+		prev_owner.remove_item(self)
+		_equipped = false
 
 func use(_player: CharacterBody3D): pass
 	

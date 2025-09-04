@@ -30,7 +30,10 @@ func use(player: CharacterBody3D):
 	
 	print("%s used" % item_name)
 	_player = player
-	free_held_scene()
+	
+	uses -= 1
+	if uses <= 0:
+		free_held_scene()
 	
 	# Set initial drug effect
 	player.add_health(HEALTH_BONUS, self)

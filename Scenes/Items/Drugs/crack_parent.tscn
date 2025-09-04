@@ -10,6 +10,9 @@ properties/0/replication_mode = 1
 properties/1/path = NodePath("DrugObject:rotation")
 properties/1/spawn = true
 properties/1/replication_mode = 1
+properties/2/path = NodePath(".:uses")
+properties/2/spawn = true
+properties/2/replication_mode = 1
 
 [node name="CrackParent" type="Node3D"]
 script = ExtResource("1_cxr30")
