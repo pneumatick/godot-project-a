@@ -16,6 +16,7 @@ func _init(i_owner: CharacterBody3D = null) -> void:
 	item_name = "Grenade"
 	condition = 100
 	value = 25
+	fire_mode = Weapon.FireMode.THROWABLE
 	
 	# Preload scenes
 	held_scene = preload("res://Scenes/Items/Weapons/grenade.tscn")
@@ -30,8 +31,7 @@ func pull_trigger() -> void:
 	if multiplayer.get_remote_sender_id() != 1:
 		return
 	
-	var in_menu = prev_owner.get_in_menu()
-	if _equipped and current_ammo > 0 and not in_menu:
+	if _equipped and current_ammo > 0:
 		timer = use(fuse_time, _on_timer_timeout, explosion_radius)
 		$"Throwable/Fuse Sound".play()
 

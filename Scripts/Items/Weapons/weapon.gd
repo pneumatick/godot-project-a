@@ -1,6 +1,8 @@
 extends Node3D
 class_name Weapon
 
+enum FireMode {SEMIAUTO, AUTO, THROWABLE}
+
 @export var max_ammo: int
 @export var max_distance: float
 @export var damage: int
@@ -21,6 +23,7 @@ var held_pos: Vector3 = Vector3(0.5, -0.25, -0.25)
 var object_scene : PackedScene
 var icon : ImageTexture
 var item_id: int
+var fire_mode: Weapon.FireMode
 
 var _can_fire : bool
 var _equipped : bool

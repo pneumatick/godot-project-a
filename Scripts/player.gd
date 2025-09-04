@@ -30,6 +30,7 @@ var _inventory : Dictionary = {}	# {String: Array[Items]}
 var _equipped_item_idx : int = 0
 var _alive : bool = true
 var _in_menu : bool = false
+var _firing: bool = false
 
 var seen_object = null
 var in_shop : bool = false
@@ -164,6 +165,8 @@ func _input(event):
 		_signal_throw_current_item.rpc_id(1)
 	elif event.is_action_pressed("fire"):
 		_fire()
+	elif event.is_action_released("fire"):
+		_stop_fire()
 	elif event.is_action_pressed("kill"):
 		_suicide.rpc_id(1)
 	elif event.is_action_pressed("interact"):
@@ -315,13 +318,28 @@ func die_rpc(source: String, victim: String, killer: String = ""):
 func _fire() -> void:
 	assert_fire.rpc_id(1)
 
+func _stop_fire() -> void:
+	assert_stop_fire.rpc_id(1)
+
 @rpc("any_peer", "call_local", "unreliable")
 func assert_fire() -> void:
 	if multiplayer.is_server():
-		print(multiplayer.get_unique_id(), " received fire assertion from ", multiplayer.get_remote_sender_id())
+		print(multiplayer.get_unique_id(), " received FIRE assertion from ", multiplayer.get_remote_sender_id())
+		_firing = true
 		var equipped = _items[_equipped_item_idx]
-		if equipped and equipped.has_method("pull_trigger"):
-			equipped.pull_trigger.rpc()
+		if equipped and equipped.has_method("pull_trigger") and not _in_menu:
+			if equipped.fire_mode == Weapon.FireMode.AUTO:
+				while _firing:
+					equipped.pull_trigger.rpc()
+					await get_tree().create_timer(equipped.fire_rate).timeout
+			else:
+				equipped.pull_trigger.rpc()
+
+@rpc("any_peer", "call_local", "unreliable")
+func assert_stop_fire() -> void:
+	if multiplayer.is_server():
+		print(multiplayer.get_unique_id(), " received STOP FIRE assertion from ", multiplayer.get_remote_sender_id())
+		_firing = false
 
 func _respawn(respawn_position: Vector3) -> void:
 	global_transform.origin = respawn_position
