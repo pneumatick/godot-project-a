@@ -44,7 +44,7 @@ func connect_player(client_player: CharacterBody3D) -> void:
 		$"Control/Hotbar".add_child(button)
 	
 	# Assign player to Shop UI
-	$ShopUI.player = player
+	$ShopUI.client_player = player
 
 func connect_peer(peer: CharacterBody3D) -> void:
 	peer.death.connect(_on_player_death)

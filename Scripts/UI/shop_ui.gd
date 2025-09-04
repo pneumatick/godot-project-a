@@ -5,7 +5,7 @@ signal on_menu_closed()
 
 @onready var hud = get_parent()
 
-var player: CharacterBody3D
+var client_player: CharacterBody3D
 
 func _ready() -> void:
 	visible = false
@@ -18,7 +18,7 @@ func _ready() -> void:
 
 func open_for_player():
 	visible = true
-	player.set_in_menu(true)
+	client_player.set_in_menu(true)
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 	on_menu_opened.emit()
 
@@ -54,7 +54,7 @@ func request_drug_buy(drug_name: String) -> void:
 	var player_id: int = multiplayer.get_remote_sender_id()
 	for player_node in get_tree().get_nodes_in_group("players"):
 		if player_node.name == str(player_id):
-			var has_enough = player.remove_money(0)
+			var has_enough = client_player.remove_money(0)
 			if has_enough:
 				Globals.ItemManager.create_drug_and_transfer(drug_name, str(player_id))
 				print("Player %s bought %s!" % [str(player_id), drug_name])
@@ -63,10 +63,10 @@ func request_drug_buy(drug_name: String) -> void:
 
 ## Attempt to sell the selected hotbar item
 func _sell_item(item_index: int):
-	var item = player.get_item(item_index)
+	var item = client_player.get_item(item_index)
 	var sold = false
 	if item:
-		sold = player.sell_item(item)
+		sold = client_player.sell_item(item)
 	else:
 		print("Get item failed at index %s" % str(item_index))
 	if not sold:
@@ -106,13 +106,13 @@ func organ_sale_request() -> void:
 
 func _on_close_pressed():
 	visible = false
-	player.set_in_menu(false)
+	client_player.set_in_menu(false)
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	on_menu_closed.emit()
 
 func _end_game():
 	var price = 100
-	if player.money >= price:
+	if client_player.money >= price:
 		get_tree().quit()
 	else:
-		print("Player needs %s more money to end the game" % str(price - player.money))
+		print("Player needs %s more money to end the game" % str(price - client_player.money))
