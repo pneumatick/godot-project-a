@@ -1,6 +1,8 @@
 extends CharacterBody3D
 class_name Player
 
+#region Signals
+
 signal spawn
 signal death
 signal weapon_equipped
@@ -11,6 +13,10 @@ signal viewing
 signal items_changed
 signal health_change
 signal received_item_sync
+
+#endregion
+
+#region "Global" constants and variables
 
 const SPEED: float = 7.5
 const ACCEL: float = 1.0
@@ -62,9 +68,9 @@ var gravity_strength: float = 9.8
 @onready var HUD: CanvasLayer = get_node("/root/3D Scene Root/HUD")
 @onready var money_display : Label = get_node("/root/3D Scene Root/HUD/Control/Money")
 
-'''
-Overridden functions
-'''
+#endregion
+
+#region Overridden functions
 
 func _ready() -> void:
 	# Prepare items array
@@ -171,9 +177,9 @@ func _input(event):
 		else:
 			set_gravity_direction(Vector3.DOWN)
 
-'''
-Movement and control functions
-'''
+#endregion
+
+#region Movement and control functions
 
 func set_gravity_direction(new_dir: Vector3):
 	gravity_direction = new_dir.normalized()
@@ -292,9 +298,9 @@ func _fire() -> void:
 func _stop_fire() -> void:
 	assert_stop_fire.rpc_id(1)
 
-'''
-Health, damage, and life functions
-'''
+#endregion
+
+#region Health, damage, and life functions
 
 # Handle player death logic
 func _die(source) -> void:
@@ -328,9 +334,9 @@ func apply_damage(amount: int, source) -> void:
 		if health <= 0 and _alive:
 			_die(source)
 
-'''
-Item functions
-'''
+#endregion
+
+#region Item functions
 
 # Add an item to the player's inventory (and hand, at least for now)
 func add_item(item, idx: int = -1) -> bool:
@@ -534,9 +540,9 @@ func sell_item(item: Node3D) -> bool:
 	
 	return true
 
-'''
-Server functions
-'''
+#endregion
+
+#region Server functions
 
 @rpc("any_peer", "call_local", "unreliable")
 func assert_fire() -> void:
@@ -634,9 +640,9 @@ func remove_money(amount: int) -> bool:
 	
 	return successful
 
-'''
-Client functions
-'''
+#endregion
+
+#region Client functions
 
 @rpc("any_peer", "call_local")
 func die_rpc(source: String, victim: String, killer: String = ""):
@@ -810,9 +816,9 @@ func broadcast_money_removal(amount: int) -> void:
 	money -= amount
 	money_change.emit(money)
 
-'''
-Getters, setters, and miscellaneous functions
-'''
+#endregion
+
+#region Getters, setters, and miscellaneous functions
 
 func set_in_menu(state: bool) -> void:
 	_in_menu = state
@@ -867,3 +873,5 @@ func place_spray(image: ImageTexture):
 			spray.rotate(Vector3.UP, PI/2)
 		elif result.normal == Vector3.DOWN:
 			spray.rotate(Vector3.RIGHT, PI)
+
+#endregion
