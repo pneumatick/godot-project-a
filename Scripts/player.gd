@@ -311,7 +311,7 @@ func _stop_fire() -> void:
 
 #region Health, damage, and life functions
 
-# Handle player death logic
+## Handle player death logic and announce to all peers
 func _die(source) -> void:
 	if not multiplayer.is_server():
 		return
@@ -321,6 +321,7 @@ func _die(source) -> void:
 	else:
 		rpc("die_rpc", source.name, self.name)
 
+## Respawn the player
 func _respawn(respawn_position: Vector3) -> void:
 	global_transform.origin = respawn_position
 	health = DEFAULT_HEALTH
@@ -347,7 +348,7 @@ func apply_damage(amount: int, source) -> void:
 
 #region Item functions
 
-# Add an item to the player's inventory (and hand, at least for now)
+## Add an item to the player's item hotbar, inventory, and hand (if applicable)
 func add_item(item, idx: int = -1) -> bool:
 	print(multiplayer.get_unique_id(), " Adding %s..." % str(item))
 	
@@ -376,6 +377,7 @@ func add_item(item, idx: int = -1) -> bool:
 	print(_items)
 	return added
 
+## Handle weapon acquisition
 func _add_weapon(weapon: Node3D, idx: int = -1) -> bool:
 	# Initialize weapon
 	var item_name = weapon.item_name
@@ -423,6 +425,7 @@ func _add_weapon(weapon: Node3D, idx: int = -1) -> bool:
 	
 	return true
 
+## Handle organ acquisition
 func _add_organ(organ: Organ) -> bool:
 	if not _inventory.has("Organs"):
 		_inventory["Organs"] = [organ]
@@ -431,9 +434,11 @@ func _add_organ(organ: Organ) -> bool:
 	
 	return true
 
+## Handle drug acquisition
 func _add_drug(drug: Drug) -> bool:
 	return _add_weapon(drug)
 
+## Remove an item from the player's inventory
 func remove_item(item: Node3D = null) -> bool:
 	print(item.get_parent())
 	var removed = false
@@ -475,6 +480,7 @@ func remove_item(item: Node3D = null) -> bool:
 	
 	return removed
 
+## Drop all items in the player's inventory
 func drop_all_items():
 	# Drop equippable items
 	for item in _items:
@@ -495,6 +501,7 @@ func drop_all_items():
 			drop_item(organ)	# Drop organ into world
 		_inventory.erase("Organs")
 
+## Drop a specific item in the player's inventory
 func drop_item(item):
 	# Add item to world
 	#get_parent().add_child(item)
@@ -516,12 +523,14 @@ func drop_item(item):
 	impulse *= rand_dir
 	body.apply_impulse(impulse)
 
+## Get all organs in the player's inventory
 func get_all_organs() -> Array:
 	if _inventory.has("Organs"):
 		return _inventory["Organs"]
 	
 	return []
 
+## Use an item (such as a drug)
 func use_item(item) -> void:
 	if item is Drug:
 		remove_item(item)				# Remove from inventory and items
@@ -531,6 +540,7 @@ func use_item(item) -> void:
 		if $"Active Drugs".get_child_count() > drug_limit:
 			_die(item)
 
+## Get the item at the specified index of the player's item hotbar
 func get_item(item_index: int) -> Node3D:
 	if item_index < _items.size():
 		return _items[item_index]
