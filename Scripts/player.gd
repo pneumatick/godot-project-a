@@ -51,16 +51,16 @@ var gravity_direction : Vector3 = Vector3.DOWN
 var gravity_strength : float = 9.8
 
 # Nodes internal to scene
-@onready var right_hand : Node3D = get_node("Pivot/Camera3D/Right Hand")
+@onready var right_hand: Node3D = $"Pivot/Camera3D/Right Hand"
+@onready var hit_sound: AudioStreamPlayer3D = $"Hit Sound"
+@onready var death_sound: AudioStreamPlayer3D = $"Death Sound"
+@onready var weapon_pick_up_sound: AudioStreamPlayer3D = $"Weapon Pick Up Sound"
+@onready var weapon_reload_sound: AudioStreamPlayer3D = $"Weapon Reload Sound"
 
 # Nodes external to scene
 @onready var world : Node3D = get_node("/root/3D Scene Root")
 @onready var HUD: CanvasLayer = get_node("/root/3D Scene Root/HUD")
 @onready var money_display : Label = get_node("/root/3D Scene Root/HUD/Control/Money")
-@onready var hit_sound : AudioStreamPlayer3D = $"Hit Sound"
-@onready var death_sound : AudioStreamPlayer3D = $"Death Sound"
-@onready var weapon_pick_up_sound : AudioStreamPlayer3D = $"Weapon Pick Up Sound"
-@onready var weapon_reload_sound : AudioStreamPlayer3D = $"Weapon Reload Sound"
 
 func _ready() -> void:
 	# Prepare items array
