@@ -12,43 +12,43 @@ signal items_changed
 signal health_change
 signal received_item_sync
 
-const SPEED = 7.5
-const ACCEL = 1.0
-const AIR_CONTROL = 0.3
-const JUMP_VELOCITY = 4.5
-const STOP_SPEED = 100
-const FRICTION = 25
-const DEFAULT_HEALTH = 100
+const SPEED: float = 7.5
+const ACCEL: float = 1.0
+const AIR_CONTROL: float = 0.3
+const JUMP_VELOCITY: float = 4.5
+const STOP_SPEED: int = 100
+const FRICTION: int = 25
+const DEFAULT_HEALTH: int = 100
 
-var _mouse_input : bool = false
-var _mouse_rotation : Vector3
-var _rotation_input : float
-var _tilt_input : float
+var _mouse_input: bool = false
+var _mouse_rotation: Vector3
+var _rotation_input: float
+var _tilt_input: float
 #var _player_rotation : Vector3
 #var _camera_rotation : Vector3
-var _items : Array = []
-var _inventory : Dictionary = {}	# {String: Array[Items]}
-var _equipped_item_idx : int = 0
-var _alive : bool = true
-var _in_menu : bool = false
+var _items: Array = []
+var _inventory: Dictionary = {}	# {String: Array[Items]}
+var _equipped_item_idx: int = 0
+var _alive: bool = true
+var _in_menu: bool = false
 var _firing: bool = false
 
 var seen_object = null
-var in_shop : bool = false
+var in_shop: bool = false
 
 @export var tilt_lower_limit := deg_to_rad(-90.0)
 @export var tilt_upper_limit := deg_to_rad(90.0)
-@export var camera_controller : Camera3D
-@export var mouse_sensitivity : float = 0.5
-@export var health : int = DEFAULT_HEALTH
-@export var death_deduction : int = 15
-@export var money : int = 0
-@export var interaction_range : float = 3.0
-@export var item_capacity : int = 6
-@export var drug_limit : int = 2
-var spray_texture : ImageTexture
-var gravity_direction : Vector3 = Vector3.DOWN
-var gravity_strength : float = 9.8
+@export var camera_controller: Camera3D
+@export var mouse_sensitivity: float = 0.5
+@export var health: int = DEFAULT_HEALTH
+@export var death_deduction: int = 15
+@export var money: int = 0
+@export var interaction_range: float = 3.0
+@export var item_capacity: int = 6
+@export var drug_limit: int = 2
+var spray_texture: ImageTexture
+var gravity_direction: Vector3 = Vector3.DOWN
+var gravity_strength: float = 9.8
 
 # Nodes internal to scene
 @onready var right_hand: Node3D = $"Pivot/Camera3D/Right Hand"
