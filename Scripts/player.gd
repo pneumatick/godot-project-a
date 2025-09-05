@@ -846,18 +846,23 @@ func broadcast_money_removal(amount: int) -> void:
 
 #region Getters, setters, and miscellaneous functions
 
+## Set the status of the player to be in a menu
 func set_in_menu(state: bool) -> void:
 	_in_menu = state
 
+## Get the player's in-menu status
 func get_in_menu() -> bool:
 	return _in_menu
 
+## Check if the player is alive
 func is_alive() -> bool:
 	return _alive
 
+## PROTOTYPE FUNCTIONALITY: Add money upon destroying a target (purely client-side)
 func _on_target_destroyed(value: int) -> void:
 	add_money(value)
 
+## Place a spray on a surface in front of the player (needs work and sync...)
 func place_spray(image: ImageTexture):
 	print("Spraying...")
 	var space_state = get_world_3d().direct_space_state
