@@ -670,6 +670,7 @@ func remove_money(amount: int) -> bool:
 
 #region Client functions
 
+## Handle a death command from the server
 @rpc("any_peer", "call_local")
 func die_rpc(source: String, victim: String, killer: String = ""):
 	if multiplayer.get_remote_sender_id() != 1:
@@ -722,6 +723,7 @@ func die_rpc(source: String, victim: String, killer: String = ""):
 	await get_tree().create_timer(2.0).timeout
 	_respawn(Vector3(0.0, 1.0, 0.0))
 
+## Handle damage
 @rpc("any_peer", "call_local")
 func _take_damage(amount: int) -> void:
 	health -= amount
@@ -729,7 +731,7 @@ func _take_damage(amount: int) -> void:
 	print("The player was hit, health now %s" % [str(health)])
 	hit_sound.play()
 
-# Equip held item
+## Equip the item at the specified item hotbar index
 @rpc("any_peer", "call_local")
 func _equip_item(idx: int) -> void:
 	if multiplayer.get_remote_sender_id() != 1:
@@ -751,6 +753,7 @@ func _equip_item(idx: int) -> void:
 	items_changed.emit(_items, _equipped_item_idx)
 	print(_equipped_item_idx)
 
+## Receive items held by this player upon joining an in-progress game
 @rpc("any_peer", "call_remote")
 func receive_item_sync(item_ids: Array, equipped_idx: int) -> void:
 	if multiplayer.get_remote_sender_id() != 1:
@@ -774,6 +777,7 @@ func receive_item_sync(item_ids: Array, equipped_idx: int) -> void:
 	
 	received_item_sync.emit()
 
+## Handle a throw item command from the server
 @rpc("any_peer", "call_local")
 func throw_current_item():
 	if _items[_equipped_item_idx] == null or multiplayer.get_remote_sender_id() != 1:
@@ -803,6 +807,7 @@ func throw_current_item():
 	
 	print(_items)
 
+## Handle reception of interactables upon the respective server command
 @rpc("any_peer", "call_local")
 func receive_interactable(item_id: int, type: String) -> void:
 	if multiplayer.get_remote_sender_id() != 1:
@@ -834,6 +839,7 @@ func add_money(amount: int) -> void:
 	money += amount
 	money_change.emit(money)
 
+## Remove money and signal the removal to the UI
 @rpc("any_peer", "call_local")
 func broadcast_money_removal(amount: int) -> void:
 	if multiplayer.get_remote_sender_id() != 1:
