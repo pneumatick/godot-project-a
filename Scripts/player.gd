@@ -563,6 +563,7 @@ func sell_item(item: Node3D) -> bool:
 
 #region Server functions
 
+## Receive a client's "fire" input assertion
 @rpc("any_peer", "call_local", "unreliable")
 func assert_fire() -> void:
 	if multiplayer.is_server():
@@ -577,23 +578,27 @@ func assert_fire() -> void:
 			else:
 				equipped.pull_trigger.rpc()
 
+## Receive a client's "fire" input cessation assertion
 @rpc("any_peer", "call_local", "unreliable")
 func assert_stop_fire() -> void:
 	if multiplayer.is_server():
 		print(multiplayer.get_unique_id(), " received STOP FIRE assertion from ", multiplayer.get_remote_sender_id())
 		_firing = false
 
+## Broadcast a client's equip input to all peers
 @rpc("any_peer", "call_local")
 func _signal_equip(idx: int) -> void:
 	if multiplayer.is_server():
 		rpc("_equip_item", idx)
 
+## Broadcast a client's throw input to to all peers
 @rpc("authority", "call_local")
 func _signal_throw_current_item() -> void:
 	print("Throw signal received by ", multiplayer.get_unique_id())
 	if multiplayer.is_server():
 		rpc("throw_current_item")
 
+## Synchronize this player's items to a player joining an in-progress game
 @rpc("any_peer", "call_remote")
 func sync_items() -> void:
 	if not multiplayer.is_server():
@@ -622,6 +627,7 @@ func sync_items() -> void:
 	
 	receive_item_sync.rpc_id(multiplayer.get_remote_sender_id(), item_ids, _equipped_item_idx)
 
+## Receive and process a player's interact input
 @rpc("any_peer", "call_local")
 func _signal_interact() -> void:
 	if not multiplayer.is_server():
@@ -641,6 +647,7 @@ func _signal_interact() -> void:
 		var item = _items[_equipped_item_idx]
 		use_item(item)
 
+## Receive a player's suicide input
 @rpc("any_peer", "call_local")
 func _suicide() -> void:
 	if not multiplayer.is_server():
