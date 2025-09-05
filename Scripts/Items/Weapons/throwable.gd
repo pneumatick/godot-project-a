@@ -5,7 +5,7 @@ var fuse_set : bool = false
 
 @export var throw_force : float = 20.0
 
-func use(fuse_time: float, callback: Callable, explosion_radius = null) -> Timer:
+func use(fuse_time: float, callback: Callable) -> Timer:
 	# Remove item from player's inventory
 	prev_owner.remove_item(self)
 	
@@ -13,11 +13,6 @@ func use(fuse_time: float, callback: Callable, explosion_radius = null) -> Timer
 	free_held_scene()
 	var projectile = instantiate_object_scene()
 	print(Globals.ItemManager.get_children())
-	if explosion_radius:
-		var explosion_area = $"Throwable/Explosion Area"
-		var explosion_collider = explosion_area.get_child(0)
-		explosion_collider.shape.radius = explosion_radius
-		global_transform = prev_owner.camera_controller.global_transform
 	
 	# Determine position
 	var camera = prev_owner.camera_controller

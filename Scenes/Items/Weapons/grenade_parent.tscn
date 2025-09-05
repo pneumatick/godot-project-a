@@ -19,6 +19,9 @@ properties/3/replication_mode = 2
 properties/4/path = NodePath(".:condition")
 properties/4/spawn = true
 properties/4/replication_mode = 2
+properties/5/path = NodePath(".:visible")
+properties/5/spawn = true
+properties/5/replication_mode = 2
 
 [node name="GrenadeParent" type="Node3D"]
 script = ExtResource("1_ir73x")

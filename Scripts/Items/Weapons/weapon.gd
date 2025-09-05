@@ -1,6 +1,8 @@
 extends Node3D
 class_name Weapon
 
+enum FireMode {SEMIAUTO, AUTO, THROWABLE}
+
 @export var max_ammo: int
 @export var max_distance: float
 @export var damage: int
@@ -21,6 +23,7 @@ var held_pos: Vector3 = Vector3(0.5, -0.25, -0.25)
 var object_scene : PackedScene
 var icon : ImageTexture
 var item_id: int
+var fire_mode: Weapon.FireMode
 
 var _can_fire : bool
 var _equipped : bool
@@ -46,6 +49,9 @@ func _process(_delta: float) -> void:
 		object_node.visible = false
 		object_node.set_physics_process(false)
 		object_node.get_node("Collection Area/CollisionShape3D").disabled = true
+		if not held_node:
+			print(multiplayer.get_unique_id(), ": Instantiating held scene...")
+			instantiate_held_scene()
 	else:
 		object_node.visible = true
 		object_node.set_physics_process(true)
@@ -116,7 +122,6 @@ func equip() -> void:
 		_equipped = true
 		held_node.visible = true
 		_can_fire = true
-		set_process(true)
 		set_process_input(true)		# Probably not necessary
 
 func unequip() -> void:
@@ -124,7 +129,6 @@ func unequip() -> void:
 		_equipped = false
 		held_node.visible = false
 		_can_fire = false
-		set_process(false)
 		set_process_input(false)	# Probably not necessary
 
 # Instantiate the scene that represents the held weapon

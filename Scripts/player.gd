@@ -10,6 +10,7 @@ signal hand_empty
 signal viewing
 signal items_changed
 signal health_change
+signal received_item_sync
 
 const SPEED = 7.5
 const ACCEL = 1.0
@@ -30,6 +31,7 @@ var _inventory : Dictionary = {}	# {String: Array[Items]}
 var _equipped_item_idx : int = 0
 var _alive : bool = true
 var _in_menu : bool = false
+var _firing: bool = false
 
 var seen_object = null
 var in_shop : bool = false
@@ -61,6 +63,10 @@ var gravity_strength : float = 9.8
 @onready var weapon_reload_sound : AudioStreamPlayer3D = $"Weapon Reload Sound"
 
 func _ready() -> void:
+	# Prepare items array
+	for i in range(item_capacity):
+		_items.append(null)
+	
 	if is_multiplayer_authority():
 		# Camera
 		camera_controller.current = true
@@ -72,10 +78,12 @@ func _ready() -> void:
 	else:
 		HUD.connect_peer(self)
 		camera_controller.current = false
-	
-	# Prepare items array
-	for i in range(item_capacity):
-		_items.append(null)
+		if not multiplayer.is_server():
+			sync_items.rpc_id(1)
+			await received_item_sync
+			print("Remote items synchronized! ", _items)
+			if _items[_equipped_item_idx]:
+				_items[_equipped_item_idx].equip()
 	
 	var spray_image : Texture2D = load("res://Assets/Sprays/spray.jpg")
 	spray_texture = ImageTexture.create_from_image(spray_image.get_image())
@@ -162,8 +170,10 @@ func _input(event):
 			_signal_equip.rpc_id(1, wrapi(_equipped_item_idx + 1, 0, _items.size()))
 	elif event.is_action_pressed("throw_item"):
 		_signal_throw_current_item.rpc_id(1)
-	elif event.is_action_pressed("fire"):
+	elif event.is_action_pressed("fire") and not _in_menu:
 		_fire()
+	elif event.is_action_released("fire"):
+		_stop_fire()
 	elif event.is_action_pressed("kill"):
 		_suicide.rpc_id(1)
 	elif event.is_action_pressed("interact"):
@@ -315,13 +325,28 @@ func die_rpc(source: String, victim: String, killer: String = ""):
 func _fire() -> void:
 	assert_fire.rpc_id(1)
 
+func _stop_fire() -> void:
+	assert_stop_fire.rpc_id(1)
+
 @rpc("any_peer", "call_local", "unreliable")
 func assert_fire() -> void:
 	if multiplayer.is_server():
-		print(multiplayer.get_unique_id(), " received fire assertion from ", multiplayer.get_remote_sender_id())
+		print(multiplayer.get_unique_id(), " received FIRE assertion from ", multiplayer.get_remote_sender_id())
+		_firing = true
 		var equipped = _items[_equipped_item_idx]
-		if equipped and equipped.has_method("pull_trigger"):
-			equipped.pull_trigger.rpc()
+		if equipped and equipped.has_method("pull_trigger") and not _in_menu:
+			if equipped.fire_mode == Weapon.FireMode.AUTO:
+				while _firing:
+					equipped.pull_trigger.rpc()
+					await get_tree().create_timer(equipped.fire_rate).timeout
+			else:
+				equipped.pull_trigger.rpc()
+
+@rpc("any_peer", "call_local", "unreliable")
+func assert_stop_fire() -> void:
+	if multiplayer.is_server():
+		print(multiplayer.get_unique_id(), " received STOP FIRE assertion from ", multiplayer.get_remote_sender_id())
+		_firing = false
 
 func _respawn(respawn_position: Vector3) -> void:
 	global_transform.origin = respawn_position
@@ -371,7 +396,7 @@ func _equip_item(idx: int) -> void:
 	if not _items[idx]:
 		hand_empty.emit()
 	else:
-		print("Weapon equipped...")
+		print(multiplayer.get_unique_id(), ": Item equipped...")
 		_items[idx].equip()
 		weapon_equipped.emit(_items[idx])
 	
@@ -380,13 +405,13 @@ func _equip_item(idx: int) -> void:
 	print(_equipped_item_idx)
 
 # Add an item to the player's inventory (and hand, at least for now)
-func add_item(item) -> bool:
+func add_item(item, idx: int = -1) -> bool:
 	print(multiplayer.get_unique_id(), " Adding %s..." % str(item))
 	
 	# Add weapons
 	var added = false
 	if item is Weapon:
-		added = _add_weapon(item)
+		added = _add_weapon(item, idx)
 	# Add organs
 	elif item is Organ:
 		added = _add_organ(item)
@@ -408,25 +433,37 @@ func add_item(item) -> bool:
 	print(_items)
 	return added
 
-func _add_weapon(weapon: Node3D) -> bool:
+func _add_weapon(weapon: Node3D, idx: int = -1) -> bool:
 	# Initialize weapon
 	var item_name = weapon.item_name
 	
 	# Check if items is at max capacity before adding to it
 	var items_full = true
-	for i in range(_items.size()):
-		if _items[i] == null:
-			weapon.instantiate_held_scene()
-			items_full = false
-			_items[i] = weapon
-			if _items[_equipped_item_idx] == weapon:
-				_equip_item(i)
-			else:
-				print("Unequipping %s at " % item_name, i)
-				weapon.unequip()
-			weapon_picked_up.emit(weapon)
-			weapon_pick_up_sound.play()
-			break
+	if idx >= 0:
+		weapon.instantiate_held_scene()
+		items_full = false
+		_items[idx] = weapon
+		if _items[_equipped_item_idx] == weapon:
+			_equip_item(idx)
+		else:
+			print("Unequipping %s at " % item_name, idx)
+			weapon.unequip()
+		weapon_picked_up.emit(weapon)
+		weapon_pick_up_sound.play()
+	else:
+		for i in range(_items.size()):
+			if _items[i] == null:
+				weapon.instantiate_held_scene()
+				items_full = false
+				_items[i] = weapon
+				if _items[_equipped_item_idx] == weapon:
+					_equip_item(i)
+				else:
+					print("Unequipping %s at " % item_name, i)
+					weapon.unequip()
+				weapon_picked_up.emit(weapon)
+				weapon_pick_up_sound.play()
+				break
 	
 	# Get rid of instantiated weapon if item cannot be added
 	if items_full:
@@ -751,3 +788,54 @@ func sell_item(item: Node3D) -> bool:
 	add_money(value)
 	
 	return true
+
+@rpc("any_peer", "call_remote")
+func sync_items() -> void:
+	if not multiplayer.is_server():
+		return
+	
+	var item_ids = []
+	var idx = 0
+	for item in _items:
+		if not item:
+			item_ids.append(null)
+			idx += 1
+			continue
+		
+		var group
+		if item is Weapon:
+			group = "weapons"
+		elif item is Drug:
+			group = "drugs"
+		item_ids.append({
+			"ID": item.item_id,
+			"Group": group,
+			"Idx": idx
+			})
+		idx += 1
+	
+	
+	receive_item_sync.rpc_id(multiplayer.get_remote_sender_id(), item_ids, _equipped_item_idx)
+
+@rpc("any_peer", "call_remote")
+func receive_item_sync(item_ids: Array, equipped_idx: int) -> void:
+	if multiplayer.get_remote_sender_id() != 1:
+		return
+	
+	print(multiplayer.get_unique_id(), ": Syncing items: ", item_ids)
+	
+	_equipped_item_idx = equipped_idx
+	
+	for item_dict in item_ids:
+		# Add items the typical way
+		if not item_dict:
+			continue
+		var id = item_dict["ID"]
+		var group = item_dict["Group"]
+		var idx = item_dict["Idx"]
+		for item in get_tree().get_nodes_in_group(group):
+			if id == item.item_id:
+				print("Item found!: ", item)
+				add_item(item, idx)
+	
+	received_item_sync.emit()

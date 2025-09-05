@@ -13,6 +13,7 @@ func _init(i_owner: CharacterBody3D = null) -> void:
 	item_name = "Rifle"
 	condition = 100
 	value = 35
+	fire_mode = Weapon.FireMode.AUTO
 	
 	# Preload scenes
 	held_scene = preload("res://Scenes/Items/Weapons/rifle.tscn")
@@ -28,8 +29,7 @@ func pull_trigger() -> void:
 	if multiplayer.get_remote_sender_id() != 1:
 		return
 	
-	var in_menu = prev_owner.get_in_menu()
-	if _equipped and _can_fire and current_ammo > 0 and not in_menu:
+	if _equipped and _can_fire and current_ammo > 0:
 		fire()
 		_can_fire = false
 		await get_tree().create_timer(fire_rate).timeout
