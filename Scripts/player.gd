@@ -66,7 +66,7 @@ var gravity_strength: float = 9.8
 # Nodes external to scene
 @onready var world : Node3D = get_node("/root/3D Scene Root")
 @onready var HUD: CanvasLayer = get_node("/root/3D Scene Root/HUD")
-@onready var money_display : Label = get_node("/root/3D Scene Root/HUD/Control/Money")
+@onready var money_display: Label = get_node("/root/3D Scene Root/HUD/Control/Money")
 
 #endregion
 
@@ -181,10 +181,12 @@ func _input(event):
 
 #region Movement and control functions
 
+## Set the new gravity direction
 func set_gravity_direction(new_dir: Vector3):
 	gravity_direction = new_dir.normalized()
 	align_with_gravity_instant()
 
+## Align gravity along the current gravity direction
 func align_with_gravity_instant():
 	var up_dir = -gravity_direction
 	set_up_direction(up_dir)
@@ -200,6 +202,7 @@ func align_with_gravity_instant():
 		Vector3(0, 0, 1)
 	)
 
+## Handle player acceleration
 func _accelerate(direction: Vector3, accel: float, max_speed: float, delta: float):
 	var current_speed = velocity.dot(direction)
 	var add_speed = max_speed - current_speed
@@ -212,6 +215,7 @@ func _accelerate(direction: Vector3, accel: float, max_speed: float, delta: floa
 	
 	velocity += direction * accel_speed
 
+## Handle player air control
 func _air_control(direction: Vector3, delta: float):
 	# Prevent backward movement
 	if abs(direction.dot(velocity.normalized())) < 0:
@@ -224,6 +228,7 @@ func _air_control(direction: Vector3, delta: float):
 	if dot > 0:
 		velocity += direction * k * speed
 
+## Apply friction when the player is touching the "floor"
 func _apply_friction(delta):
 	var speed = velocity.length()
 	if speed < 0.1:
@@ -235,6 +240,7 @@ func _apply_friction(delta):
 	var new_speed = max(speed - drop, 0)
 	velocity = velocity.normalized() * new_speed
 
+## Align camera with respect to mouse input
 func _update_camera(delta: float) -> void:
 	# Update pitch (X) and yaw (Y) from input
 	_mouse_rotation.x = clamp(_mouse_rotation.x + _tilt_input * delta, tilt_lower_limit, tilt_upper_limit)
@@ -267,6 +273,7 @@ func _update_camera(delta: float) -> void:
 	_rotation_input = 0.0
 	_tilt_input = 0.0
 
+## Perform a raycast to check if the player is viewing an interactable
 func _check_interact_target():
 	var space_state = get_world_3d().direct_space_state
 	var from = camera_controller.global_transform.origin
@@ -292,9 +299,11 @@ func _check_interact_target():
 		seen_object = null
 		viewing.emit()
 
+## Assert "fire" input to the server
 func _fire() -> void:
 	assert_fire.rpc_id(1)
 
+## Assert cessation of "fire" input to the server
 func _stop_fire() -> void:
 	assert_stop_fire.rpc_id(1)
 
