@@ -62,6 +62,10 @@ var gravity_strength: float = 9.8
 @onready var HUD: CanvasLayer = get_node("/root/3D Scene Root/HUD")
 @onready var money_display : Label = get_node("/root/3D Scene Root/HUD/Control/Money")
 
+'''
+Overridden functions
+'''
+
 func _ready() -> void:
 	# Prepare items array
 	for i in range(item_capacity):
@@ -136,25 +140,6 @@ func _physics_process(delta: float) -> void:
 	
 	move_and_slide()
 
-func set_gravity_direction(new_dir: Vector3):
-	gravity_direction = new_dir.normalized()
-	align_with_gravity_instant()
-
-func align_with_gravity_instant():
-	var up_dir = -gravity_direction
-	set_up_direction(up_dir)
-	'''
-	var forward = transform.basis.z.normalized()
-	forward = (forward - up_dir * forward.dot(up_dir)).normalized()
-	var right = forward.cross(up_dir).normalized()
-	transform.basis = Basis(right, up_dir, forward).orthonormalized()
-	'''
-	transform.basis *= Basis(
-		Vector3(-1, 0, 0),
-		Vector3(0, -1, 0),
-		Vector3(0, 0, 1)
-	)
-
 func _input(event):
 	if not is_multiplayer_authority():
 		return
@@ -185,6 +170,29 @@ func _input(event):
 			set_gravity_direction(Vector3.UP)
 		else:
 			set_gravity_direction(Vector3.DOWN)
+
+'''
+Movement and control functions
+'''
+
+func set_gravity_direction(new_dir: Vector3):
+	gravity_direction = new_dir.normalized()
+	align_with_gravity_instant()
+
+func align_with_gravity_instant():
+	var up_dir = -gravity_direction
+	set_up_direction(up_dir)
+	'''
+	var forward = transform.basis.z.normalized()
+	forward = (forward - up_dir * forward.dot(up_dir)).normalized()
+	var right = forward.cross(up_dir).normalized()
+	transform.basis = Basis(right, up_dir, forward).orthonormalized()
+	'''
+	transform.basis *= Basis(
+		Vector3(-1, 0, 0),
+		Vector3(0, -1, 0),
+		Vector3(0, 0, 1)
+	)
 
 func _accelerate(direction: Vector3, accel: float, max_speed: float, delta: float):
 	var current_speed = velocity.dot(direction)
@@ -253,12 +261,40 @@ func _update_camera(delta: float) -> void:
 	_rotation_input = 0.0
 	_tilt_input = 0.0
 
-@rpc("any_peer", "call_local")
-func _suicide() -> void:
-	if not multiplayer.is_server():
-		return
+func _check_interact_target():
+	var space_state = get_world_3d().direct_space_state
+	var from = camera_controller.global_transform.origin
+	var to = from + -camera_controller.global_transform.basis.z * interaction_range
+
+	var result = space_state.intersect_ray(
+		PhysicsRayQueryParameters3D.create(
+			from, 
+			to, 
+			0xFFFFFFFF,			  # Default value
+			[self]
+		)
+	)
 	
-	_die(self)
+	if result and result.collider and _alive:
+		if result.collider.is_in_group("interactables") or result.collider is RigidBody3D:
+			seen_object = result.collider
+			viewing.emit(result.collider)
+		else:
+			seen_object = null
+			viewing.emit()
+	else:
+		seen_object = null
+		viewing.emit()
+
+func _fire() -> void:
+	assert_fire.rpc_id(1)
+
+func _stop_fire() -> void:
+	assert_stop_fire.rpc_id(1)
+
+'''
+Health, damage, and life functions
+'''
 
 # Handle player death logic
 func _die(source) -> void:
@@ -270,84 +306,6 @@ func _die(source) -> void:
 	else:
 		rpc("die_rpc", source.name, self.name)
 
-@rpc("any_peer", "call_local")
-func die_rpc(source: String, victim: String, killer: String = ""):
-	if multiplayer.get_remote_sender_id() != 1:
-		return
-	
-	_alive = false
-	set_process(false)
-	set_physics_process(false)
-	visible = false
-	
-	# Drop items
-	drop_all_items()
-	
-	# Clear inventory slots
-	_items = []
-	for i in range(item_capacity):
-		_items.append(null)
-	_inventory = {}
-	
-	# Spawn organs
-	world.get_node("ItemManager").spawn_organs(self)
-	
-	velocity = Vector3.ZERO
-	
-	# Deduct money
-	if money - death_deduction >= 0:
-		remove_money(death_deduction)
-	else:
-		remove_money(money)
-	
-	# Remove active drugs
-	var timers = $"Active Drugs".get_children()
-	for timer in timers:
-		# Free the drug with the same item_id as the timer
-		if multiplayer.is_server():
-			for drug in get_tree().get_nodes_in_group("drugs"):
-				if str(drug.item_id) == timer.name:
-					print("Found active drug from timer: ", drug.name, " ", drug.item_id)
-					drug.queue_free()
-					break
-		timer.queue_free()
-	
-	death_sound.play()
-	if killer == "":
-		death.emit(source, victim)
-	else:
-		death.emit(source, victim, killer)
-	
-	# Wait a bit before respawning the player
-	await get_tree().create_timer(2.0).timeout
-	_respawn(Vector3(0.0, 1.0, 0.0))
-
-func _fire() -> void:
-	assert_fire.rpc_id(1)
-
-func _stop_fire() -> void:
-	assert_stop_fire.rpc_id(1)
-
-@rpc("any_peer", "call_local", "unreliable")
-func assert_fire() -> void:
-	if multiplayer.is_server():
-		print(multiplayer.get_unique_id(), " received FIRE assertion from ", multiplayer.get_remote_sender_id())
-		_firing = true
-		var equipped = _items[_equipped_item_idx]
-		if equipped and equipped.has_method("pull_trigger") and not _in_menu:
-			if equipped.fire_mode == Weapon.FireMode.AUTO:
-				while _firing:
-					equipped.pull_trigger.rpc()
-					await get_tree().create_timer(equipped.fire_rate).timeout
-			else:
-				equipped.pull_trigger.rpc()
-
-@rpc("any_peer", "call_local", "unreliable")
-func assert_stop_fire() -> void:
-	if multiplayer.is_server():
-		print(multiplayer.get_unique_id(), " received STOP FIRE assertion from ", multiplayer.get_remote_sender_id())
-		_firing = false
-
 func _respawn(respawn_position: Vector3) -> void:
 	global_transform.origin = respawn_position
 	health = DEFAULT_HEALTH
@@ -357,13 +315,6 @@ func _respawn(respawn_position: Vector3) -> void:
 	set_process(true)
 	set_physics_process(true)
 	spawn.emit()
-
-@rpc("any_peer", "call_local")
-func _take_damage(amount: int) -> void:
-	health -= amount
-	health_change.emit(health)
-	print("The player was hit, health now %s" % [str(health)])
-	hit_sound.play()
 
 ## Add health to the player (server-authoritative)
 func add_health(amount: int, source) -> void:
@@ -377,32 +328,9 @@ func apply_damage(amount: int, source) -> void:
 		if health <= 0 and _alive:
 			_die(source)
 
-@rpc("any_peer", "call_local")
-func _signal_equip(idx: int) -> void:
-	if multiplayer.is_server():
-		rpc("_equip_item", idx)
-
-# Equip held item
-@rpc("any_peer", "call_local")
-func _equip_item(idx: int) -> void:
-	if multiplayer.get_remote_sender_id() != 1:
-		return
-	
-	# Unequip (previously) equipped item
-	if _items[_equipped_item_idx]:
-		_items[_equipped_item_idx].unequip()
-	
-	# Equip item
-	if not _items[idx]:
-		hand_empty.emit()
-	else:
-		print(multiplayer.get_unique_id(), ": Item equipped...")
-		_items[idx].equip()
-		weapon_equipped.emit(_items[idx])
-	
-	_equipped_item_idx = idx
-	items_changed.emit(_items, _equipped_item_idx)
-	print(_equipped_item_idx)
+'''
+Item functions
+'''
 
 # Add an item to the player's inventory (and hand, at least for now)
 func add_item(item, idx: int = -1) -> bool:
@@ -532,78 +460,6 @@ func remove_item(item: Node3D = null) -> bool:
 	
 	return removed
 
-func _on_target_destroyed(value: int) -> void:
-	add_money(value)
-
-## Increase the amount of money the player has
-@rpc("any_peer", "call_local")
-func add_money(amount: int) -> void:
-	if multiplayer.get_remote_sender_id() != 1:
-		return
-	
-	money += amount
-	money_change.emit(money)
-
-## Attempt to remove an amount of money from the player
-func remove_money(amount: int) -> bool:
-	var successful = true
-	
-	if multiplayer.is_server() and money - amount >= 0:
-		rpc("broadcast_money_removal", amount)
-	else:
-		successful = false
-	
-	return successful
-
-@rpc("any_peer", "call_local")
-func broadcast_money_removal(amount: int) -> void:
-	if multiplayer.get_remote_sender_id() != 1:
-		return 
-	
-	money -= amount
-	money_change.emit(money)
-
-func set_in_menu(state: bool) -> void:
-	_in_menu = state
-
-func get_in_menu() -> bool:
-	return _in_menu
-
-@rpc("authority", "call_local")
-func _signal_throw_current_item() -> void:
-	print("Throw signal received by ", multiplayer.get_unique_id())
-	if multiplayer.is_server():
-		rpc("throw_current_item")
-
-@rpc("any_peer", "call_local")
-func throw_current_item():
-	if _items[_equipped_item_idx] == null or multiplayer.get_remote_sender_id() != 1:
-		return
-
-	# Remove the item
-	var current_item = _items[_equipped_item_idx]
-	remove_item(current_item)
-	
-	# Create the thrown object
-	var thrown = current_item.instantiate_object_scene()
-	thrown.get_parent().prev_owner = self
-	#get_parent().add_child(current_item)
-
-	# Determine position
-	var muzzle_pos = camera_controller.global_transform.origin
-	var forward = -camera_controller.global_transform.basis.z 
-	thrown.global_transform.origin = muzzle_pos + forward * 1.5
-
-	# Apply impulse
-	var impulse = camera_controller.global_transform.basis.y + -camera_controller.global_transform.basis.z * 5
-	# Apply additional force if the throw is not against the direction of velocity
-	var with_movement : bool = forward.dot(velocity) >= 0
-	if velocity != Vector3.ZERO and with_movement:
-		impulse += Vector3(velocity.x, 0, velocity.z)
-	thrown.apply_impulse(impulse, forward * 15)
-	
-	print(_items)
-
 func drop_all_items():
 	# Drop equippable items
 	for item in _items:
@@ -644,35 +500,102 @@ func drop_item(item):
 			impulse += velocity
 	impulse *= rand_dir
 	body.apply_impulse(impulse)
+
+func get_all_organs() -> Array:
+	if _inventory.has("Organs"):
+		return _inventory["Organs"]
 	
+	return []
 
-func is_alive() -> bool:
-	return _alive
+func use_item(item) -> void:
+	if item is Drug:
+		remove_item(item)				# Remove from inventory and items
+		item.use(self)
+		
+		# Overdose
+		if $"Active Drugs".get_child_count() > drug_limit:
+			_die(item)
 
-func _check_interact_target():
-	var space_state = get_world_3d().direct_space_state
-	var from = camera_controller.global_transform.origin
-	var to = from + -camera_controller.global_transform.basis.z * interaction_range
+func get_item(item_index: int) -> Node3D:
+	if item_index < _items.size():
+		return _items[item_index]
+	return null
 
-	var result = space_state.intersect_ray(
-		PhysicsRayQueryParameters3D.create(
-			from, 
-			to, 
-			0xFFFFFFFF,			  # Default value
-			[self]
-		)
-	)
+## Sell an item by reference
+func sell_item(item: Node3D) -> bool:
+	# Remove the item from the player's inventory
+	var removed = remove_item(item)
+	if not removed:
+		return false
 	
-	if result and result.collider and _alive:
-		if result.collider.is_in_group("interactables") or result.collider is RigidBody3D:
-			seen_object = result.collider
-			viewing.emit(result.collider)
-		else:
-			seen_object = null
-			viewing.emit()
-	else:
-		seen_object = null
-		viewing.emit()
+	# Add money 
+	var value = floori(item.value * (float(item.condition) / 100.0))
+	add_money(value)
+	
+	return true
+
+'''
+Server functions
+'''
+
+@rpc("any_peer", "call_local", "unreliable")
+func assert_fire() -> void:
+	if multiplayer.is_server():
+		print(multiplayer.get_unique_id(), " received FIRE assertion from ", multiplayer.get_remote_sender_id())
+		_firing = true
+		var equipped = _items[_equipped_item_idx]
+		if equipped and equipped.has_method("pull_trigger") and not _in_menu:
+			if equipped.fire_mode == Weapon.FireMode.AUTO:
+				while _firing:
+					equipped.pull_trigger.rpc()
+					await get_tree().create_timer(equipped.fire_rate).timeout
+			else:
+				equipped.pull_trigger.rpc()
+
+@rpc("any_peer", "call_local", "unreliable")
+func assert_stop_fire() -> void:
+	if multiplayer.is_server():
+		print(multiplayer.get_unique_id(), " received STOP FIRE assertion from ", multiplayer.get_remote_sender_id())
+		_firing = false
+
+@rpc("any_peer", "call_local")
+func _signal_equip(idx: int) -> void:
+	if multiplayer.is_server():
+		rpc("_equip_item", idx)
+
+@rpc("authority", "call_local")
+func _signal_throw_current_item() -> void:
+	print("Throw signal received by ", multiplayer.get_unique_id())
+	if multiplayer.is_server():
+		rpc("throw_current_item")
+
+@rpc("any_peer", "call_remote")
+func sync_items() -> void:
+	if not multiplayer.is_server():
+		return
+	
+	var item_ids = []
+	var idx = 0
+	for item in _items:
+		if not item:
+			item_ids.append(null)
+			idx += 1
+			continue
+		
+		var group
+		if item is Weapon:
+			group = "weapons"
+		elif item is Drug:
+			group = "drugs"
+		item_ids.append({
+			"ID": item.item_id,
+			"Group": group,
+			"Idx": idx
+			})
+		idx += 1
+	
+	
+	receive_item_sync.rpc_id(multiplayer.get_remote_sender_id(), item_ids, _equipped_item_idx)
 
 @rpc("any_peer", "call_local")
 func _signal_interact() -> void:
@@ -694,6 +617,161 @@ func _signal_interact() -> void:
 		use_item(item)
 
 @rpc("any_peer", "call_local")
+func _suicide() -> void:
+	if not multiplayer.is_server():
+		return
+	
+	_die(self)
+
+## Attempt to remove an amount of money from the player
+func remove_money(amount: int) -> bool:
+	var successful = true
+	
+	if multiplayer.is_server() and money - amount >= 0:
+		rpc("broadcast_money_removal", amount)
+	else:
+		successful = false
+	
+	return successful
+
+'''
+Client functions
+'''
+
+@rpc("any_peer", "call_local")
+func die_rpc(source: String, victim: String, killer: String = ""):
+	if multiplayer.get_remote_sender_id() != 1:
+		return
+	
+	_alive = false
+	set_process(false)
+	set_physics_process(false)
+	visible = false
+	
+	# Drop items
+	drop_all_items()
+	
+	# Clear inventory slots
+	_items = []
+	for i in range(item_capacity):
+		_items.append(null)
+	_inventory = {}
+	
+	# Spawn organs
+	world.get_node("ItemManager").spawn_organs(self)
+	
+	velocity = Vector3.ZERO
+	
+	# Deduct money
+	if money - death_deduction >= 0:
+		remove_money(death_deduction)
+	else:
+		remove_money(money)
+	
+	# Remove active drugs
+	var timers = $"Active Drugs".get_children()
+	for timer in timers:
+		# Free the drug with the same item_id as the timer
+		if multiplayer.is_server():
+			for drug in get_tree().get_nodes_in_group("drugs"):
+				if str(drug.item_id) == timer.name:
+					print("Found active drug from timer: ", drug.name, " ", drug.item_id)
+					drug.queue_free()
+					break
+		timer.queue_free()
+	
+	death_sound.play()
+	if killer == "":
+		death.emit(source, victim)
+	else:
+		death.emit(source, victim, killer)
+	
+	# Wait a bit before respawning the player
+	await get_tree().create_timer(2.0).timeout
+	_respawn(Vector3(0.0, 1.0, 0.0))
+
+@rpc("any_peer", "call_local")
+func _take_damage(amount: int) -> void:
+	health -= amount
+	health_change.emit(health)
+	print("The player was hit, health now %s" % [str(health)])
+	hit_sound.play()
+
+# Equip held item
+@rpc("any_peer", "call_local")
+func _equip_item(idx: int) -> void:
+	if multiplayer.get_remote_sender_id() != 1:
+		return
+	
+	# Unequip (previously) equipped item
+	if _items[_equipped_item_idx]:
+		_items[_equipped_item_idx].unequip()
+	
+	# Equip item
+	if not _items[idx]:
+		hand_empty.emit()
+	else:
+		print(multiplayer.get_unique_id(), ": Item equipped...")
+		_items[idx].equip()
+		weapon_equipped.emit(_items[idx])
+	
+	_equipped_item_idx = idx
+	items_changed.emit(_items, _equipped_item_idx)
+	print(_equipped_item_idx)
+
+@rpc("any_peer", "call_remote")
+func receive_item_sync(item_ids: Array, equipped_idx: int) -> void:
+	if multiplayer.get_remote_sender_id() != 1:
+		return
+	
+	print(multiplayer.get_unique_id(), ": Syncing items: ", item_ids)
+	
+	_equipped_item_idx = equipped_idx
+	
+	for item_dict in item_ids:
+		# Add items the typical way
+		if not item_dict:
+			continue
+		var id = item_dict["ID"]
+		var group = item_dict["Group"]
+		var idx = item_dict["Idx"]
+		for item in get_tree().get_nodes_in_group(group):
+			if id == item.item_id:
+				print("Item found!: ", item)
+				add_item(item, idx)
+	
+	received_item_sync.emit()
+
+@rpc("any_peer", "call_local")
+func throw_current_item():
+	if _items[_equipped_item_idx] == null or multiplayer.get_remote_sender_id() != 1:
+		return
+
+	# Remove the item
+	var current_item = _items[_equipped_item_idx]
+	remove_item(current_item)
+	
+	# Create the thrown object
+	var thrown = current_item.instantiate_object_scene()
+	thrown.get_parent().prev_owner = self
+	#get_parent().add_child(current_item)
+
+	# Determine position
+	var muzzle_pos = camera_controller.global_transform.origin
+	var forward = -camera_controller.global_transform.basis.z 
+	thrown.global_transform.origin = muzzle_pos + forward * 1.5
+
+	# Apply impulse
+	var impulse = camera_controller.global_transform.basis.y + -camera_controller.global_transform.basis.z * 5
+	# Apply additional force if the throw is not against the direction of velocity
+	var with_movement : bool = forward.dot(velocity) >= 0
+	if velocity != Vector3.ZERO and with_movement:
+		impulse += Vector3(velocity.x, 0, velocity.z)
+	thrown.apply_impulse(impulse, forward * 15)
+	
+	print(_items)
+
+@rpc("any_peer", "call_local")
 func receive_interactable(item_id: int, type: String) -> void:
 	if multiplayer.get_remote_sender_id() != 1:
 		return
@@ -709,25 +787,44 @@ func receive_interactable(item_id: int, type: String) -> void:
 				drug.interact(self)
 				return
 
-func get_all_organs() -> Array:
-	if _inventory.has("Organs"):
-		return _inventory["Organs"]
-	
-	return []
-
+## Remove all organs upon selling at the shop
 @rpc("any_peer", "call_local")
 func remove_all_organs() -> void:
 	if _inventory.has("Organs"):
 		_inventory.erase("Organs")
 
-func use_item(item) -> void:
-	if item is Drug:
-		remove_item(item)				# Remove from inventory and items
-		item.use(self)
-		
-		# Overdose
-		if $"Active Drugs".get_child_count() > drug_limit:
-			_die(item)
+## Increase the amount of money the player has
+@rpc("any_peer", "call_local")
+func add_money(amount: int) -> void:
+	if multiplayer.get_remote_sender_id() != 1:
+		return
+	
+	money += amount
+	money_change.emit(money)
+
+@rpc("any_peer", "call_local")
+func broadcast_money_removal(amount: int) -> void:
+	if multiplayer.get_remote_sender_id() != 1:
+		return 
+	
+	money -= amount
+	money_change.emit(money)
+
+'''
+Getters, setters, and miscellaneous functions
+'''
+
+func set_in_menu(state: bool) -> void:
+	_in_menu = state
+
+func get_in_menu() -> bool:
+	return _in_menu
+
+func is_alive() -> bool:
+	return _alive
+
+func _on_target_destroyed(value: int) -> void:
+	add_money(value)
 
 func place_spray(image: ImageTexture):
 	print("Spraying...")
@@ -770,72 +867,3 @@ func place_spray(image: ImageTexture):
 			spray.rotate(Vector3.UP, PI/2)
 		elif result.normal == Vector3.DOWN:
 			spray.rotate(Vector3.RIGHT, PI)
-
-func get_item(item_index: int) -> Node3D:
-	if item_index < _items.size():
-		return _items[item_index]
-	return null
-
-## Sell an item by reference
-func sell_item(item: Node3D) -> bool:
-	# Remove the item from the player's inventory
-	var removed = remove_item(item)
-	if not removed:
-		return false
-	
-	# Add money 
-	var value = floori(item.value * (float(item.condition) / 100.0))
-	add_money(value)
-	
-	return true
-
-@rpc("any_peer", "call_remote")
-func sync_items() -> void:
-	if not multiplayer.is_server():
-		return
-	
-	var item_ids = []
-	var idx = 0
-	for item in _items:
-		if not item:
-			item_ids.append(null)
-			idx += 1
-			continue
-		
-		var group
-		if item is Weapon:
-			group = "weapons"
-		elif item is Drug:
-			group = "drugs"
-		item_ids.append({
-			"ID": item.item_id,
-			"Group": group,
-			"Idx": idx
-			})
-		idx += 1
-	
-	
-	receive_item_sync.rpc_id(multiplayer.get_remote_sender_id(), item_ids, _equipped_item_idx)
-
-@rpc("any_peer", "call_remote")
-func receive_item_sync(item_ids: Array, equipped_idx: int) -> void:
-	if multiplayer.get_remote_sender_id() != 1:
-		return
-	
-	print(multiplayer.get_unique_id(), ": Syncing items: ", item_ids)
-	
-	_equipped_item_idx = equipped_idx
-	
-	for item_dict in item_ids:
-		# Add items the typical way
-		if not item_dict:
-			continue
-		var id = item_dict["ID"]
-		var group = item_dict["Group"]
-		var idx = item_dict["Idx"]
-		for item in get_tree().get_nodes_in_group(group):
-			if id == item.item_id:
-				print("Item found!: ", item)
-				add_item(item, idx)
-	
-	received_item_sync.emit()
